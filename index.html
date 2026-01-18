@@ -25,23 +25,42 @@
       padding-top: 2rem;
     }
 
+    /* Hidden SEO text */
+    .hidden-seo {
+      position: absolute;
+      left: -9999px;
+      top: -9999px;
+    }
+
     /* Hero section for all products */
+    .hero-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+
+    .hero-wrapper::-webkit-scrollbar {
+      display: none; /* hide scrollbar */
+    }
+
     .hero {
       display: flex;
-      flex-wrap: wrap; /* allows wrapping on mobile */
-      justify-content: center;
-      align-items: center;
-      gap: 4rem; /* space between products */
-      min-height: 90vh; /* keeps products near vertical center on desktop */
+      gap: 4rem;
+      flex-shrink: 0;
+      padding: 2rem 0;
     }
 
     .hero a img {
       width: 250px;
-      max-width: 90vw;
       height: auto;
       border: none;
       border-radius: 4px;
       transition: transform 0.2s;
+      flex-shrink: 0;
+      display: block;
     }
 
     .hero a img:hover {
@@ -50,7 +69,7 @@
 
     /* Contact form pushed further down */
     .contact {
-      margin-top: 20rem; /* off-screen initially */
+      margin-top: 20rem; /* off-screen on page load */
       width: 100%;
       display: flex;
       justify-content: center;
@@ -82,20 +101,16 @@
 
     button:hover { background: #666; }
 
-    /* Mobile adjustments: two rows of two images */
+    /* Mobile: scale down images and center first one */
     @media (max-width: 700px) {
       .hero a img {
-        width: 45vw; /* two images per row */
+        width: 60vw;
+      }
+      .hero-wrapper {
+        justify-content: flex-start;
+        padding-left: 20px; /* some left padding so first product is visible */
       }
     }
-
-    /* Hidden SEO text */
-    .hidden-seo {
-      position: absolute;
-      left: -9999px;
-      top: -9999px;
-    }
-
   </style>
 </head>
 <body>
@@ -105,23 +120,22 @@
     Landon L Gow, Landon Gow, Landon Leroy Gow, All My Nights Are Dreams
   </div>
 
-  <!-- Hero section: all books and albums -->
-  <div class="hero">
-    <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
-      <img src="book.jpg" alt="Latest Book">
-    </a>
-
-    <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
-      <img src="album.jpg" alt="Latest Album">
-    </a>
-
-    <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
-      <img src="book2.jpg" alt="Second Book">
-    </a>
-
-    <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
-      <img src="album2.jpg" alt="Second Album">
-    </a>
+  <!-- Hero section: scrollable on mobile -->
+  <div class="hero-wrapper">
+    <div class="hero">
+      <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
+        <img src="book.jpg" alt="Latest Book">
+      </a>
+      <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
+        <img src="album.jpg" alt="Latest Album">
+      </a>
+      <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
+        <img src="book2.jpg" alt="Second Book">
+      </a>
+      <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
+        <img src="album2.jpg" alt="Second Album">
+      </a>
+    </div>
   </div>
 
   <!-- Contact form -->
