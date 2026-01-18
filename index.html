@@ -11,18 +11,11 @@
   <style>
     html, body {
       margin: 0;
+      padding: 0;
       height: 100%;
-    }
-
-    body {
       font-family: Arial, sans-serif;
       background-color: #2b2b2b; /* graphite grey */
       color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 4rem 1rem; /* gives space at top */
     }
 
     /* Hidden SEO text */
@@ -32,36 +25,50 @@
       top: -9999px;
     }
 
-    /* Desktop hero layout: horizontal row */
+    /* Hero section fills viewport */
     .hero {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 4rem; /* space between products */
+      min-height: 100vh; /* full screen */
       width: 100%;
-      max-width: 1200px;
-      margin-bottom: 10rem; /* space to contact form */
+      overflow-x: auto; /* allow scroll on mobile if needed */
+      padding: 0 2rem;
+      box-sizing: border-box;
     }
 
-    .hero a img {
+    .hero::-webkit-scrollbar {
+      display: none; /* hide scroll bar on mobile */
+    }
+
+    .products {
+      display: flex;
+      gap: 4rem; /* spacing between products */
+      flex-shrink: 0;
+    }
+
+    .products a img {
       width: 250px;
       max-width: 90vw;
       height: auto;
-      border: none;
       border-radius: 4px;
+      border: none;
       transition: transform 0.2s;
+      flex-shrink: 0;
     }
 
-    .hero a img:hover {
+    .products a img:hover {
       transform: scale(1.05);
     }
 
-    /* Contact form */
+    /* Contact form below hero */
     .contact {
       width: 100%;
       display: flex;
       justify-content: center;
-      margin-bottom: 4rem;
+      padding-top: 100vh; /* forces full screen scroll before visible */
+      padding-bottom: 4rem;
+      box-sizing: border-box;
     }
 
     form {
@@ -88,18 +95,18 @@
       transition: background 0.2s;
     }
 
-    button:hover { background: #666; }
+    button:hover {
+      background: #666;
+    }
 
-    /* Mobile: stack products vertically */
-    @media (max-width: 800px) {
-      .hero {
-        flex-direction: column;
-        gap: 4rem;
-        margin-bottom: 8rem;
+    /* Mobile responsiveness */
+    @media (max-width: 700px) {
+      .products {
+        gap: 2rem;
       }
 
-      .hero a img {
-        width: 80vw; /* larger, easier to tap */
+      .products a img {
+        width: 60vw; /* scale to mobile width */
       }
     }
   </style>
@@ -111,23 +118,22 @@
     Landon L Gow, Landon Gow, Landon Leroy Gow, All My Nights Are Dreams
   </div>
 
-  <!-- Hero section: desktop horizontal, mobile stacked -->
+  <!-- Hero: horizontally centered products -->
   <div class="hero">
-    <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
-      <img src="book.jpg" alt="Latest Book">
-    </a>
-
-    <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
-      <img src="album.jpg" alt="Latest Album">
-    </a>
-
-    <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
-      <img src="book2.jpg" alt="Second Book">
-    </a>
-
-    <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
-      <img src="album2.jpg" alt="Second Album">
-    </a>
+    <div class="products">
+      <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
+        <img src="book.jpg" alt="Latest Book">
+      </a>
+      <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
+        <img src="album.jpg" alt="Latest Album">
+      </a>
+      <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
+        <img src="book2.jpg" alt="Second Book">
+      </a>
+      <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
+        <img src="album2.jpg" alt="Second Album">
+      </a>
+    </div>
   </div>
 
   <!-- Contact form -->
