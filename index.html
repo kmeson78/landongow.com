@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,19 +19,21 @@
       align-items: center;
     }
 
+    /* Hero section for book + album */
     .hero {
       flex: 1;
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 3rem;
+      gap: 4rem; /* slightly larger gap between images */
       padding-top: 2rem;
       padding-bottom: 2rem;
+      min-height: 80vh; /* take most of viewport height */
     }
 
     .hero a img {
-      width: 200px;
-      max-width: 40vw;
+      width: 250px; /* bigger images */
+      max-width: 45vw;
       height: auto;
       border: 2px solid #fff;
       border-radius: 4px;
@@ -41,8 +44,9 @@
       transform: scale(1.05);
     }
 
+    /* Contact form pushed further down */
     .contact {
-      margin-top: 4rem; /* space below images */
+      margin-top: 8rem; /* more space below hero section */
       width: 100%;
       display: flex;
       justify-content: center;
@@ -72,11 +76,9 @@
       transition: background 0.2s;
     }
 
-    button:hover {
-      background: #666;
-    }
+    button:hover { background: #666; }
 
-    /* mobile responsiveness */
+    /* Mobile responsiveness */
     @media (max-width: 500px) {
       .hero {
         flex-direction: column;
