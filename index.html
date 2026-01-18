@@ -23,23 +23,26 @@
       align-items: center;
     }
 
-    /* Hero section for all products */
-    .hero {
-      flex: 1;
+    /* Hero section container */
+    .hero-wrapper {
+      width: 100%;
+      overflow-x: auto;
       display: flex;
       justify-content: center;
-      align-items: center;
-      gap: 6rem; /* spacing between images */
-      padding-top: 2rem;
-      padding-bottom: 2rem;
-      min-height: 90vh;
-      flex-wrap: nowrap; /* no wrapping, we want horizontal scroll */
-      overflow-x: auto; /* scroll if needed */
-      -webkit-overflow-scrolling: touch; /* smooth scrolling on iPhone */
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
     }
 
-    .hero::-webkit-scrollbar {
-      display: none; /* hide scrollbar for clean look */
+    .hero {
+      display: flex;
+      gap: 6rem;
+      padding: 2rem 0;
+      flex-shrink: 0;
+    }
+
+    .hero a {
+      scroll-snap-align: center;
+      flex-shrink: 0;
     }
 
     .hero a img {
@@ -48,7 +51,7 @@
       border: none;
       border-radius: 4px;
       transition: transform 0.2s;
-      flex-shrink: 0; /* prevents shrinking on small screens */
+      display: block;
     }
 
     .hero a img:hover {
@@ -57,7 +60,7 @@
 
     /* Contact form pushed further down */
     .contact {
-      margin-top: 30rem; /* off-screen on page load */
+      margin-top: 30rem; /* off-screen initially */
       width: 100%;
       display: flex;
       justify-content: center;
@@ -89,10 +92,16 @@
 
     button:hover { background: #666; }
 
-    /* Mobile responsiveness: nothing extra needed, horizontal scroll handles it */
-    @media (max-width: 500px) {
+    /* Mobile adjustments */
+    @media (max-width: 800px) {
+      .hero-wrapper {
+        justify-content: flex-start;
+        padding-left: 50%;
+        transform: translateX(-50%); /* center first item */
+      }
+
       .hero a img {
-        width: 200px; /* smaller on tiny screens */
+        width: 200px;
       }
     }
 
@@ -102,7 +111,6 @@
       left: -9999px;
       top: -9999px;
     }
-
   </style>
 </head>
 <body>
@@ -112,25 +120,39 @@
     Landon L Gow, Landon Gow, Landon Leroy Gow, All My Nights Are Dreams
   </div>
 
-  <!-- Hero section: all books and albums -->
-  <div class="hero">
-    <!-- Original book and album -->
-    <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
-      <img src="book.jpg" alt="Latest Book">
-    </a>
+  <!-- Hero section: horizontally scrollable -->
+  <div class="hero-wrapper">
+    <div class="hero">
+      <!-- Original book and album -->
+      <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
+        <img src="book.jpg" alt="Latest Book">
+      </a>
+      <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
+        <img src="album.jpg" alt="Latest Album">
+      </a>
 
-    <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
-      <img src="album.jpg" alt="Latest Album">
-    </a>
+      <!-- New book and album -->
+      <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
+        <img src="book2.jpg" alt="Second Book">
+      </a>
+      <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
+        <img src="album2.jpg" alt="Second Album">
+      </a>
 
-    <!-- New book and album -->
-    <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
-      <img src="book2.jpg" alt="Second Book">
-    </a>
-
-    <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
-      <img src="album2.jpg" alt="Second Album">
-    </a>
+      <!-- Repeat for infinite scroll effect -->
+      <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
+        <img src="book.jpg" alt="Latest Book">
+      </a>
+      <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
+        <img src="album.jpg" alt="Latest Album">
+      </a>
+      <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
+        <img src="book2.jpg" alt="Second Book">
+      </a>
+      <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
+        <img src="album2.jpg" alt="Second Album">
+      </a>
+    </div>
   </div>
 
   <!-- Contact form -->
