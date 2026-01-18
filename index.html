@@ -33,16 +33,22 @@
       padding-top: 2rem;
       padding-bottom: 2rem;
       min-height: 90vh;
-      flex-wrap: wrap; /* wrap on smaller screens */
+      flex-wrap: nowrap; /* no wrapping, we want horizontal scroll */
+      overflow-x: auto; /* scroll if needed */
+      -webkit-overflow-scrolling: touch; /* smooth scrolling on iPhone */
+    }
+
+    .hero::-webkit-scrollbar {
+      display: none; /* hide scrollbar for clean look */
     }
 
     .hero a img {
       width: 250px;
-      max-width: 40vw;
       height: auto;
       border: none;
       border-radius: 4px;
       transition: transform 0.2s;
+      flex-shrink: 0; /* prevents shrinking on small screens */
     }
 
     .hero a img:hover {
@@ -83,15 +89,10 @@
 
     button:hover { background: #666; }
 
-    /* Mobile responsiveness */
+    /* Mobile responsiveness: nothing extra needed, horizontal scroll handles it */
     @media (max-width: 500px) {
-      .hero {
-        flex-direction: column;
-        gap: 2rem;
-      }
-
       .hero a img {
-        width: 60vw;
+        width: 200px; /* smaller on tiny screens */
       }
     }
 
