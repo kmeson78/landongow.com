@@ -1,98 +1,77 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2822
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Landon Gow</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    .links {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    .links a img {
+      width: 180px;
+      max-width: 45vw;
+      height: auto;
+      border: 2px solid #fff;
+      border-radius: 4px;
+      transition: transform 0.2s;
+    }
+    .links a img:hover { transform: scale(1.05); }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      width: 100%;
+      max-width: 300px;
+    }
+    input, textarea, button {
+      padding: 0.4rem;
+      font-size: 0.9rem;
+      border: 1px solid #fff;
+      border-radius: 4px;
+      background: #111;
+      color: #fff;
+    }
+    button {
+      cursor: pointer;
+      border: none;
+      background: #444;
+      transition: background 0.2s;
+    }
+    button:hover { background: #666; }
+  </style>
+</head>
+<body>
 
-\f0\fs24 \cf0 <!DOCTYPE html>\
-<html lang="en">\
-<head>\
-  <meta charset="UTF-8">\
-  <title>Landon Leroy Gow</title>\
-  <style>\
-    body \{\
-      margin: 0;\
-      font-family: Arial, sans-serif;\
-      background-color: #000;\
-      color: #fff;\
-      display: flex;\
-      flex-direction: column;\
-      align-items: center;\
-      justify-content: flex-start;\
-      min-height: 100vh;\
-      padding: 2rem;\
-    \}\
-\
-    .links \{\
-      display: flex;\
-      gap: 2rem;\
-      justify-content: center;\
-      flex-wrap: wrap;\
-      margin-bottom: 2rem;\
-    \}\
-\
-    .links a img \{\
-      width: 180px;\
-      max-width: 45vw;\
-      height: auto;\
-      border: 2px solid #fff;\
-      border-radius: 4px;\
-      transition: transform 0.2s;\
-    \}\
-\
-    .links a img:hover \{\
-      transform: scale(1.05);\
-    \}\
-\
-    form \{\
-      display: flex;\
-      flex-direction: column;\
-      gap: 0.5rem;\
-      width: 100%;\
-      max-width: 300px;\
-    \}\
-\
-    input, textarea, button \{\
-      padding: 0.4rem;\
-      font-size: 0.9rem;\
-      border: 1px solid #fff;\
-      border-radius: 4px;\
-      background: #111;\
-      color: #fff;\
-    \}\
-\
-    button \{\
-      cursor: pointer;\
-      border: none;\
-      background: #444;\
-      transition: background 0.2s;\
-    \}\
-\
-    button:hover \{\
-      background: #666;\
-    \}\
-  </style>\
-</head>\
-<body>\
-\
-  <div class="links">\
-    <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">\
-      <img src="book.jpg" alt="Latest Book">\
-    </a>\
-\
-    <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">\
-      <img src="album.jpg" alt="Latest Album">\
-    </a>\
-  </div>\
-\
-  <form action="https://formspree.io/f/xvzzzele" method="POST">\
-    <input type="text" name="name" placeholder="Name" required>\
-    <input type="email" name="email" placeholder="Email" required>\
-    <textarea name="message" rows="5" placeholder="Message" required></textarea>\
-    <button type="submit">Send</button>\
-  </form>\
-\
-</body>\
-</html>\
-}
+  <div class="links">
+    <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
+      <img src="book.jpg" alt="Latest Book">
+    </a>
+
+    <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
+      <img src="album.jpg" alt="Latest Album">
+    </a>
+  </div>
+
+  <form action="https://formspree.io/f/xvzzzele" method="POST">
+    <input type="text" name="name" placeholder="Name" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <textarea name="message" rows="5" placeholder="Message" required></textarea>
+    <button type="submit">Send</button>
+  </form>
+
+</body>
+</html>
