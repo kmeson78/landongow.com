@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Landon Leroy Gow</title>
+  <title>LLG</title>
+
+  <!-- SEO meta tags -->
+  <meta name="keywords" content="Landon L Gow, Landon Gow, Landon Leroy Gow, All My Nights Are Dreams, music, book, albums, author">
+  <meta name="description" content="Official website of Landon Leroy Gow. Explore books, music, and contact Landon.">
+
   <style>
     html, body {
       margin: 0;
@@ -24,11 +29,11 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 6rem;
+      gap: 6rem; /* spacing between images */
       padding-top: 2rem;
       padding-bottom: 2rem;
       min-height: 90vh;
-      flex-wrap: wrap;
+      flex-wrap: wrap; /* wrap on smaller screens */
     }
 
     .hero a img {
@@ -46,7 +51,7 @@
 
     /* Contact form pushed further down */
     .contact {
-      margin-top: 30rem;
+      margin-top: 30rem; /* off-screen on page load */
       width: 100%;
       display: flex;
       justify-content: center;
@@ -90,10 +95,23 @@
       }
     }
 
+    /* Hidden SEO text */
+    .hidden-seo {
+      position: absolute;
+      left: -9999px;
+      top: -9999px;
+    }
+
   </style>
 </head>
 <body>
 
+  <!-- Hidden SEO text -->
+  <div class="hidden-seo">
+    Landon L Gow, Landon Gow, Landon Leroy Gow, All My Nights Are Dreams
+  </div>
+
+  <!-- Hero section: all books and albums -->
   <div class="hero">
     <!-- Original book and album -->
     <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
@@ -114,6 +132,7 @@
     </a>
   </div>
 
+  <!-- Contact form -->
   <div class="contact">
     <form action="https://formspree.io/f/xvzzzele" method="POST">
       <input type="text" name="name" placeholder="Name" required>
