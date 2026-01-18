@@ -32,19 +32,24 @@
       align-items: center;
       min-height: 100vh; /* full screen */
       width: 100%;
-      overflow-x: auto; /* allow scroll on mobile if needed */
+      overflow-x: auto; /* horizontal scroll on mobile */
       padding: 0 2rem;
       box-sizing: border-box;
     }
 
     .hero::-webkit-scrollbar {
-      display: none; /* hide scroll bar on mobile */
+      height: 8px;
+    }
+    .hero::-webkit-scrollbar-thumb {
+      background: #555;
+      border-radius: 4px;
     }
 
     .products {
       display: flex;
       gap: 4rem; /* spacing between products */
       flex-shrink: 0;
+      padding-left: 2rem; /* ensures first product not clipped */
     }
 
     .products a img {
@@ -67,7 +72,7 @@
       width: 100%;
       display: flex;
       justify-content: center;
-      padding-top: 100vh; /* forces full screen scroll before visible */
+      padding-top: 100vh; /* forces full viewport scroll before visible */
       padding-bottom: 4rem;
       box-sizing: border-box;
     }
@@ -101,13 +106,13 @@
     }
 
     /* Mobile responsiveness */
-    @media (max-width: 700px) {
+    @media (max-width: 900px) {
       .products {
         gap: 2rem;
       }
 
       .products a img {
-        width: 60vw; /* scale to mobile width */
+        width: 60vw;
       }
     }
   </style>
@@ -122,23 +127,34 @@
   <!-- Hero: horizontally centered products -->
   <div class="hero">
     <div class="products">
+      <!-- Original Book -->
       <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
         <img src="book.jpg" alt="Latest Book">
       </a>
+
+      <!-- Original Album -->
       <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
         <img src="album.jpg" alt="Latest Album">
       </a>
+
+      <!-- New Book3 -->
+      <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FVTB26S2/ref=tmm_pap_swatch_0" target="_blank">
+        <img src="book3.jpg" alt="Third Book">
+      </a>
+
+      <!-- New Album3 -->
+      <a href="https://allmynightsaredreams.bandcamp.com/album/age-of-unknowns-2017" target="_blank">
+        <img src="album3.jpg" alt="Third Album">
+      </a>
+
+      <!-- Original Book2 -->
       <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
         <img src="book2.jpg" alt="Second Book">
       </a>
+
+      <!-- Original Album2 -->
       <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
         <img src="album2.jpg" alt="Second Album">
-      </a>
-      <a href="LINK_TO_BOOK3" target="_blank">
-        <img src="book3.jpg" alt="Third Book">
-      </a>
-      <a href="LINK_TO_ALBUM3" target="_blank">
-        <img src="album3.jpg" alt="Third Album">
       </a>
     </div>
   </div>
