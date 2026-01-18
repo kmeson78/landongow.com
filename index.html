@@ -24,32 +24,50 @@
       padding: 2rem 1rem;
     }
 
-    /* Hero section for all products vertically stacked */
+    /* Hidden SEO text */
+    .hidden-seo {
+      position: absolute;
+      left: -9999px;
+      top: -9999px;
+    }
+
+    /* Hero section for horizontal layout */
+    .hero-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      overflow-x: auto;
+      padding: 2rem 0;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .hero-wrapper::-webkit-scrollbar {
+      display: none; /* hide scrollbar */
+    }
+
     .hero {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5rem; /* space between each product */
-      width: 100%;
-      max-width: 600px; /* keeps images from being too wide on desktop */
+      gap: 4rem; /* spacing between images */
+      flex-shrink: 0;
     }
 
     .hero a img {
-      width: 100%;
-      max-width: 300px;
+      width: 250px;
       height: auto;
       border: none;
       border-radius: 4px;
       transition: transform 0.2s;
+      flex-shrink: 0;
+      display: block;
     }
 
     .hero a img:hover {
       transform: scale(1.05);
     }
 
-    /* Contact form further down */
+    /* Contact form pushed further down */
     .contact {
-      margin-top: 5rem;
+      margin-top: 10rem; /* off-screen initially */
       width: 100%;
       display: flex;
       justify-content: center;
@@ -81,12 +99,17 @@
 
     button:hover { background: #666; }
 
-    /* Hidden SEO text */
-    .hidden-seo {
-      position: absolute;
-      left: -9999px;
-      top: -9999px;
+    /* Mobile adjustments: first product centered, smaller images */
+    @media (max-width: 700px) {
+      .hero-wrapper {
+        justify-content: flex-start;
+        padding-left: 10px;
+      }
+      .hero a img {
+        width: 60vw; /* adapt to screen size */
+      }
     }
+
   </style>
 </head>
 <body>
@@ -96,23 +119,22 @@
     Landon L Gow, Landon Gow, Landon Leroy Gow, All My Nights Are Dreams
   </div>
 
-  <!-- Hero section: vertically stacked -->
-  <div class="hero">
-    <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
-      <img src="book.jpg" alt="Latest Book">
-    </a>
-
-    <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
-      <img src="album.jpg" alt="Latest Album">
-    </a>
-
-    <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
-      <img src="book2.jpg" alt="Second Book">
-    </a>
-
-    <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
-      <img src="album2.jpg" alt="Second Album">
-    </a>
+  <!-- Hero section: horizontal scrollable -->
+  <div class="hero-wrapper">
+    <div class="hero">
+      <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
+        <img src="book.jpg" alt="Latest Book">
+      </a>
+      <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
+        <img src="album.jpg" alt="Latest Album">
+      </a>
+      <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
+        <img src="book2.jpg" alt="Second Book">
+      </a>
+      <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
+        <img src="album2.jpg" alt="Second Album">
+      </a>
+    </div>
   </div>
 
   <!-- Contact form -->
