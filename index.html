@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>landongow.com</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    h1 {
+      margin-bottom: 2rem;
+      font-weight: normal;
+    }
+
+    .links {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+
+    .links a img {
+      width: 200px;
+      max-width: 45vw;
+      height: auto;
+      border: 2px solid #fff;
+      border-radius: 4px;
+      transition: transform 0.2s;
+    }
+
+    .links a img:hover {
+      transform: scale(1.05);
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    input, textarea, button {
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #fff;
+      border-radius: 4px;
+      background: #111;
+      color: #fff;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: #444;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #666;
+    }
+
+  </style>
+</head>
+<body>
+
+  <h1>landongow.com</h1>
+
+  <div class="links">
+    <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
+      <img src="book.jpg" alt="Latest Book">
+    </a>
+
+    <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
+      <img src="album.jpg" alt="Latest Album">
+    </a>
+  </div>
+
+  <form action="https://formspree.io/f/xvzzzele" method="POST">
+    <input type="text" name="name" placeholder="Name" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <textarea name="message" rows="5" placeholder="Message" required></textarea>
+    <button type="submit">Send</button>
+  </form>
+
+</body>
+</html>
