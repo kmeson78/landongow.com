@@ -21,7 +21,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 2rem 1rem;
+      justify-content: flex-start;
+      padding: 4rem 1rem; /* gives space at top */
     }
 
     /* Hidden SEO text */
@@ -31,46 +32,36 @@
       top: -9999px;
     }
 
-    /* Hero section for horizontal layout */
-    .hero-wrapper {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      overflow-x: auto;
-      padding: 2rem 0;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .hero-wrapper::-webkit-scrollbar {
-      display: none; /* hide scrollbar */
-    }
-
+    /* Desktop hero layout: horizontal row */
     .hero {
       display: flex;
-      gap: 4rem; /* spacing between images */
-      flex-shrink: 0;
+      justify-content: center;
+      align-items: center;
+      gap: 4rem; /* space between products */
+      width: 100%;
+      max-width: 1200px;
+      margin-bottom: 10rem; /* space to contact form */
     }
 
     .hero a img {
       width: 250px;
+      max-width: 90vw;
       height: auto;
       border: none;
       border-radius: 4px;
       transition: transform 0.2s;
-      flex-shrink: 0;
-      display: block;
     }
 
     .hero a img:hover {
       transform: scale(1.05);
     }
 
-    /* Contact form pushed further down */
+    /* Contact form */
     .contact {
-      margin-top: 10rem; /* off-screen initially */
       width: 100%;
       display: flex;
       justify-content: center;
+      margin-bottom: 4rem;
     }
 
     form {
@@ -99,17 +90,18 @@
 
     button:hover { background: #666; }
 
-    /* Mobile adjustments: first product centered, smaller images */
-    @media (max-width: 700px) {
-      .hero-wrapper {
-        justify-content: flex-start;
-        padding-left: 10px;
+    /* Mobile: stack products vertically */
+    @media (max-width: 800px) {
+      .hero {
+        flex-direction: column;
+        gap: 4rem;
+        margin-bottom: 8rem;
       }
+
       .hero a img {
-        width: 60vw; /* adapt to screen size */
+        width: 80vw; /* larger, easier to tap */
       }
     }
-
   </style>
 </head>
 <body>
@@ -119,22 +111,23 @@
     Landon L Gow, Landon Gow, Landon Leroy Gow, All My Nights Are Dreams
   </div>
 
-  <!-- Hero section: horizontal scrollable -->
-  <div class="hero-wrapper">
-    <div class="hero">
-      <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
-        <img src="book.jpg" alt="Latest Book">
-      </a>
-      <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
-        <img src="album.jpg" alt="Latest Album">
-      </a>
-      <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
-        <img src="book2.jpg" alt="Second Book">
-      </a>
-      <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
-        <img src="album2.jpg" alt="Second Album">
-      </a>
-    </div>
+  <!-- Hero section: desktop horizontal, mobile stacked -->
+  <div class="hero">
+    <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
+      <img src="book.jpg" alt="Latest Book">
+    </a>
+
+    <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
+      <img src="album.jpg" alt="Latest Album">
+    </a>
+
+    <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
+      <img src="book2.jpg" alt="Second Book">
+    </a>
+
+    <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
+      <img src="album2.jpg" alt="Second Album">
+    </a>
   </div>
 
   <!-- Contact form -->
