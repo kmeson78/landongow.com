@@ -10,6 +10,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
 
+  <!-- SEO meta tags -->
   <meta name="keywords" content="Landon L Gow, Landon Gow, Landon Leroy Gow, All My Nights Are Dreams, music, book, albums, author">
   <meta name="description" content="Official website of Landon Leroy Gow. Explore books, music, and contact Landon.">
 
@@ -50,9 +51,7 @@
     }
 
     .products {
-      display: grid;
-      grid-template-columns: repeat(3, auto);
-      grid-template-rows: auto auto;
+      display: flex;
       gap: 4rem;
       flex-shrink: 0;
       padding-left: 2rem;
@@ -65,19 +64,12 @@
       border-radius: 4px;
       border: 2px solid #555;
       transition: transform 0.2s;
+      flex-shrink: 0;
       display: block;
     }
 
     .products a img:hover {
       transform: scale(1.05);
-    }
-
-    .products a:nth-child(-n+3) {
-      align-self: start;
-    }
-
-    .products a:nth-child(n+4) {
-      align-self: end;
     }
 
     .contact {
@@ -137,26 +129,24 @@
   <div class="hero">
     <div class="products">
 
-      <!-- Top row: books -->
       <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
         <img src="book.jpg" alt="Latest Book">
+      </a>
+
+      <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
+        <img src="album.jpg" alt="Latest Album">
       </a>
 
       <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FVTB26S2/ref=tmm_pap_swatch_0" target="_blank">
         <img src="book3.jpg" alt="Third Book">
       </a>
 
-      <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
-        <img src="book2.jpg" alt="Second Book">
-      </a>
-
-      <!-- Bottom row: albums -->
-      <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
-        <img src="album.jpg" alt="Latest Album">
-      </a>
-
       <a href="https://allmynightsaredreams.bandcamp.com/album/age-of-unknowns-2017" target="_blank">
         <img src="album3.jpg" alt="Third Album">
+      </a>
+
+      <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
+        <img src="book2.jpg" alt="Second Book">
       </a>
 
       <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
