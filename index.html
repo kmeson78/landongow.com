@@ -29,6 +29,7 @@
       top: -9999px;
     }
 
+    /* Horizontal scroll container */
     .hero {
       display: flex;
       justify-content: center;
@@ -49,17 +50,18 @@
       border-radius: 4px;
     }
 
+    /* Horizontal spacing between product columns */
     .products {
       display: flex;
-      gap: 4rem;
+      gap: 2rem; /* unified spacing */
       align-items: stretch;
       flex-shrink: 0;
       padding-left: 2rem;
     }
 
-    /* Book images: fixed height, proportional width */
+    /* Book images: fixed height for uniformity */
     .products > a img {
-      height: 345px;   /* fixed height for uniformity */
+      height: 345px;
       width: auto;
       max-width: 90vw;
       border-radius: 4px;
@@ -73,8 +75,9 @@
     .album-stack {
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: flex-start; /* prevent stretching */
       align-items: center;
+      gap: 2rem; /* unified spacing */
     }
 
     .album-stack a img {
@@ -90,6 +93,7 @@
       transform: scale(1.05);
     }
 
+    /* Contact form */
     .contact {
       width: 100%;
       display: flex;
@@ -126,14 +130,15 @@
       background: #666;
     }
 
+    /* Mobile responsiveness */
     @media (max-width: 900px) {
       .products {
-        gap: 2rem;
+        gap: 1.5rem; /* slightly smaller on mobile */
       }
 
       .products > a img {
         width: 60vw;
-        height: auto;  /* maintain aspect ratio on small screens */
+        height: auto;
       }
 
       .album-stack a img {
