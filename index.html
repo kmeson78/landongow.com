@@ -29,12 +29,37 @@
       top: -9999px;
     }
 
-    /* wrapper around hero + glyphs */
+    /* wrapper to stack rows */
     .hero-wrapper {
-      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
       width: 100%;
     }
 
+    /* Glyph rows above and below the scroll */
+    .glyph-row {
+      display: flex;
+      width: 100%;
+    }
+
+    .glyph-row.top {
+      justify-content: flex-start; /* align upper-left glyph with left edge */
+      margin-bottom: 1rem;
+    }
+
+    .glyph-row.bottom {
+      justify-content: flex-end; /* align lower-right glyph with right edge */
+      margin-top: 1rem;
+    }
+
+    .glyph {
+      width: 40px;
+      height: 40px;
+      pointer-events: none;
+    }
+
+    /* Horizontal scroll row */
     .hero {
       display: flex;
       justify-content: center;
@@ -65,7 +90,7 @@
 
     /* Book images: fixed height, proportional width */
     .products > a img {
-      height: 345px;
+      height: 345px;   /* uniform height */
       width: auto;
       max-width: 90vw;
       border-radius: 4px;
@@ -96,24 +121,7 @@
       transform: scale(1.05);
     }
 
-    /* Glyphs outside scroll */
-    .glyph {
-      position: absolute;
-      pointer-events: none;
-      width: 40px;
-      height: 40px;
-    }
-
-    .glyph.upper-left {
-      bottom: 100%; /* above hero scroll */
-      left: 2rem;   /* aligns with first product */
-    }
-
-    .glyph.lower-right {
-      top: 100%; /* below hero scroll */
-      right: 2rem; /* aligns with last product */
-    }
-
+    /* Contact form */
     .contact {
       width: 100%;
       display: flex;
@@ -180,9 +188,12 @@
 
   <div class="hero-wrapper">
 
-    <!-- Top-left glyph above scroll -->
-    <img src="upper_left_glyph.png" alt="" class="glyph upper-left">
+    <!-- Top glyph row -->
+    <div class="glyph-row top">
+      <img src="upper_left_glyph.png" alt="" class="glyph">
+    </div>
 
+    <!-- Middle row: horizontal scroll products -->
     <div class="hero">
       <div class="products">
 
@@ -224,8 +235,10 @@
       </div>
     </div>
 
-    <!-- Bottom-right glyph below scroll -->
-    <img src="lower_right_glyph.png" alt="" class="glyph lower-right">
+    <!-- Bottom glyph row -->
+    <div class="glyph-row bottom">
+      <img src="lower_right_glyph.png" alt="" class="glyph">
+    </div>
 
   </div>
 
