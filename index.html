@@ -29,10 +29,11 @@
       top: -9999px;
     }
 
+    /* Horizontal scroll container */
     .hero {
       display: flex;
       justify-content: center;
-      align-items: stretch; /* stretch so all columns match tallest book */
+      align-items: center;
       min-height: 100vh;
       width: 100%;
       overflow-x: auto;
@@ -49,58 +50,50 @@
       border-radius: 4px;
     }
 
+    /* Horizontal spacing between product columns */
     .products {
       display: flex;
-      gap: 2rem; /* consistent horizontal spacing */
-      align-items: stretch; /* all columns same height */
+      gap: 2rem; /* unified spacing */
+      align-items: stretch;
       flex-shrink: 0;
       padding-left: 2rem;
     }
 
-    /* Book column */
-    .book-column {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end; /* align to bottom for hover scaling */
-      flex: 0 0 auto;
-    }
-
-    .book-column img {
-      height: 80vh; /* max height relative to viewport */
+    /* Book images: fixed height for uniformity */
+    .products > a img {
+      height: 345px;
       width: auto;
+      max-width: 90vw;
       border-radius: 4px;
       border: 2px solid #555;
       transition: transform 0.2s;
       display: block;
+      flex-shrink: 0;
     }
 
-    /* Album stack column */
-    .album-column {
+    /* Album stack */
+    .album-stack {
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      flex: 0 0 auto;
-      height: 80vh; /* match book column height */
+      justify-content: flex-start; /* prevent stretching */
+      align-items: center;
+      gap: 2rem; /* unified spacing */
     }
 
-    .album-column a img {
-      flex: 1 1 auto;
-      width: auto;
-      max-height: calc((100% - 1rem)/2); /* divide space evenly minus small gap */
+    .album-stack a img {
+      width: 160px;
+      height: auto;
       border-radius: 4px;
       border: 2px solid #555;
       transition: transform 0.2s;
       display: block;
-    }
-
-    .album-column a:first-child {
-      margin-bottom: 1rem; /* small spacing between top and bottom album */
     }
 
     .products img:hover {
       transform: scale(1.05);
     }
 
+    /* Contact form */
     .contact {
       width: 100%;
       display: flex;
@@ -137,23 +130,19 @@
       background: #666;
     }
 
+    /* Mobile responsiveness */
     @media (max-width: 900px) {
       .products {
-        gap: 1.5rem;
+        gap: 1.5rem; /* slightly smaller on mobile */
       }
 
-      .book-column img,
-      .album-column a img {
-        width: 45vw;
-        height: auto; /* scale proportionally */
-      }
-
-      .album-column {
+      .products > a img {
+        width: 60vw;
         height: auto;
       }
 
-      .album-column a:first-child {
-        margin-bottom: 1rem;
+      .album-stack a img {
+        width: 45vw;
       }
     }
   </style>
@@ -168,15 +157,13 @@
   <div class="hero">
     <div class="products">
 
-      <!-- Column 1: Book -->
-      <div class="book-column">
-        <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
-          <img src="book.jpg" alt="Latest Book">
-        </a>
-      </div>
+      <!-- Book -->
+      <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
+        <img src="book.jpg" alt="Latest Book">
+      </a>
 
-      <!-- Column 2: Album Stack -->
-      <div class="album-column">
+      <!-- Album stack -->
+      <div class="album-stack">
         <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
           <img src="album.jpg" alt="Latest Album">
         </a>
@@ -185,15 +172,13 @@
         </a>
       </div>
 
-      <!-- Column 3: Book -->
-      <div class="book-column">
-        <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FVTB26S2/ref=tmm_pap_swatch_0" target="_blank">
-          <img src="book3.jpg" alt="Third Book">
-        </a>
-      </div>
+      <!-- Book -->
+      <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FVTB26S2/ref=tmm_pap_swatch_0" target="_blank">
+        <img src="book3.jpg" alt="Third Book">
+      </a>
 
-      <!-- Column 4: Album Stack -->
-      <div class="album-column">
+      <!-- Album stack -->
+      <div class="album-stack">
         <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
           <img src="album2.jpg" alt="Second Album">
         </a>
@@ -202,12 +187,10 @@
         </a>
       </div>
 
-      <!-- Column 5: Book -->
-      <div class="book-column">
-        <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
-          <img src="book2.jpg" alt="Second Book">
-        </a>
-      </div>
+      <!-- Book -->
+      <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
+        <img src="book2.jpg" alt="Second Book">
+      </a>
 
     </div>
   </div>
