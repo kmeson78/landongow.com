@@ -32,7 +32,7 @@
     .hero {
       display: flex;
       justify-content: center;
-      align-items: flex-end; /* bottom-align all columns */
+      align-items: flex-end; /* bottom align all columns */
       min-height: 100vh;
       width: 100%;
       overflow-x: auto;
@@ -52,12 +52,12 @@
     .products {
       display: flex;
       gap: 2rem; /* consistent spacing horizontally */
-      align-items: flex-end; /* bottom align books and album stacks */
+      align-items: flex-end;
       flex-shrink: 0;
       padding-left: 2rem;
     }
 
-    /* Columns containing books */
+    /* Book columns */
     .products > a {
       flex: 0 0 auto;
       display: flex;
@@ -65,7 +65,7 @@
     }
 
     .products > a img {
-      height: 345px; /* books set the height */
+      max-height: 80vh; /* responsive max height */
       width: auto;
       border-radius: 4px;
       border: 2px solid #555;
@@ -73,19 +73,18 @@
       display: block;
     }
 
-    /* Album stacks scale to match book height */
+    /* Album stacks */
     .album-stack {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       flex: 0 0 auto;
-      height: 345px; /* same height as book */
-      gap: 2rem;     /* vertical spacing between albums matches horizontal gap */
+      max-height: 80vh; /* same as book max height */
     }
 
     .album-stack a img {
       width: auto;
-      max-height: calc((100% - 2rem) / 2); /* split remaining height evenly between two albums minus gap */
+      max-height: calc((100% - 2rem)/2); /* divide height evenly minus spacing */
       border-radius: 4px;
       border: 2px solid #555;
       transition: transform 0.2s;
@@ -132,16 +131,20 @@
       background: #666;
     }
 
+    /* Responsive scaling */
     @media (max-width: 900px) {
+      .products {
+        gap: 1.5rem;
+      }
+
       .products > a img,
       .album-stack a img {
-        height: auto;
-        width: 45vw;
         max-height: none;
+        width: 45vw;
+        height: auto;
       }
 
       .album-stack {
-        height: auto;
         gap: 1rem;
       }
     }
