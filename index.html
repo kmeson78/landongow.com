@@ -50,20 +50,32 @@
       border-radius: 4px;
     }
 
-    /* Horizontal spacing between product columns */
+    /* Products container: responsive and centered */
     .products {
       display: flex;
-      gap: 2rem; /* unified spacing */
+      flex-wrap: wrap;          /* allow wrap on very small screens */
+      gap: 2rem;                /* unified spacing */
+      justify-content: center;  /* center products in row */
       align-items: stretch;
-      flex-shrink: 0;
-      padding-left: 2rem;
+      padding-left: 0;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    /* Each column (book or album stack) scales */
+    .products > a,
+    .album-stack {
+      flex: 1 1 150px;  /* grow and shrink, min width 150px */
+      max-width: 200px; /* limit column width */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     /* Book images: fixed height for uniformity */
     .products > a img {
       height: 345px;
       width: auto;
-      max-width: 90vw;
       border-radius: 4px;
       border: 2px solid #555;
       transition: transform 0.2s;
@@ -71,17 +83,14 @@
       flex-shrink: 0;
     }
 
-    /* Album stack */
+    /* Album stack: vertical spacing consistent */
     .album-stack {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start; /* prevent stretching */
-      align-items: center;
-      gap: 2rem; /* unified spacing */
+      gap: 2rem;
+      justify-content: flex-start;
     }
 
     .album-stack a img {
-      width: 160px;
+      width: 100%; /* scale to column width */
       height: auto;
       border-radius: 4px;
       border: 2px solid #555;
@@ -130,19 +139,16 @@
       background: #666;
     }
 
-    /* Mobile responsiveness */
+    /* Mobile adjustments */
     @media (max-width: 900px) {
-      .products {
-        gap: 1.5rem; /* slightly smaller on mobile */
-      }
-
       .products > a img {
-        width: 60vw;
         height: auto;
+        width: 60vw; /* scale dynamically on smaller screens */
       }
 
       .album-stack a img {
         width: 45vw;
+        height: auto;
       }
     }
   </style>
