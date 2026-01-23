@@ -32,7 +32,7 @@
     .hero {
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-end; /* bottom-align all columns */
       min-height: 100vh;
       width: 100%;
       overflow-x: auto;
@@ -51,45 +51,41 @@
 
     .products {
       display: flex;
-      gap: 2rem; /* standard spacing horizontally and vertically */
-      align-items: stretch; /* all columns same height */
+      gap: 2rem; /* consistent spacing horizontally */
+      align-items: flex-end; /* bottom align books and album stacks */
       flex-shrink: 0;
       padding-left: 2rem;
     }
 
-    /* Book images scale responsively */
+    /* Columns containing books */
     .products > a {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
       flex: 0 0 auto;
+      display: flex;
+      align-items: flex-end;
     }
 
     .products > a img {
-      height: 100%; /* take full column height */
+      height: 345px; /* books set the height */
       width: auto;
-      max-height: 345px; /* optional cap to avoid huge books on very large screens */
       border-radius: 4px;
       border: 2px solid #555;
       transition: transform 0.2s;
       display: block;
     }
 
-    /* Album stacks match the height of books */
+    /* Album stacks scale to match book height */
     .album-stack {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       flex: 0 0 auto;
-      height: 100%; /* match book height */
-      gap: 2rem; /* vertical spacing between albums */
+      height: 345px; /* same height as book */
+      gap: 2rem;     /* vertical spacing between albums matches horizontal gap */
     }
 
     .album-stack a img {
-      width: 100%;
-      height: auto;
-      flex: 1 1 auto; /* stretch proportionally within stack */
-      object-fit: contain;
+      width: auto;
+      max-height: calc((100% - 2rem) / 2); /* split remaining height evenly between two albums minus gap */
       border-radius: 4px;
       border: 2px solid #555;
       transition: transform 0.2s;
@@ -136,20 +132,16 @@
       background: #666;
     }
 
-    /* Mobile adjustments */
     @media (max-width: 900px) {
-      .products {
-        gap: 1.5rem;
-      }
-
       .products > a img,
       .album-stack a img {
-        max-height: none; /* allow scaling to fit screen */
-        width: 45vw;
         height: auto;
+        width: 45vw;
+        max-height: none;
       }
 
       .album-stack {
+        height: auto;
         gap: 1rem;
       }
     }
@@ -165,12 +157,12 @@
   <div class="hero">
     <div class="products">
 
-      <!-- Book -->
+      <!-- Column 1: Book -->
       <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
         <img src="book.jpg" alt="Latest Book">
       </a>
 
-      <!-- Album stack -->
+      <!-- Column 2: Album Stack -->
       <div class="album-stack">
         <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
           <img src="album.jpg" alt="Latest Album">
@@ -180,12 +172,12 @@
         </a>
       </div>
 
-      <!-- Book -->
+      <!-- Column 3: Book -->
       <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FVTB26S2/ref=tmm_pap_swatch_0" target="_blank">
         <img src="book3.jpg" alt="Third Book">
       </a>
 
-      <!-- Album stack -->
+      <!-- Column 4: Album Stack -->
       <div class="album-stack">
         <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
           <img src="album2.jpg" alt="Second Album">
@@ -195,7 +187,7 @@
         </a>
       </div>
 
-      <!-- Book -->
+      <!-- Column 5: Book -->
       <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
         <img src="book2.jpg" alt="Second Book">
       </a>
