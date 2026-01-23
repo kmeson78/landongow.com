@@ -29,7 +29,6 @@
       top: -9999px;
     }
 
-    /* Hero horizontal scroll */
     .hero {
       display: flex;
       justify-content: center;
@@ -50,40 +49,47 @@
       border-radius: 4px;
     }
 
-    /* Products container using CSS grid */
     .products {
-      display: grid;
-      grid-auto-flow: column;               /* horizontal flow */
-      grid-auto-columns: minmax(150px, 1fr); /* scale columns */
-      align-items: end;                     /* bottom align books and albums */
-      gap: 2rem;                            /* consistent vertical and horizontal spacing */
-      justify-content: center;              /* center the row */
-      width: 100%;
-      box-sizing: border-box;
+      display: flex;
+      gap: 2rem; /* standard spacing horizontally and vertically */
+      align-items: stretch; /* all columns same height */
+      flex-shrink: 0;
+      padding-left: 2rem;
     }
 
-    /* Book images scale to column width */
+    /* Book images scale responsively */
+    .products > a {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      flex: 0 0 auto;
+    }
+
     .products > a img {
-      width: 100%;
-      height: auto;
+      height: 100%; /* take full column height */
+      width: auto;
+      max-height: 345px; /* optional cap to avoid huge books on very large screens */
       border-radius: 4px;
       border: 2px solid #555;
       transition: transform 0.2s;
       display: block;
     }
 
-    /* Album stacks */
+    /* Album stacks match the height of books */
     .album-stack {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 2rem;        /* match horizontal gap */
-      height: 100%;     /* align bottom with books */
+      flex: 0 0 auto;
+      height: 100%; /* match book height */
+      gap: 2rem; /* vertical spacing between albums */
     }
 
     .album-stack a img {
       width: 100%;
       height: auto;
+      flex: 1 1 auto; /* stretch proportionally within stack */
+      object-fit: contain;
       border-radius: 4px;
       border: 2px solid #555;
       transition: transform 0.2s;
@@ -94,7 +100,6 @@
       transform: scale(1.05);
     }
 
-    /* Contact form */
     .contact {
       width: 100%;
       display: flex;
@@ -134,8 +139,18 @@
     /* Mobile adjustments */
     @media (max-width: 900px) {
       .products {
-        grid-auto-columns: minmax(120px, 45vw);
         gap: 1.5rem;
+      }
+
+      .products > a img,
+      .album-stack a img {
+        max-height: none; /* allow scaling to fit screen */
+        width: 45vw;
+        height: auto;
+      }
+
+      .album-stack {
+        gap: 1rem;
       }
     }
   </style>
