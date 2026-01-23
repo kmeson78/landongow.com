@@ -29,6 +29,12 @@
       top: -9999px;
     }
 
+    /* wrapper around hero + glyphs */
+    .hero-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
     .hero {
       display: flex;
       justify-content: center;
@@ -38,7 +44,6 @@
       overflow-x: auto;
       padding: 0 2rem;
       box-sizing: border-box;
-      position: relative; /* for glyph positioning */
     }
 
     .hero::-webkit-scrollbar {
@@ -58,6 +63,7 @@
       padding-left: 2rem;
     }
 
+    /* Book images: fixed height, proportional width */
     .products > a img {
       height: 345px;
       width: auto;
@@ -69,6 +75,7 @@
       flex-shrink: 0;
     }
 
+    /* Album stack */
     .album-stack {
       display: flex;
       flex-direction: column;
@@ -89,23 +96,22 @@
       transform: scale(1.05);
     }
 
+    /* Glyphs outside scroll */
     .glyph {
       position: absolute;
-      z-index: 1;
+      pointer-events: none;
+      width: 40px;
+      height: 40px;
     }
 
     .glyph.upper-left {
-      top: -40px;
-      left: -40px;
-      width: 40px;
-      height: 40px;
+      bottom: 100%; /* above hero scroll */
+      left: 2rem;   /* aligns with first product */
     }
 
     .glyph.lower-right {
-      bottom: -40px;
-      right: -40px;
-      width: 40px;
-      height: 40px;
+      top: 100%; /* below hero scroll */
+      right: 2rem; /* aligns with last product */
     }
 
     .contact {
@@ -158,14 +164,9 @@
         width: 45vw;
       }
 
-      .glyph.upper-left,
-      .glyph.lower-right {
+      .glyph {
         width: 20px;
         height: 20px;
-        top: -20px;
-        left: -20px;
-        bottom: -20px;
-        right: -20px;
       }
     }
   </style>
@@ -177,51 +178,55 @@
     Landon L Gow, Landon Gow, Landon Leroy Gow, All My Nights Are Dreams
   </div>
 
-  <div class="hero">
-    <!-- Top-left glyph -->
+  <div class="hero-wrapper">
+
+    <!-- Top-left glyph above scroll -->
     <img src="upper_left_glyph.png" alt="" class="glyph upper-left">
 
-    <div class="products">
+    <div class="hero">
+      <div class="products">
 
-      <!-- Book -->
-      <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
-        <img src="book.jpg" alt="Latest Book">
-      </a>
+        <!-- Book -->
+        <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
+          <img src="book.jpg" alt="Latest Book">
+        </a>
 
-      <!-- Album stack -->
-      <div class="album-stack">
-        <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
-          <img src="album.jpg" alt="Latest Album">
+        <!-- Album stack -->
+        <div class="album-stack">
+          <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
+            <img src="album.jpg" alt="Latest Album">
+          </a>
+          <a href="https://allmynightsaredreams.bandcamp.com/album/age-of-unknowns-2017" target="_blank">
+            <img src="album3.jpg" alt="Third Album">
+          </a>
+        </div>
+
+        <!-- Book -->
+        <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FVTB26S2/ref=tmm_pap_swatch_0" target="_blank">
+          <img src="book3.jpg" alt="Third Book">
         </a>
-        <a href="https://allmynightsaredreams.bandcamp.com/album/age-of-unknowns-2017" target="_blank">
-          <img src="album3.jpg" alt="Third Album">
+
+        <!-- Album stack -->
+        <div class="album-stack">
+          <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
+            <img src="album2.jpg" alt="Second Album">
+          </a>
+          <a href="https://allmynightsaredreams.bandcamp.com/album/oneirism" target="_blank">
+            <img src="album4.jpg" alt="Fourth Album">
+          </a>
+        </div>
+
+        <!-- Book -->
+        <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
+          <img src="book2.jpg" alt="Second Book">
         </a>
+
       </div>
-
-      <!-- Book -->
-      <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FVTB26S2/ref=tmm_pap_swatch_0" target="_blank">
-        <img src="book3.jpg" alt="Third Book">
-      </a>
-
-      <!-- Album stack -->
-      <div class="album-stack">
-        <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
-          <img src="album2.jpg" alt="Second Album">
-        </a>
-        <a href="https://allmynightsaredreams.bandcamp.com/album/oneirism" target="_blank">
-          <img src="album4.jpg" alt="Fourth Album">
-        </a>
-      </div>
-
-      <!-- Book -->
-      <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
-        <img src="book2.jpg" alt="Second Book">
-      </a>
-
     </div>
 
-    <!-- Bottom-right glyph -->
+    <!-- Bottom-right glyph below scroll -->
     <img src="lower_right_glyph.png" alt="" class="glyph lower-right">
+
   </div>
 
   <div class="contact">
