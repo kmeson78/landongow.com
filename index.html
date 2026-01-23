@@ -19,8 +19,14 @@
       padding: 0;
       height: 100%;
       font-family: Arial, sans-serif;
-      background-color: #000;
       color: #fff;
+
+      background-color: #000;
+      background-image: url("site_background.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
     }
 
     .hidden-seo {
@@ -53,13 +59,13 @@
     /* Horizontal spacing between product columns */
     .products {
       display: flex;
-      gap: 2rem; /* unified spacing */
+      gap: 2rem;
       align-items: stretch;
       flex-shrink: 0;
       padding-left: 2rem;
     }
 
-    /* Book images: fixed height for uniformity */
+    /* Book images */
     .products > a img {
       height: 345px;
       width: auto;
@@ -69,15 +75,16 @@
       transition: transform 0.2s;
       display: block;
       flex-shrink: 0;
+      background: #000;
     }
 
     /* Album stack */
     .album-stack {
       display: flex;
       flex-direction: column;
-      justify-content: flex-start; /* prevent stretching */
+      justify-content: flex-start;
       align-items: center;
-      gap: 2rem; /* unified spacing */
+      gap: 2rem;
     }
 
     .album-stack a img {
@@ -87,6 +94,7 @@
       border: 2px solid #555;
       transition: transform 0.2s;
       display: block;
+      background: #000;
     }
 
     .products img:hover {
@@ -133,7 +141,7 @@
     /* Mobile responsiveness */
     @media (max-width: 900px) {
       .products {
-        gap: 1.5rem; /* slightly smaller on mobile */
+        gap: 1.5rem;
       }
 
       .products > a img {
@@ -157,12 +165,10 @@
   <div class="hero">
     <div class="products">
 
-      <!-- Book -->
       <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank">
         <img src="book.jpg" alt="Latest Book">
       </a>
 
-      <!-- Album stack -->
       <div class="album-stack">
         <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
           <img src="album.jpg" alt="Latest Album">
@@ -172,12 +178,10 @@
         </a>
       </div>
 
-      <!-- Book -->
       <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FVTB26S2/ref=tmm_pap_swatch_0" target="_blank">
         <img src="book3.jpg" alt="Third Book">
       </a>
 
-      <!-- Album stack -->
       <div class="album-stack">
         <a href="https://allmynightsaredreams.bandcamp.com/album/lets-go-off-our-meds-together-all-those-broken-records" target="_blank">
           <img src="album2.jpg" alt="Second Album">
@@ -187,7 +191,6 @@
         </a>
       </div>
 
-      <!-- Book -->
       <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank">
         <img src="book2.jpg" alt="Second Book">
       </a>
