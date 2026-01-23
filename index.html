@@ -29,34 +29,10 @@
       top: -9999px;
     }
 
-    /* wrapper to stack rows */
+    /* wrapper around hero to position glyphs relative to products */
     .hero-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
+      position: relative;
       width: 100%;
-    }
-
-    /* Glyph rows above and below the scroll */
-    .glyph-row {
-      display: flex;
-      width: 100%;
-    }
-
-    .glyph-row.top {
-      justify-content: flex-start; /* align upper-left glyph with left edge */
-      margin-bottom: 1rem;
-    }
-
-    .glyph-row.bottom {
-      justify-content: flex-end; /* align lower-right glyph with right edge */
-      margin-top: 1rem;
-    }
-
-    .glyph {
-      width: 40px;
-      height: 40px;
-      pointer-events: none;
     }
 
     /* Horizontal scroll row */
@@ -88,9 +64,9 @@
       padding-left: 2rem;
     }
 
-    /* Book images: fixed height, proportional width */
+    /* Book images: fixed height for uniformity */
     .products > a img {
-      height: 345px;   /* uniform height */
+      height: 345px;
       width: auto;
       max-width: 90vw;
       border-radius: 4px;
@@ -119,6 +95,15 @@
 
     .products img:hover {
       transform: scale(1.05);
+    }
+
+    /* Glyphs positioned absolutely relative to wrapper but aligned dynamically via JS */
+    .glyph {
+      position: absolute;
+      pointer-events: none;
+      width: 40px;
+      height: 40px;
+      z-index: 9999;
     }
 
     /* Contact form */
@@ -188,12 +173,9 @@
 
   <div class="hero-wrapper">
 
-    <!-- Top glyph row -->
-    <div class="glyph-row top">
-      <img src="upper_left_glyph.png" alt="" class="glyph">
-    </div>
+    <!-- Top-left glyph -->
+    <img src="upper_left_glyph.png" alt="" class="glyph upper-left">
 
-    <!-- Middle row: horizontal scroll products -->
     <div class="hero">
       <div class="products">
 
@@ -235,10 +217,8 @@
       </div>
     </div>
 
-    <!-- Bottom glyph row -->
-    <div class="glyph-row bottom">
-      <img src="lower_right_glyph.png" alt="" class="glyph">
-    </div>
+    <!-- Bottom-right glyph -->
+    <img src="lower_right_glyph.png" alt="" class="glyph lower-right">
 
   </div>
 
@@ -250,6 +230,33 @@
       <button type="submit">Send</button>
     </form>
   </div>
+
+  <script>
+    function positionGlyphs() {
+      const firstProduct = document.querySelector('.products > a:first-child');
+      const lastProduct = document.querySelector('.products > a:last-child');
+      const upperGlyph = document.querySelector('.glyph.upper-left');
+      const lowerGlyph = document.querySelector('.glyph.lower-right');
+
+      if (!firstProduct || !lastProduct || !upperGlyph || !lowerGlyph) return;
+
+      const wrapperRect = document.querySelector('.hero-wrapper').getBoundingClientRect();
+      const firstRect = firstProduct.getBoundingClientRect();
+      const lastRect = lastProduct.getBoundingClientRect();
+
+      // position upper-left glyph just above first product
+      upperGlyph.style.left = (firstRect.left - wrapperRect.left) + 'px';
+      upperGlyph.style.top = (firstRect.top - wrapperRect.top - upperGlyph.offsetHeight - 10) + 'px';
+
+      // position lower-right glyph just below last product
+      lowerGlyph.style.left = (lastRect.right - wrapperRect.left - lowerGlyph.offsetWidth) + 'px';
+      lowerGlyph.style.top = (lastRect.bottom - wrapperRect.top + 10) + 'px';
+    }
+
+    window.addEventListener('load', positionGlyphs);
+    window.addEventListener('resize', positionGlyphs);
+    window.addEventListener('scroll', positionGlyphs);
+  </script>
 
 </body>
 </html>
