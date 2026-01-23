@@ -50,46 +50,21 @@
       border-radius: 4px;
     }
 
-    /* Products container: responsive and centered */
+    /* Products container using CSS grid */
     .products {
-      display: flex;
-      flex-wrap: wrap;           /* wrap on very small screens */
-      gap: 2rem;                 /* uniform spacing */
-      justify-content: center;   /* center the row */
-      align-items: stretch;
+      display: grid;
+      grid-auto-flow: column;               /* horizontal flow */
+      grid-auto-columns: minmax(150px, 1fr); /* scale columns */
+      align-items: end;                     /* bottom align books and albums */
+      gap: 2rem;                            /* consistent vertical and horizontal spacing */
+      justify-content: center;              /* center the row */
       width: 100%;
       box-sizing: border-box;
     }
 
-    /* Each product column scales */
-    .products > a,
-    .album-stack {
-      flex: 1 1 150px;           /* grow and shrink, minimum width */
-      max-width: 200px;          /* limit column width */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    /* Book images: scale proportionally */
+    /* Book images scale to column width */
     .products > a img {
-      width: 100%;      /* fill the column */
-      height: auto;     /* maintain aspect ratio */
-      border-radius: 4px;
-      border: 2px solid #555;
-      transition: transform 0.2s;
-      display: block;
-    }
-
-    /* Album stacks: vertical spacing consistent and scalable */
-    .album-stack {
-      gap: 2rem;        /* same spacing as horizontal gap */
-      justify-content: flex-start;
       width: 100%;
-    }
-
-    .album-stack a img {
-      width: 100%;      /* fill stack column width */
       height: auto;
       border-radius: 4px;
       border: 2px solid #555;
@@ -97,7 +72,24 @@
       display: block;
     }
 
-    /* Hover effect */
+    /* Album stacks */
+    .album-stack {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 2rem;        /* match horizontal gap */
+      height: 100%;     /* align bottom with books */
+    }
+
+    .album-stack a img {
+      width: 100%;
+      height: auto;
+      border-radius: 4px;
+      border: 2px solid #555;
+      transition: transform 0.2s;
+      display: block;
+    }
+
     .products img:hover {
       transform: scale(1.05);
     }
@@ -141,16 +133,9 @@
 
     /* Mobile adjustments */
     @media (max-width: 900px) {
-      .products > a,
-      .album-stack {
-        flex: 1 1 120px;  /* smaller minimum width */
-        max-width: 45vw;  /* scale to screen width */
-      }
-
-      .products > a img,
-      .album-stack a img {
-        width: 100%;      /* scale proportionally */
-        height: auto;
+      .products {
+        grid-auto-columns: minmax(120px, 45vw);
+        gap: 1.5rem;
       }
     }
   </style>
