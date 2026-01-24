@@ -75,7 +75,6 @@
       background: #000;
     }
 
-    /* Remove frame for all book PNGs */
     .products > a img.no-border {
       border: none;
       background: transparent;
@@ -99,7 +98,6 @@
       background: #000;
     }
 
-    /* More noticeable hover effect without changing layout flow */
     .products img:hover {
       transform: scale(1.18);
       position: relative;
@@ -109,10 +107,25 @@
     .contact {
       width: 100%;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
       padding-top: 100vh;
       padding-bottom: 4rem;
       box-sizing: border-box;
+    }
+
+    .logo-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .logo-container img {
+      max-width: 300px;
+      width: 100%;
+      height: auto;
+      display: block;
     }
 
     form {
@@ -202,6 +215,10 @@
   </div>
 
   <div class="contact">
+    <div class="logo-container">
+      <img src="logo.png" alt="Publishing Logo">
+    </div>
+
     <form action="https://formspree.io/f/xvzzzele" method="POST">
       <input type="text" name="name" placeholder="Name" required>
       <input type="email" name="email" placeholder="Email" required>
