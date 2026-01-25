@@ -62,7 +62,6 @@
       padding-left: 2rem;
     }
 
-    /* Give the hover a "3D space" to exist in */
     .products > a,
     .album-stack a {
       display: inline-block;
@@ -75,12 +74,11 @@
       width: auto;
       max-width: 90vw;
       border-radius: 4px;
-      transition: transform 0.45s ease, filter 0.45s ease;
+      transition: transform 0.45s ease;
       display: block;
       flex-shrink: 0;
       background: #000;
       transform-origin: 50% 50%;
-      will-change: transform, filter;
       backface-visibility: hidden;
       transform: translateZ(0);
     }
@@ -102,25 +100,14 @@
       width: 160px;
       height: auto;
       border-radius: 4px;
-      transition: transform 0.45s ease, filter 0.45s ease;
+      transition: transform 0.45s ease;
       display: block;
       background: transparent;
       transform-origin: 50% 50%;
-      will-change: transform, filter;
       backface-visibility: hidden;
       transform: translateZ(0);
     }
 
-    /* Base hover pose (pickup) */
-    .products > a:hover img,
-    .album-stack a:hover img {
-      transform: translateX(10px) rotateY(-8deg) translateZ(30px) scale(1.35);
-      position: relative;
-      z-index: 10;
-      filter: drop-shadow(10px 16px 22px rgba(0,0,0,0.25));
-    }
-
-    /* Minimal movement: a slow "breath" while hovered */
     @keyframes hoverBreath {
       0%   { transform: translateX(10px) rotateY(-8deg) translateZ(30px) scale(1.35); }
       50%  { transform: translateX(12px) rotateY(-9deg) translateZ(32px) scale(1.36); }
@@ -129,20 +116,21 @@
 
     .products > a:hover img,
     .album-stack a:hover img {
+      position: relative;
+      z-index: 10;
+      will-change: transform;
+      transform: translateX(10px) rotateY(-8deg) translateZ(30px) scale(1.35);
       animation: hoverBreath 1.8s ease-in-out infinite;
     }
 
-    /* Turn off hover motion on touch devices */
     @media (hover: none) {
       .products > a:hover img,
       .album-stack a:hover img {
         transform: none;
-        filter: none;
         animation: none;
       }
     }
 
-    /* Respect reduced motion preferences */
     @media (prefers-reduced-motion: reduce) {
       .products > a img,
       .album-stack a img {
@@ -279,3 +267,4 @@
 
 </body>
 </html>
+
