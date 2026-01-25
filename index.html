@@ -111,7 +111,7 @@
       transform: translateZ(0);
     }
 
-    /* New hover: same bold scale, plus gentle sideways move + slight turn + subtle shadow */
+    /* Base hover pose (pickup) */
     .products > a:hover img,
     .album-stack a:hover img {
       transform: translateX(10px) rotateY(-8deg) translateZ(30px) scale(1.35);
@@ -120,12 +120,25 @@
       filter: drop-shadow(10px 16px 22px rgba(0,0,0,0.25));
     }
 
+    /* Minimal movement: a slow "breath" while hovered */
+    @keyframes hoverBreath {
+      0%   { transform: translateX(10px) rotateY(-8deg) translateZ(30px) scale(1.35); }
+      50%  { transform: translateX(12px) rotateY(-9deg) translateZ(32px) scale(1.36); }
+      100% { transform: translateX(10px) rotateY(-8deg) translateZ(30px) scale(1.35); }
+    }
+
+    .products > a:hover img,
+    .album-stack a:hover img {
+      animation: hoverBreath 1.8s ease-in-out infinite;
+    }
+
     /* Turn off hover motion on touch devices */
     @media (hover: none) {
       .products > a:hover img,
       .album-stack a:hover img {
         transform: none;
         filter: none;
+        animation: none;
       }
     }
 
@@ -134,6 +147,10 @@
       .products > a img,
       .album-stack a img {
         transition: none;
+      }
+      .products > a:hover img,
+      .album-stack a:hover img {
+        animation: none;
       }
     }
 
