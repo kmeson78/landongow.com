@@ -62,15 +62,27 @@
       padding-left: 2rem;
     }
 
+    /* Give the hover a "3D space" to exist in */
+    .products > a,
+    .album-stack a {
+      display: inline-block;
+      perspective: 900px;
+      perspective-origin: center;
+    }
+
     .products > a img {
       height: 345px;
       width: auto;
       max-width: 90vw;
       border-radius: 4px;
-      transition: transform 0.45s ease;
+      transition: transform 0.45s ease, filter 0.45s ease;
       display: block;
       flex-shrink: 0;
       background: #000;
+      transform-origin: 50% 50%;
+      will-change: transform, filter;
+      backface-visibility: hidden;
+      transform: translateZ(0);
     }
 
     .products > a img.no-border {
@@ -90,15 +102,39 @@
       width: 160px;
       height: auto;
       border-radius: 4px;
-      transition: transform 0.45s ease;
+      transition: transform 0.45s ease, filter 0.45s ease;
       display: block;
       background: transparent;
+      transform-origin: 50% 50%;
+      will-change: transform, filter;
+      backface-visibility: hidden;
+      transform: translateZ(0);
     }
 
-    .products img:hover {
-      transform: scale(1.35);
+    /* New hover: same bold scale, plus gentle sideways move + slight turn + subtle shadow */
+    .products > a:hover img,
+    .album-stack a:hover img {
+      transform: translateX(10px) rotateY(-8deg) translateZ(30px) scale(1.35);
       position: relative;
       z-index: 10;
+      filter: drop-shadow(10px 16px 22px rgba(0,0,0,0.25));
+    }
+
+    /* Turn off hover motion on touch devices */
+    @media (hover: none) {
+      .products > a:hover img,
+      .album-stack a:hover img {
+        transform: none;
+        filter: none;
+      }
+    }
+
+    /* Respect reduced motion preferences */
+    @media (prefers-reduced-motion: reduce) {
+      .products > a img,
+      .album-stack a img {
+        transition: none;
+      }
     }
 
     .contact {
