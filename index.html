@@ -142,22 +142,28 @@
       }
     }
 
-    /* NEW: discreet centered gif under the products section */
+    /* Centered gif under products */
     .author-gif-center {
       width: 100%;
       display: flex;
       justify-content: center;
-      padding: 2.25rem 0 0; /* about 3-4 lines of space */
+      padding: 2.25rem 0 0;
       box-sizing: border-box;
     }
 
-    .author-gif-center a {
+    .author-gif-center button {
+      appearance: none;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      background: transparent;
+      cursor: pointer;
       display: inline-flex;
       opacity: 0.55;
       transition: opacity 0.2s;
     }
 
-    .author-gif-center a:hover {
+    .author-gif-center button:hover {
       opacity: 0.9;
     }
 
@@ -165,6 +171,122 @@
       width: 32px;
       height: 32px;
       display: block;
+    }
+
+    /* Popup modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 2rem;
+      box-sizing: border-box;
+    }
+
+    .modal-overlay.is-open {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 720px;
+      background: rgba(0, 0, 0, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 1.25rem;
+      box-sizing: border-box;
+    }
+
+    .modal-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal-title {
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+      opacity: 0.9;
+    }
+
+    .modal-close {
+      appearance: none;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: transparent;
+      color: #fff;
+      border-radius: 8px;
+      padding: 0.35rem 0.6rem;
+      cursor: pointer;
+      opacity: 0.75;
+      transition: opacity 0.2s;
+    }
+
+    .modal-close:hover {
+      opacity: 1;
+    }
+
+    .modal-body {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 1.25rem;
+      align-items: start;
+    }
+
+    .author-photo {
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      display: block;
+    }
+
+    .modal-text h3 {
+      margin: 0 0 0.75rem;
+      font-size: 1rem;
+      opacity: 0.95;
+      font-weight: 600;
+    }
+
+    .modal-text p {
+      margin: 0 0 0.9rem;
+      line-height: 1.45;
+      font-size: 0.92rem;
+      opacity: 0.88;
+    }
+
+    .modal-actions {
+      margin-top: 0.75rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .modal-actions a {
+      display: inline-block;
+      text-decoration: none;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 8px;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.9rem;
+      opacity: 0.9;
+      transition: opacity 0.2s, background 0.2s;
+    }
+
+    .modal-actions a:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    @media (max-width: 720px) {
+      .modal-body {
+        grid-template-columns: 1fr;
+      }
     }
 
     .contact {
@@ -277,11 +399,10 @@
     </div>
   </div>
 
-  <!-- NEW: centered gif below the product showcase -->
   <div class="author-gif-center">
-    <a href="https://www.amazon.com/stores/author/B0FVTQH5WD/about" target="_blank" rel="noopener noreferrer" aria-label="Amazon author page">
+    <button id="openAuthorModal" type="button" aria-label="Open author bio">
       <img src="author_link_glyph.gif" alt="">
-    </a>
+    </button>
   </div>
 
   <div class="contact">
@@ -296,6 +417,63 @@
       <button type="submit">Send</button>
     </form>
   </div>
+
+  <!-- Modal -->
+  <div id="authorModal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="About the author">
+    <div class="modal">
+      <div class="modal-top">
+        <div class="modal-title">About the author</div>
+        <button id="closeAuthorModal" class="modal-close" type="button" aria-label="Close">Close</button>
+      </div>
+
+      <div class="modal-body">
+        <img class="author-photo" src="author.jpg" alt="Author photo">
+
+        <div class="modal-text">
+          <h3>Landon L Gow</h3>
+
+          <p>
+            Landon L Gow has wandered the states and traversed the globe. He has climbed many mountains, swam in many seas, he has jumped from helicopters, he’s been charged by bears, he has encountered strange visions while lost in the deep dark woods. He is a musician, a songwriter, a poet, a woodworker, and a lousy painter. He has survived on wit and grit alone, and found uncommon grace and kindness in fellow travelers along the way. He has survived every car wreck and dodged nearly every punch. The bombs all missed, the bullets biffed, and now he casts stories out to the void.
+          </p>
+
+          <p>
+            He lives with a fierce respect for individuality, a steady commitment to humanism, and an unyielding hope that kindness will be our salvation.
+          </p>
+
+          <div class="modal-actions">
+            <a href="https://www.amazon.com/stores/author/B0FVTQH5WD/about" target="_blank" rel="noopener noreferrer">View on Amazon</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const openBtn = document.getElementById("openAuthorModal");
+      const overlay = document.getElementById("authorModal");
+      const closeBtn = document.getElementById("closeAuthorModal");
+
+      function openModal() {
+        overlay.classList.add("is-open");
+      }
+
+      function closeModal() {
+        overlay.classList.remove("is-open");
+      }
+
+      openBtn.addEventListener("click", openModal);
+      closeBtn.addEventListener("click", closeModal);
+
+      overlay.addEventListener("click", function (e) {
+        if (e.target === overlay) closeModal();
+      });
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeModal();
+      });
+    })();
+  </script>
 
 </body>
 </html>
