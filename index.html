@@ -109,8 +109,8 @@
     }
 
     @keyframes hoverBreath {
-      0%   { transform: translateX(10px) rotateY(-8deg) translateZ(30px) scale(1.35); }
-      50%  { transform: translateX(12px) rotateY(-9deg) translateZ(32px) scale(1.36); }
+      0% { transform: translateX(10px) rotateY(-8deg) translateZ(30px) scale(1.35); }
+      50% { transform: translateX(12px) rotateY(-9deg) translateZ(32px) scale(1.36); }
       100% { transform: translateX(10px) rotateY(-8deg) translateZ(30px) scale(1.35); }
     }
 
@@ -142,23 +142,18 @@
       }
     }
 
-    /* Centered gif under products */
+    /* centered gif */
     .author-gif-center {
       width: 100%;
       display: flex;
       justify-content: center;
       padding: 2.25rem 0 0;
-      box-sizing: border-box;
     }
 
     .author-gif-center button {
-      appearance: none;
-      border: 0;
-      padding: 0;
-      margin: 0;
-      background: transparent;
+      background: none;
+      border: none;
       cursor: pointer;
-      display: inline-flex;
       opacity: 0.55;
       transition: opacity 0.2s;
     }
@@ -170,20 +165,18 @@
     .author-gif-center img {
       width: 32px;
       height: 32px;
-      display: block;
     }
 
-    /* Popup modal */
+    /* modal */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.78);
+      background: rgba(0,0,0,0.78);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 1000;
       padding: 2rem;
-      box-sizing: border-box;
     }
 
     .modal-overlay.is-open {
@@ -191,96 +184,46 @@
     }
 
     .modal {
-      width: 100%;
       max-width: 720px;
-      background: rgba(0, 0, 0, 0.92);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      width: 100%;
+      background: rgba(0,0,0,0.92);
+      border: 1px solid rgba(255,255,255,0.12);
       border-radius: 10px;
       padding: 1.25rem;
-      box-sizing: border-box;
     }
 
     .modal-top {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
       margin-bottom: 1rem;
     }
 
-    .modal-title {
-      font-size: 0.95rem;
-      letter-spacing: 0.02em;
-      opacity: 0.9;
-    }
-
     .modal-close {
-      appearance: none;
-      border: 1px solid rgba(255, 255, 255, 0.18);
       background: transparent;
       color: #fff;
+      border: 1px solid rgba(255,255,255,0.18);
       border-radius: 8px;
       padding: 0.35rem 0.6rem;
       cursor: pointer;
-      opacity: 0.75;
-      transition: opacity 0.2s;
-    }
-
-    .modal-close:hover {
-      opacity: 1;
     }
 
     .modal-body {
       display: grid;
       grid-template-columns: 220px 1fr;
       gap: 1.25rem;
-      align-items: start;
     }
 
     .author-photo {
       width: 100%;
       border-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      display: block;
-    }
-
-    .modal-text h3 {
-      margin: 0 0 0.75rem;
-      font-size: 1rem;
-      opacity: 0.95;
-      font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.18);
     }
 
     .modal-text p {
-      margin: 0 0 0.9rem;
-      line-height: 1.45;
       font-size: 0.92rem;
+      line-height: 1.45;
       opacity: 0.88;
-    }
-
-    .modal-actions {
-      margin-top: 0.75rem;
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-
-    .modal-actions a {
-      display: inline-block;
-      text-decoration: none;
-      color: #fff;
-      background: rgba(255, 255, 255, 0.10);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 8px;
-      padding: 0.55rem 0.75rem;
-      font-size: 0.9rem;
-      opacity: 0.9;
-      transition: opacity 0.2s, background 0.2s;
-    }
-
-    .modal-actions a:hover {
-      opacity: 1;
-      background: rgba(255, 255, 255, 0.14);
+      margin-bottom: 0.9rem;
     }
 
     @media (max-width: 720px) {
@@ -288,192 +231,92 @@
         grid-template-columns: 1fr;
       }
     }
-
-    .contact {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-top: 100vh;
-      padding-bottom: 4rem;
-      box-sizing: border-box;
-    }
-
-    .logo-container {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .logo-container img {
-      max-width: 300px;
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      width: 100%;
-      max-width: 300px;
-    }
-
-    input, textarea, button {
-      padding: 0.5rem;
-      font-size: 0.9rem;
-      border: none;
-      border-radius: 4px;
-      background: #111;
-      color: #fff;
-    }
-
-    button {
-      cursor: pointer;
-      background: #444;
-      transition: background 0.2s;
-    }
-
-    button:hover {
-      background: #666;
-    }
-
-    @media (max-width: 900px) {
-      .products {
-        gap: 1.5rem;
-      }
-
-      .products > a img {
-        width: 60vw;
-        height: auto;
-      }
-
-      .album-stack a img {
-        width: 45vw;
-      }
-    }
   </style>
 </head>
 
 <body>
 
-  <div class="hidden-seo">
-    Landon L Gow, Landon Gow, Landon Leroy Gow, All My Nights Are Dreams
-  </div>
+<div class="hidden-seo">
+  Landon L Gow, Landon Gow, Landon Leroy Gow, All My Nights Are Dreams
+</div>
 
-  <div class="hero">
-    <div class="products">
+<div class="hero">
+  <div class="products">
 
-      <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank" rel="noopener noreferrer">
-        <img src="book.png" alt="Latest Book" class="no-border">
+    <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/" target="_blank">
+      <img src="book.png" class="no-border">
+    </a>
+
+    <div class="album-stack">
+      <a href="https://elasticstage.com/amnad/releases/that-which-does-not-kill-you-circles-back-again-and-again-album" target="_blank">
+        <img src="album2.png" class="no-border">
       </a>
-
-      <div class="album-stack">
-        <a href="https://elasticstage.com/amnad/releases/that-which-does-not-kill-you-circles-back-again-and-again-album" target="_blank" rel="noopener noreferrer">
-          <img src="album2.png" alt="Latest Album (Vinyl)" class="no-border">
-        </a>
-        <a href="https://allmynightsaredreams.bandcamp.com/album/age-of-unknowns-2017" target="_blank" rel="noopener noreferrer">
-          <img src="album3.png" alt="Third Album" class="no-border">
-        </a>
-      </div>
-
-      <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FVTB26S2/ref=tmm_pap_swatch_0" target="_blank" rel="noopener noreferrer">
-        <img src="book3.png" alt="Third Book" class="no-border">
+      <a href="https://allmynightsaredreams.bandcamp.com/album/age-of-unknowns-2017" target="_blank">
+        <img src="album3.png" class="no-border">
       </a>
-
-      <div class="album-stack">
-        <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank" rel="noopener noreferrer">
-          <img src="album.png" alt="Latest Album" class="no-border">
-        </a>
-        <a href="https://allmynightsaredreams.bandcamp.com/album/oneirism" target="_blank" rel="noopener noreferrer">
-          <img src="album4.png" alt="Fourth Album" class="no-border">
-        </a>
-      </div>
-
-      <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank" rel="noopener noreferrer">
-        <img src="book2.png" alt="Second Book" class="no-border">
-      </a>
-
-    </div>
-  </div>
-
-  <div class="author-gif-center">
-    <button id="openAuthorModal" type="button" aria-label="Open author bio">
-      <img src="author_link_glyph.gif" alt="">
-    </button>
-  </div>
-
-  <div class="contact">
-    <div class="logo-container">
-      <img src="logo.png" alt="Publishing Logo">
     </div>
 
-    <form action="https://formspree.io/f/xvzzzele" method="POST">
-      <input type="text" name="name" placeholder="Name" required>
-      <input type="email" name="email" placeholder="Email" required>
-      <textarea name="message" rows="5" placeholder="Message" required></textarea>
-      <button type="submit">Send</button>
-    </form>
+    <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FVTB26S2/" target="_blank">
+      <img src="book3.png" class="no-border">
+    </a>
+
+    <div class="album-stack">
+      <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank">
+        <img src="album.png" class="no-border">
+      </a>
+      <a href="https://allmynightsaredreams.bandcamp.com/album/oneirism" target="_blank">
+        <img src="album4.png" class="no-border">
+      </a>
+    </div>
+
+    <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4/" target="_blank">
+      <img src="book2.png" class="no-border">
+    </a>
+
   </div>
+</div>
 
-  <!-- Modal -->
-  <div id="authorModal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="About the author">
-    <div class="modal">
-      <div class="modal-top">
-        <div class="modal-title">About the author</div>
-        <button id="closeAuthorModal" class="modal-close" type="button" aria-label="Close">Close</button>
-      </div>
+<div class="author-gif-center">
+  <button id="openAuthorModal">
+    <img src="author_link_glyph.gif" alt="">
+  </button>
+</div>
 
-      <div class="modal-body">
-        <img class="author-photo" src="author.jpg" alt="Author photo">
+<div id="authorModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-top">
+      <strong>About the author</strong>
+      <button id="closeAuthorModal" class="modal-close">Close</button>
+    </div>
 
-        <div class="modal-text">
-          <h3>Landon L Gow</h3>
+    <div class="modal-body">
+      <img src="llgphoto.jpg" class="author-photo">
 
-          <p>
-            Landon L Gow has wandered the states and traversed the globe. He has climbed many mountains, swam in many seas, he has jumped from helicopters, he’s been charged by bears, he has encountered strange visions while lost in the deep dark woods. He is a musician, a songwriter, a poet, a woodworker, and a lousy painter. He has survived on wit and grit alone, and found uncommon grace and kindness in fellow travelers along the way. He has survived every car wreck and dodged nearly every punch. The bombs all missed, the bullets biffed, and now he casts stories out to the void.
-          </p>
-
-          <p>
-            He lives with a fierce respect for individuality, a steady commitment to humanism, and an unyielding hope that kindness will be our salvation.
-          </p>
-
-          <div class="modal-actions">
-            <a href="https://www.amazon.com/stores/author/B0FVTQH5WD/about" target="_blank" rel="noopener noreferrer">View on Amazon</a>
-          </div>
-        </div>
+      <div class="modal-text">
+        <p>
+          Landon L Gow has wandered the states and traversed the globe. He has climbed many mountains, swam in many seas, he has jumped from helicopters, he’s been charged by bears, he has encountered strange visions while lost in the deep dark woods. He is a musician, a songwriter, a poet, a woodworker, and a lousy painter.
+        </p>
+        <p>
+          He has survived on wit and grit alone, and found uncommon grace and kindness in fellow travelers along the way. The bombs all missed, the bullets biffed, and now he casts stories out to the void.
+        </p>
+        <p>
+          He lives with a fierce respect for individuality, a steady commitment to humanism, and an unyielding hope that kindness will be our salvation.
+        </p>
       </div>
     </div>
   </div>
+</div>
 
-  <script>
-    (function () {
-      const openBtn = document.getElementById("openAuthorModal");
-      const overlay = document.getElementById("authorModal");
-      const closeBtn = document.getElementById("closeAuthorModal");
+<script>
+  const openBtn = document.getElementById("openAuthorModal");
+  const closeBtn = document.getElementById("closeAuthorModal");
+  const modal = document.getElementById("authorModal");
 
-      function openModal() {
-        overlay.classList.add("is-open");
-      }
-
-      function closeModal() {
-        overlay.classList.remove("is-open");
-      }
-
-      openBtn.addEventListener("click", openModal);
-      closeBtn.addEventListener("click", closeModal);
-
-      overlay.addEventListener("click", function (e) {
-        if (e.target === overlay) closeModal();
-      });
-
-      document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") closeModal();
-      });
-    })();
-  </script>
+  openBtn.onclick = () => modal.classList.add("is-open");
+  closeBtn.onclick = () => modal.classList.remove("is-open");
+  modal.onclick = e => { if (e.target === modal) modal.classList.remove("is-open"); };
+  document.onkeydown = e => { if (e.key === "Escape") modal.classList.remove("is-open"); };
+</script>
 
 </body>
 </html>
