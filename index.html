@@ -35,6 +35,7 @@
     }
 
     .hero {
+      position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -142,30 +143,20 @@
       }
     }
 
-    /* NEW: small gif link under the horizontal scroll, aligned right */
-    .author-gif-wrap {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 0 2rem;
-      margin-top: 0.75rem;
-      display: flex;
-      justify-content: flex-end;
-      pointer-events: none;
-    }
-
-    .author-gif-link {
-      display: inline-flex;
-      align-items: center;
-      pointer-events: auto;
+    /* Author GIF placement */
+    .author-gif {
+      position: absolute;
+      right: 2rem;
+      bottom: 2.5rem;
       opacity: 0.55;
       transition: opacity 0.2s;
     }
 
-    .author-gif-link:hover {
+    .author-gif:hover {
       opacity: 0.9;
     }
 
-    .author-gif-link img {
+    .author-gif img {
       width: 32px;
       height: 32px;
       display: block;
@@ -235,6 +226,10 @@
       .album-stack a img {
         width: 45vw;
       }
+
+      .author-gif {
+        bottom: 1.75rem;
+      }
     }
   </style>
 </head>
@@ -279,13 +274,11 @@
       </a>
 
     </div>
-  </div>
 
-  <!-- NEW: gif link under products, aligned right, not part of horizontal scroll -->
-  <div class="author-gif-wrap">
-    <a class="author-gif-link" href="https://www.amazon.com/stores/author/B0FVTQH5WD/about" target="_blank" rel="noopener noreferrer" aria-label="Amazon author page">
+    <a class="author-gif" href="https://www.amazon.com/stores/author/B0FVTQH5WD/about" target="_blank" rel="noopener noreferrer" aria-label="Amazon author page">
       <img src="author_link_glyph.gif" alt="">
     </a>
+
   </div>
 
   <div class="contact">
