@@ -34,18 +34,18 @@
       top: -9999px;
     }
 
-    /* NEW: centers the whole product showcase block on wide screens */
+    /* UPDATED: lock this section to the viewport height so adding the gif does not create vertical scroll */
     .hero-wrap {
-      min-height: 100vh;
+      height: 100vh;                 /* CHANGED from min-height */
       width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 0 2rem;
       box-sizing: border-box;
+      overflow: hidden;              /* NEW: prevents accidental vertical scrollbar */
     }
 
-    /* NEW: this box becomes "as wide as the products" but never wider than the viewport */
     .showcase {
       width: max-content;
       max-width: 100%;
@@ -53,13 +53,14 @@
       flex-direction: column;
       align-items: stretch;
       box-sizing: border-box;
+      gap: 0.75rem;                  /* NEW: space between products and gif */
     }
 
-    /* NEW: horizontal scroll lives here */
     .hero-scroll {
       width: max-content;
       max-width: 100%;
       overflow-x: auto;
+      overflow-y: hidden;
       box-sizing: border-box;
     }
 
@@ -160,14 +161,12 @@
       }
     }
 
-    /* NEW: gif row aligned to the same right edge as the showcase box */
     .author-gif-row {
       width: 100%;
       display: flex;
       justify-content: flex-end;
-      padding-left: 2rem; /* matches .products padding-left */
+      padding-left: 2rem;
       box-sizing: border-box;
-      margin-top: 0.5rem;
     }
 
     .author-gif-link {
@@ -260,7 +259,6 @@
     Landon L Gow, Landon Gow, Landon Leroy Gow, All My Nights Are Dreams
   </div>
 
-  <!-- UPDATED STRUCTURE: centered showcase box -->
   <div class="hero-wrap">
     <div class="showcase">
 
@@ -300,7 +298,6 @@
         </div>
       </div>
 
-      <!-- gif is under the products, not in the scroller, aligned to the showcase right edge -->
       <div class="author-gif-row">
         <a class="author-gif-link" href="https://www.amazon.com/stores/author/B0FVTQH5WD/about" target="_blank" rel="noopener noreferrer" aria-label="Amazon author page">
           <img src="author_link_glyph.gif" alt="">
