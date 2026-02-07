@@ -34,34 +34,42 @@
       top: -9999px;
     }
 
-    .hero {
+    /* NEW: wrapper holds the scroller plus the gif row under it */
+    .hero-wrap {
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+
+    /* NEW: this is the horizontal scroller (your old .hero behavior) */
+    .hero-scroll {
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
       width: 100%;
       overflow-x: auto;
       padding: 0 2rem;
       box-sizing: border-box;
     }
 
-    .hero::-webkit-scrollbar {
+    .hero-scroll::-webkit-scrollbar {
       height: 8px;
     }
 
-    .hero::-webkit-scrollbar-thumb {
+    .hero-scroll::-webkit-scrollbar-thumb {
       background: #555;
       border-radius: 4px;
     }
 
     .products {
-      position: relative;              /* NEW */
       display: flex;
       gap: 2rem;
       align-items: stretch;
       flex-shrink: 0;
       padding-left: 2rem;
-      padding-bottom: 3rem;            /* NEW: room for the gif underneath */
     }
 
     .products > a,
@@ -144,20 +152,36 @@
       }
     }
 
-    /* NEW: gif is aligned to the right edge of the products row (not the screen) */
-    .author-gif {
-      position: absolute;
-      right: 0;
-      bottom: 0;
+    /* NEW: gif row under the scroller, aligned to the same padding as the scroller */
+    .author-gif-row {
+      width: 100%;
+      padding: 0 2rem;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* NEW: aligns to the right edge of the content area (same as your products area) */
+    .author-gif-inner {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      padding-left: 2rem; /* matches .products padding-left */
+      box-sizing: border-box;
+      margin-top: 0.5rem;
+    }
+
+    .author-gif-link {
+      display: inline-flex;
       opacity: 0.55;
       transition: opacity 0.2s;
     }
 
-    .author-gif:hover {
+    .author-gif-link:hover {
       opacity: 0.9;
     }
 
-    .author-gif img {
+    .author-gif-link img {
       width: 32px;
       height: 32px;
       display: block;
@@ -217,7 +241,6 @@
     @media (max-width: 900px) {
       .products {
         gap: 1.5rem;
-        padding-bottom: 2.75rem;
       }
 
       .products > a img {
@@ -238,45 +261,52 @@
     Landon L Gow, Landon Gow, Landon Leroy Gow, All My Nights Are Dreams
   </div>
 
-  <div class="hero">
-    <div class="products">
+  <div class="hero-wrap">
 
-      <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank" rel="noopener noreferrer">
-        <img src="book.png" alt="Latest Book" class="no-border">
-      </a>
+    <div class="hero-scroll">
+      <div class="products">
 
-      <div class="album-stack">
-        <a href="https://elasticstage.com/amnad/releases/that-which-does-not-kill-you-circles-back-again-and-again-album" target="_blank" rel="noopener noreferrer">
-          <img src="album2.png" alt="Latest Album (Vinyl)" class="no-border">
+        <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank" rel="noopener noreferrer">
+          <img src="book.png" alt="Latest Book" class="no-border">
         </a>
-        <a href="https://allmynightsaredreams.bandcamp.com/album/age-of-unknowns-2017" target="_blank" rel="noopener noreferrer">
-          <img src="album3.png" alt="Third Album" class="no-border">
+
+        <div class="album-stack">
+          <a href="https://elasticstage.com/amnad/releases/that-which-does-not-kill-you-circles-back-again-and-again-album" target="_blank" rel="noopener noreferrer">
+            <img src="album2.png" alt="Latest Album (Vinyl)" class="no-border">
+          </a>
+          <a href="https://allmynightsaredreams.bandcamp.com/album/age-of-unknowns-2017" target="_blank" rel="noopener noreferrer">
+            <img src="album3.png" alt="Third Album" class="no-border">
+          </a>
+        </div>
+
+        <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FVTB26S2/ref=tmm_pap_swatch_0" target="_blank" rel="noopener noreferrer">
+          <img src="book3.png" alt="Third Book" class="no-border">
         </a>
+
+        <div class="album-stack">
+          <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank" rel="noopener noreferrer">
+            <img src="album.png" alt="Latest Album" class="no-border">
+          </a>
+          <a href="https://allmynightsaredreams.bandcamp.com/album/oneirism" target="_blank" rel="noopener noreferrer">
+            <img src="album4.png" alt="Fourth Album" class="no-border">
+          </a>
+        </div>
+
+        <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank" rel="noopener noreferrer">
+          <img src="book2.png" alt="Second Book" class="no-border">
+        </a>
+
       </div>
-
-      <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FVTB26S2/ref=tmm_pap_swatch_0" target="_blank" rel="noopener noreferrer">
-        <img src="book3.png" alt="Third Book" class="no-border">
-      </a>
-
-      <div class="album-stack">
-        <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank" rel="noopener noreferrer">
-          <img src="album.png" alt="Latest Album" class="no-border">
-        </a>
-        <a href="https://allmynightsaredreams.bandcamp.com/album/oneirism" target="_blank" rel="noopener noreferrer">
-          <img src="album4.png" alt="Fourth Album" class="no-border">
-        </a>
-      </div>
-
-      <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank" rel="noopener noreferrer">
-        <img src="book2.png" alt="Second Book" class="no-border">
-      </a>
-
-      <!-- NEW: gif link, aligned to products' right edge, under the row -->
-      <a class="author-gif" href="https://www.amazon.com/stores/author/B0FVTQH5WD/about" target="_blank" rel="noopener noreferrer" aria-label="Amazon author page">
-        <img src="author_link_glyph.gif" alt="">
-      </a>
-
     </div>
+
+    <div class="author-gif-row">
+      <div class="author-gif-inner">
+        <a class="author-gif-link" href="https://www.amazon.com/stores/author/B0FVTQH5WD/about" target="_blank" rel="noopener noreferrer" aria-label="Amazon author page">
+          <img src="author_link_glyph.gif" alt="">
+        </a>
+      </div>
+    </div>
+
   </div>
 
   <div class="contact">
