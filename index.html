@@ -142,6 +142,35 @@
       }
     }
 
+    /* NEW: small gif link under the horizontal scroll, aligned right */
+    .author-gif-wrap {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0 2rem;
+      margin-top: 0.75rem;
+      display: flex;
+      justify-content: flex-end;
+      pointer-events: none;
+    }
+
+    .author-gif-link {
+      display: inline-flex;
+      align-items: center;
+      pointer-events: auto;
+      opacity: 0.55;
+      transition: opacity 0.2s;
+    }
+
+    .author-gif-link:hover {
+      opacity: 0.9;
+    }
+
+    .author-gif-link img {
+      width: 32px;
+      height: 32px;
+      display: block;
+    }
+
     .contact {
       width: 100%;
       display: flex;
@@ -252,6 +281,13 @@
     </div>
   </div>
 
+  <!-- NEW: gif link under products, aligned right, not part of horizontal scroll -->
+  <div class="author-gif-wrap">
+    <a class="author-gif-link" href="https://www.amazon.com/stores/author/B0FVTQH5WD/about" target="_blank" rel="noopener noreferrer" aria-label="Amazon author page">
+      <img src="author_link_glyph.gif" alt="">
+    </a>
+  </div>
+
   <div class="contact">
     <div class="logo-container">
       <img src="logo.png" alt="Publishing Logo">
@@ -267,4 +303,3 @@
 
 </body>
 </html>
-
