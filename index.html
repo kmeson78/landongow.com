@@ -35,7 +35,6 @@
     }
 
     .hero {
-      position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -56,11 +55,13 @@
     }
 
     .products {
+      position: relative;              /* NEW */
       display: flex;
       gap: 2rem;
       align-items: stretch;
       flex-shrink: 0;
       padding-left: 2rem;
+      padding-bottom: 3rem;            /* NEW: room for the gif underneath */
     }
 
     .products > a,
@@ -143,11 +144,11 @@
       }
     }
 
-    /* Author GIF placement */
+    /* NEW: gif is aligned to the right edge of the products row (not the screen) */
     .author-gif {
       position: absolute;
-      right: 2rem;
-      bottom: 2.5rem;
+      right: 0;
+      bottom: 0;
       opacity: 0.55;
       transition: opacity 0.2s;
     }
@@ -216,6 +217,7 @@
     @media (max-width: 900px) {
       .products {
         gap: 1.5rem;
+        padding-bottom: 2.75rem;
       }
 
       .products > a img {
@@ -225,10 +227,6 @@
 
       .album-stack a img {
         width: 45vw;
-      }
-
-      .author-gif {
-        bottom: 1.75rem;
       }
     }
   </style>
@@ -273,12 +271,12 @@
         <img src="book2.png" alt="Second Book" class="no-border">
       </a>
 
+      <!-- NEW: gif link, aligned to products' right edge, under the row -->
+      <a class="author-gif" href="https://www.amazon.com/stores/author/B0FVTQH5WD/about" target="_blank" rel="noopener noreferrer" aria-label="Amazon author page">
+        <img src="author_link_glyph.gif" alt="">
+      </a>
+
     </div>
-
-    <a class="author-gif" href="https://www.amazon.com/stores/author/B0FVTQH5WD/about" target="_blank" rel="noopener noreferrer" aria-label="Amazon author page">
-      <img src="author_link_glyph.gif" alt="">
-    </a>
-
   </div>
 
   <div class="contact">
