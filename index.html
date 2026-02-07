@@ -34,24 +34,32 @@
       top: -9999px;
     }
 
-    /* NEW: wrapper holds the scroller plus the gif row under it */
+    /* NEW: centers the whole product showcase block on wide screens */
     .hero-wrap {
       min-height: 100vh;
       width: 100%;
       display: flex;
-      flex-direction: column;
+      align-items: center;
       justify-content: center;
+      padding: 0 2rem;
       box-sizing: border-box;
     }
 
-    /* NEW: this is the horizontal scroller (your old .hero behavior) */
-    .hero-scroll {
+    /* NEW: this box becomes "as wide as the products" but never wider than the viewport */
+    .showcase {
+      width: max-content;
+      max-width: 100%;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+      box-sizing: border-box;
+    }
+
+    /* NEW: horizontal scroll lives here */
+    .hero-scroll {
+      width: max-content;
+      max-width: 100%;
       overflow-x: auto;
-      padding: 0 2rem;
       box-sizing: border-box;
     }
 
@@ -152,17 +160,8 @@
       }
     }
 
-    /* NEW: gif row under the scroller, aligned to the same padding as the scroller */
+    /* NEW: gif row aligned to the same right edge as the showcase box */
     .author-gif-row {
-      width: 100%;
-      padding: 0 2rem;
-      box-sizing: border-box;
-      display: flex;
-      justify-content: center;
-    }
-
-    /* NEW: aligns to the right edge of the content area (same as your products area) */
-    .author-gif-inner {
       width: 100%;
       display: flex;
       justify-content: flex-end;
@@ -261,52 +260,54 @@
     Landon L Gow, Landon Gow, Landon Leroy Gow, All My Nights Are Dreams
   </div>
 
+  <!-- UPDATED STRUCTURE: centered showcase box -->
   <div class="hero-wrap">
+    <div class="showcase">
 
-    <div class="hero-scroll">
-      <div class="products">
+      <div class="hero-scroll">
+        <div class="products">
 
-        <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank" rel="noopener noreferrer">
-          <img src="book.png" alt="Latest Book" class="no-border">
-        </a>
-
-        <div class="album-stack">
-          <a href="https://elasticstage.com/amnad/releases/that-which-does-not-kill-you-circles-back-again-and-again-album" target="_blank" rel="noopener noreferrer">
-            <img src="album2.png" alt="Latest Album (Vinyl)" class="no-border">
+          <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FYDHFV16/ref=tmm_hrd_swatch_0" target="_blank" rel="noopener noreferrer">
+            <img src="book.png" alt="Latest Book" class="no-border">
           </a>
-          <a href="https://allmynightsaredreams.bandcamp.com/album/age-of-unknowns-2017" target="_blank" rel="noopener noreferrer">
-            <img src="album3.png" alt="Third Album" class="no-border">
+
+          <div class="album-stack">
+            <a href="https://elasticstage.com/amnad/releases/that-which-does-not-kill-you-circles-back-again-and-again-album" target="_blank" rel="noopener noreferrer">
+              <img src="album2.png" alt="Latest Album (Vinyl)" class="no-border">
+            </a>
+            <a href="https://allmynightsaredreams.bandcamp.com/album/age-of-unknowns-2017" target="_blank" rel="noopener noreferrer">
+              <img src="album3.png" alt="Third Album" class="no-border">
+            </a>
+          </div>
+
+          <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FVTB26S2/ref=tmm_pap_swatch_0" target="_blank" rel="noopener noreferrer">
+            <img src="book3.png" alt="Third Book" class="no-border">
           </a>
+
+          <div class="album-stack">
+            <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank" rel="noopener noreferrer">
+              <img src="album.png" alt="Latest Album" class="no-border">
+            </a>
+            <a href="https://allmynightsaredreams.bandcamp.com/album/oneirism" target="_blank" rel="noopener noreferrer">
+              <img src="album4.png" alt="Fourth Album" class="no-border">
+            </a>
+          </div>
+
+          <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank" rel="noopener noreferrer">
+            <img src="book2.png" alt="Second Book" class="no-border">
+          </a>
+
         </div>
-
-        <a href="https://www.amazon.com/Dissociation-Provocations-Collected-Works-Importance/dp/B0FVTB26S2/ref=tmm_pap_swatch_0" target="_blank" rel="noopener noreferrer">
-          <img src="book3.png" alt="Third Book" class="no-border">
-        </a>
-
-        <div class="album-stack">
-          <a href="https://allmynightsaredreams.bandcamp.com/album/dysthmia" target="_blank" rel="noopener noreferrer">
-            <img src="album.png" alt="Latest Album" class="no-border">
-          </a>
-          <a href="https://allmynightsaredreams.bandcamp.com/album/oneirism" target="_blank" rel="noopener noreferrer">
-            <img src="album4.png" alt="Fourth Album" class="no-border">
-          </a>
-        </div>
-
-        <a href="https://www.amazon.com/This-Flag-Raised-Rebellion-Landon/dp/B0G29WXKV4?ref_=ast_author_dp&th=1&psc=1" target="_blank" rel="noopener noreferrer">
-          <img src="book2.png" alt="Second Book" class="no-border">
-        </a>
-
       </div>
-    </div>
 
-    <div class="author-gif-row">
-      <div class="author-gif-inner">
+      <!-- gif is under the products, not in the scroller, aligned to the showcase right edge -->
+      <div class="author-gif-row">
         <a class="author-gif-link" href="https://www.amazon.com/stores/author/B0FVTQH5WD/about" target="_blank" rel="noopener noreferrer" aria-label="Amazon author page">
           <img src="author_link_glyph.gif" alt="">
         </a>
       </div>
-    </div>
 
+    </div>
   </div>
 
   <div class="contact">
