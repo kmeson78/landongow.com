@@ -205,38 +205,6 @@
       }
     }
 
-    .author-gif-trigger {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 2.25rem;
-      z-index: 5;
-      pointer-events: none;
-    }
-
-    .author-gif-trigger button {
-      pointer-events: auto;
-      appearance: none;
-      border: 0;
-      padding: 0;
-      margin: 0;
-      background: transparent;
-      cursor: pointer;
-      display: inline-flex;
-      opacity: 0.55;
-      transition: opacity 0.2s;
-    }
-
-    .author-gif-trigger button:hover {
-      opacity: 0.9;
-    }
-
-    .author-gif-trigger img {
-      width: 32px;
-      height: 32px;
-      display: block;
-    }
-
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -402,44 +370,6 @@
     button:hover {
       background: #666;
     }
-
-    @media (max-width: 900px) {
-      .products {
-        gap: 1.5rem;
-      }
-
-      .products > a img,
-      .arcolith-wrap > a img {
-        width: 60vw;
-        height: auto;
-      }
-
-      .album-stack a img {
-        width: 45vw;
-      }
-
-      .trilogy-button-container {
-        top: calc(100% + 26px);
-      }
-
-      .trilogy-button img {
-        max-width: 180px;
-      }
-
-      .author-gif-trigger {
-        bottom: 1.75rem;
-      }
-    }
-
-    @media (max-width: 900px) {
-      .author-gif-trigger {
-        position: fixed;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: 1.75rem;
-        z-index: 20;
-      }
-    }
   </style>
 </head>
 
@@ -471,7 +401,7 @@
         </a>
 
         <div class="trilogy-button-container">
-          <button id="openSeriesModal" class="trilogy-button" type="button" aria-label="Open series information">
+          <button id="openSeriesModal" class="trilogy-button" type="button">
             <img src="seriesbutton.png" alt="The Arcolith Trilogy" loading="lazy">
           </button>
         </div>
@@ -491,13 +421,6 @@
       </a>
 
     </div>
-
-    <div class="author-gif-trigger">
-      <button id="openAuthorModal" type="button" aria-label="Open author bio">
-        <img src="author_link_glyph.gif" alt="Author information">
-      </button>
-    </div>
-
   </div>
 
   <div class="contact">
@@ -517,40 +440,11 @@
     </form>
   </div>
 
-  <div id="authorModal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="About the author">
+  <div id="seriesModal" class="modal-overlay">
     <div class="modal">
       <div class="modal-top">
         <div class="modal-title">&nbsp;</div>
-        <button id="closeAuthorModal" class="modal-close" type="button" aria-label="Close">Close</button>
-      </div>
-
-      <div class="modal-body">
-        <img class="author-photo" src="llgphoto.jpg" alt="Author photo" loading="lazy">
-
-        <div class="modal-text">
-          <h3>About the author</h3>
-
-          <p>
-            Landon L Gow has wandered the states and traversed the globe. He has climbed many mountains, swam in many seas, he has jumped from helicopters, he’s been charged by bears, he has encountered strange visions while lost in the deep dark woods. He is a musician, a songwriter, a poet, a woodworker, and a lousy painter. He has survived on wit and grit alone, and found uncommon grace and kindness in fellow travelers along the way. He has survived every car wreck and dodged nearly every punch. The bombs all missed, the bullets biffed, and now he casts stories out to the void.
-          </p>
-
-          <p>
-            He lives with a fierce respect for individuality, a steady commitment to humanism, and an unyielding hope that kindness will be our salvation.
-          </p>
-
-          <div class="modal-actions">
-            <a href="https://www.amazon.com/author/landonlgow" target="_blank" rel="noopener noreferrer">View on Amazon</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="seriesModal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="About the series">
-    <div class="modal">
-      <div class="modal-top">
-        <div class="modal-title">&nbsp;</div>
-        <button id="closeSeriesModal" class="modal-close" type="button" aria-label="Close">Close</button>
+        <button id="closeSeriesModal" class="modal-close" type="button">Close</button>
       </div>
 
       <div class="modal-body">
@@ -582,21 +476,9 @@
 
   <script>
     (function () {
-      const openBtn = document.getElementById("openAuthorModal");
-      const overlay = document.getElementById("authorModal");
-      const closeBtn = document.getElementById("closeAuthorModal");
-
       const openSeriesBtn = document.getElementById("openSeriesModal");
       const seriesOverlay = document.getElementById("seriesModal");
       const closeSeriesBtn = document.getElementById("closeSeriesModal");
-
-      function openModal() {
-        overlay.classList.add("is-open");
-      }
-
-      function closeModal() {
-        overlay.classList.remove("is-open");
-      }
 
       function openSeriesModal() {
         seriesOverlay.classList.add("is-open");
@@ -606,15 +488,8 @@
         seriesOverlay.classList.remove("is-open");
       }
 
-      openBtn.addEventListener("click", openModal);
-      closeBtn.addEventListener("click", closeModal);
-
       openSeriesBtn.addEventListener("click", openSeriesModal);
       closeSeriesBtn.addEventListener("click", closeSeriesModal);
-
-      overlay.addEventListener("click", function (e) {
-        if (e.target === overlay) closeModal();
-      });
 
       seriesOverlay.addEventListener("click", function (e) {
         if (e.target === seriesOverlay) closeSeriesModal();
@@ -622,7 +497,6 @@
 
       document.addEventListener("keydown", function (e) {
         if (e.key === "Escape") {
-          closeModal();
           closeSeriesModal();
         }
       });
