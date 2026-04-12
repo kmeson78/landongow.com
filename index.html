@@ -64,7 +64,8 @@
     }
 
     .products > a,
-    .album-stack a {
+    .album-stack a,
+    .arcolith-wrap {
       display: inline-block;
       perspective: 900px;
       perspective-origin: center;
@@ -109,6 +110,62 @@
       transform: translateZ(0);
     }
 
+    .arcolith-wrap {
+      position: relative;
+      z-index: 1;
+    }
+
+    .arcolith-wrap > a img {
+      height: 345px;
+      width: auto;
+      max-width: 90vw;
+      border-radius: 4px;
+      transition: transform 0.45s ease;
+      display: block;
+      flex-shrink: 0;
+      background: transparent;
+      transform-origin: 50% 50%;
+      backface-visibility: hidden;
+      transform: translateZ(0);
+    }
+
+    .trilogy-button-container {
+      position: absolute;
+      left: 50%;
+      top: calc(100% + 32px);
+      transform: translateX(-50%);
+      z-index: 2;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .trilogy-button {
+      pointer-events: auto;
+      appearance: none;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      background: transparent;
+      cursor: pointer;
+      display: inline-flex;
+      opacity: 0.78;
+      transition: opacity 0.2s ease;
+      max-width: 100%;
+    }
+
+    .trilogy-button:hover {
+      opacity: 1;
+    }
+
+    .trilogy-button img {
+      display: block;
+      width: 100%;
+      max-width: 220px;
+      height: auto;
+    }
+
     @keyframes hoverBreath {
       0%   { transform: translateX(10px) rotateY(-8deg) translateZ(30px) scale(1.35); }
       50%  { transform: translateX(12px) rotateY(-9deg) translateZ(32px) scale(1.36); }
@@ -116,7 +173,8 @@
     }
 
     .products > a:hover img,
-    .album-stack a:hover img {
+    .album-stack a:hover img,
+    .arcolith-wrap > a:hover img {
       position: relative;
       z-index: 10;
       will-change: transform;
@@ -126,7 +184,8 @@
 
     @media (hover: none) {
       .products > a:hover img,
-      .album-stack a:hover img {
+      .album-stack a:hover img,
+      .arcolith-wrap > a:hover img {
         transform: none;
         animation: none;
       }
@@ -134,11 +193,14 @@
 
     @media (prefers-reduced-motion: reduce) {
       .products > a img,
-      .album-stack a img {
+      .album-stack a img,
+      .arcolith-wrap > a img {
         transition: none;
       }
+
       .products > a:hover img,
-      .album-stack a:hover img {
+      .album-stack a:hover img,
+      .arcolith-wrap > a:hover img {
         animation: none;
       }
     }
@@ -346,13 +408,22 @@
         gap: 1.5rem;
       }
 
-      .products > a img {
+      .products > a img,
+      .arcolith-wrap > a img {
         width: 60vw;
         height: auto;
       }
 
       .album-stack a img {
         width: 45vw;
+      }
+
+      .trilogy-button-container {
+        top: calc(100% + 26px);
+      }
+
+      .trilogy-button img {
+        max-width: 180px;
       }
 
       .author-gif-trigger {
@@ -394,9 +465,17 @@
         </a>
       </div>
 
-      <a href="https://www.amazon.com/dp/B0GWW2DS1D" target="_blank" rel="noopener noreferrer">
-        <img src="book.png" alt="Novel - The Arcolith - Book 1: Enclose" class="no-border" loading="lazy">
-      </a>
+      <div class="arcolith-wrap">
+        <a href="https://www.amazon.com/dp/B0GWW2DS1D" target="_blank" rel="noopener noreferrer">
+          <img src="book.png" alt="Novel - The Arcolith - Book 1: Enclose" class="no-border" loading="lazy">
+        </a>
+
+        <div class="trilogy-button-container">
+          <button id="openSeriesModal" class="trilogy-button" type="button" aria-label="Open series information">
+            <img src="seriesbutton.png" alt="The Arcolith Trilogy" loading="lazy">
+          </button>
+        </div>
+      </div>
 
       <div class="album-stack">
         <a href="https://elasticstage.com/amnad/releases/shadows-fall-album" target="_blank" rel="noopener noreferrer">
@@ -467,11 +546,49 @@
     </div>
   </div>
 
+  <div id="seriesModal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="About the series">
+    <div class="modal">
+      <div class="modal-top">
+        <div class="modal-title">&nbsp;</div>
+        <button id="closeSeriesModal" class="modal-close" type="button" aria-label="Close">Close</button>
+      </div>
+
+      <div class="modal-body">
+        <img class="author-photo" src="seriesinfo.jpg" alt="The Arcolith Trilogy" loading="lazy">
+
+        <div class="modal-text">
+          <h3>The Arcolith Trilogy</h3>
+
+          <p>
+            A science fiction series about a civilization that eliminated suffering by redesigning the human condition, and the fracture that begins when that design starts to fail.
+          </p>
+
+          <p>
+            Told from both within the system and at its edges, it explores the tension between control and emergence, and the limits of what can be engineered.
+          </p>
+
+          <p>
+            The Arcolith is available now.<br>
+            Books II and III are in development.
+          </p>
+
+          <div class="modal-actions">
+            <a href="https://www.amazon.com/dp/B0FGFBH94V" target="_blank" rel="noopener noreferrer">View on Amazon</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     (function () {
       const openBtn = document.getElementById("openAuthorModal");
       const overlay = document.getElementById("authorModal");
       const closeBtn = document.getElementById("closeAuthorModal");
+
+      const openSeriesBtn = document.getElementById("openSeriesModal");
+      const seriesOverlay = document.getElementById("seriesModal");
+      const closeSeriesBtn = document.getElementById("closeSeriesModal");
 
       function openModal() {
         overlay.classList.add("is-open");
@@ -481,15 +598,33 @@
         overlay.classList.remove("is-open");
       }
 
+      function openSeriesModal() {
+        seriesOverlay.classList.add("is-open");
+      }
+
+      function closeSeriesModal() {
+        seriesOverlay.classList.remove("is-open");
+      }
+
       openBtn.addEventListener("click", openModal);
       closeBtn.addEventListener("click", closeModal);
+
+      openSeriesBtn.addEventListener("click", openSeriesModal);
+      closeSeriesBtn.addEventListener("click", closeSeriesModal);
 
       overlay.addEventListener("click", function (e) {
         if (e.target === overlay) closeModal();
       });
 
+      seriesOverlay.addEventListener("click", function (e) {
+        if (e.target === seriesOverlay) closeSeriesModal();
+      });
+
       document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") closeModal();
+        if (e.key === "Escape") {
+          closeModal();
+          closeSeriesModal();
+        }
       });
     })();
   </script>
