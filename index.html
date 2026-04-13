@@ -46,29 +46,6 @@
       box-sizing: border-box;
     }
 
-    .hero::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      background:
-        radial-gradient(
-          ellipse at center,
-          rgba(255,255,255,0.07) 0%,
-          rgba(255,255,255,0.035) 20%,
-          rgba(255,255,255,0.012) 35%,
-          rgba(0,0,0,0) 55%
-        ),
-        radial-gradient(
-          ellipse at center,
-          rgba(0,0,0,0) 38%,
-          rgba(0,0,0,0.20) 64%,
-          rgba(0,0,0,0.48) 100%
-        );
-      filter: blur(18px);
-    }
-
     .hero::-webkit-scrollbar {
       height: 8px;
     }
@@ -84,8 +61,6 @@
       align-items: stretch;
       flex-shrink: 0;
       padding-left: 0;
-      position: relative;
-      z-index: 1;
     }
 
     .products > a,
