@@ -1,217 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>The Arcolith Trilogy | Landon L Gow</title>
+<meta charset="UTF-8">
+<title>The Arcolith Trilogy | Landon L Gow</title>
 
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="manifest" href="site.webmanifest">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
 
-  <meta name="keywords" content="The Arcolith Trilogy, The Arcolith, Landon L Gow, science fiction, dystopian fiction, speculative fiction">
-  <meta name="description" content="The Arcolith Trilogy by Landon L Gow. A planned science fiction trilogy about engineered suffering, control, fracture, and emergence.">
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family: Arial, sans-serif;
+  color: #111;
+  background: #000 url("arc_background copy.png") center/cover no-repeat fixed;
+}
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      min-height: 100%;
-      font-family: Arial, sans-serif;
-      color: #111;
-      background: #000 url("arc_background copy.png") center/cover no-repeat fixed;
-    }
+* { box-sizing: border-box; }
 
-    * {
-      box-sizing: border-box;
-    }
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 32px 32px;
+}
 
-    .page {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 40px 36px 28px;
-    }
+.content {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 320px 500px;
+  gap: 52px;
+  align-items: center;
+  justify-content: center;
+  transform: translateX(-20px);
+}
 
-    .content {
-      width: 100%;
-      max-width: 1080px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 320px 500px;
-      gap: 54px;
-      align-items: center;
-      justify-content: center;
-      transform: translateX(-18px);
-    }
+/* BOOK */
 
-    .book-link {
-      display: inline-block;
-      justify-self: end;
-      perspective: 900px;
-      perspective-origin: center;
-    }
+.book-link {
+  justify-self: end;
+  perspective: 900px;
+}
 
-    .book-image {
-      width: 100%;
-      max-width: 300px;
-      height: auto;
-      display: block;
-      transition: transform 0.45s ease;
-    }
+.book-image {
+  width: 100%;
+  max-width: 300px;
+  transition: transform 0.45s ease;
+}
 
-    .book-link:hover .book-image {
-      transform: translateX(8px) rotateY(-6deg) scale(1.18);
-    }
+.book-link:hover .book-image {
+  transform: translateX(8px) rotateY(-6deg) scale(1.18);
+}
 
-    .text-block {
-      width: 100%;
-      max-width: 480px;
-      justify-self: start;
-      background: rgba(175, 168, 155, 0.32);
-      backdrop-filter: blur(2px);
-      -webkit-backdrop-filter: blur(2px);
-      padding: 16px 18px 14px;
-      border-radius: 4px;
-    }
+/* TEXT PANEL */
 
-    .classified-mark {
-      display: block;
-      width: 100%;
-      max-width: 300px;
-      height: auto;
-      margin: 0 auto 18px auto;
-      opacity: 0.55;
-    }
+.text-block {
+  max-width: 480px;
+  background: rgba(175,168,155,0.32);
+  backdrop-filter: blur(2px);
+  padding: 16px 18px 14px;
+  border-radius: 4px;
+}
 
-    .text-block h1 {
-      margin: 0 0 12px;
-      font-size: 1.15rem;
-      line-height: 1.22;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-    }
+.classified-mark {
+  display: block;
+  max-width: 300px;
+  margin: 0 auto 18px;
+  opacity: 0.55;
+}
 
-    .text-block p {
-      margin: 0 0 14px;
-      font-size: 0.95rem;
-      line-height: 1.6;
-    }
+.text-block h1 {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+  line-height: 1.22;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
 
-    .sublead {
-      font-size: 0.98rem;
-    }
+.text-block p {
+  margin: 0 0 14px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
 
-    .breach {
-      margin: 16px 0;
-      font-size: 1.04rem;
-      font-style: italic;
-    }
+.sublead { font-size: 0.98rem; }
+.breach { margin: 16px 0; font-style: italic; }
+.planned { font-weight: 700; }
 
-    .planned {
-      font-weight: 700;
-    }
+/* BUTTON — MATCHES HOMEPAGE BEHAVIOR */
 
-    .button-row {
-      width: 100%;
-      max-width: 1080px;
-      margin: 22px auto 0;
-      display: flex;
-      justify-content: flex-start;
-      padding-left: 536px;
-    }
+.button-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px; /* tighter, like homepage */
+}
 
-    .continue-link {
-      display: inline-block;
-    }
+.continue-link {
+  opacity: 0.78;
+  transition: opacity 0.2s ease;
+}
 
-    .continue-image {
-      width: 100%;
-      max-width: 180px;
-      height: auto;
-      display: block;
-      opacity: 0.8;
-      transition: opacity 0.2s ease;
-    }
+.continue-link:hover {
+  opacity: 1;
+}
 
-    .continue-link:hover .continue-image {
-      opacity: 1;
-    }
+.continue-image {
+  max-width: 180px; /* exact match to homepage */
+  display: block;
+}
 
-    @media (max-width: 900px) {
-      .page {
-        padding: 34px 20px 24px;
-      }
+/* MOBILE */
 
-      .content {
-        grid-template-columns: 1fr;
-        gap: 28px;
-        transform: none;
-        text-align: center;
-      }
+@media (max-width: 900px) {
+  .content {
+    grid-template-columns: 1fr;
+    text-align: center;
+    transform: none;
+    gap: 28px;
+  }
 
-      .book-link {
-        justify-self: center;
-      }
+  .book-link { justify-self: center; }
+  .text-block { margin: 0 auto; }
 
-      .book-image {
-        max-width: 260px;
-      }
-
-      .text-block {
-        max-width: 560px;
-        justify-self: center;
-        padding: 16px 16px 14px;
-      }
-
-      .classified-mark {
-        margin: 0 auto 14px;
-      }
-
-      .button-row {
-        max-width: 560px;
-        justify-content: center;
-        padding-left: 0;
-        margin-top: 20px;
-      }
-    }
-  </style>
+  .button-row {
+    margin-top: 20px;
+  }
+}
+</style>
 </head>
 
 <body>
-  <main class="page">
-    <section class="content">
-      <a class="book-link" href="https://www.amazon.com/dp/B0GWWZR7D7" target="_blank" rel="noopener noreferrer">
-        <img src="1775684283.png" alt="The Arcolith by Landon L Gow" class="book-image">
-      </a>
 
-      <div class="text-block">
-        <img src="fm3 copy.png" alt="Sovereignty Classified" class="classified-mark">
+<main class="page">
 
-        <h1>WHAT IF A SOCIETY COULD ELIMINATE SUFFERING BY REMOVING THE ABILITY TO EXPERIENCE IT?</h1>
+  <section class="content">
 
-        <p class="sublead">What would it build? What would it cost? What happens when it fails?</p>
+    <a class="book-link" href="https://www.amazon.com/dp/B0GWWZR7D7" target="_blank">
+      <img src="1775684283.png" class="book-image">
+    </a>
 
-        <p>In a controlled system where behavior is regulated at the biological level, one worker begins to encounter failures that cannot be explained or contained. Told in two voices, one intimate, one institutional, this is a story about compliance written into the body and the feeling that eventually breaks through.</p>
+    <div class="text-block">
 
-        <p class="breach">Connection is the breach.</p>
+      <img src="fm3 copy.png" class="classified-mark">
 
-        <p>The Arcolith Trilogy is a science fiction series about a civilization that solved suffering by redesigning the human condition, and the fracture that begins when that design starts to fail. Told across multiple perspectives, it follows the tension between control and emergence, between what is engineered and what cannot be contained.</p>
+      <h1>
+        WHAT IF A SOCIETY COULD ELIMINATE SUFFERING BY REMOVING THE ABILITY TO EXPERIENCE IT?
+      </h1>
 
-        <p class="planned">A planned three-part work. One continuous arc. Book II currently in development.</p>
+      <p class="sublead">
+        What would it build? What would it cost? What happens when it fails?
+      </p>
 
-        <p>As the structure begins to show strain, the question is no longer whether it can be maintained, but what remains when it is no longer believed.</p>
-      </div>
-    </section>
+      <p>
+        In a controlled system where behavior is regulated at the biological level, one worker begins to encounter failures that cannot be explained or contained. Told in two voices, one intimate, one institutional, this is a story about compliance written into the body and the feeling that eventually breaks through.
+      </p>
 
-    <div class="button-row">
-      <a href="index.html" class="continue-link">
-        <img src="continue.png" alt="Continue to Main Site" class="continue-image">
-      </a>
+      <p class="breach">Connection is the breach.</p>
+
+      <p>
+        The Arcolith Trilogy is a science fiction series about a civilization that solved suffering by redesigning the human condition, and the fracture that begins when that design starts to fail. Told across multiple perspectives, it follows the tension between control and emergence, between what is engineered and what cannot be contained.
+      </p>
+
+      <p class="planned">
+        A planned three-part work. One continuous arc. Book II currently in development.
+      </p>
+
+      <p>
+        As the structure begins to show strain, the question is no longer whether it can be maintained, but what remains when it is no longer believed.
+      </p>
+
     </div>
-  </main>
+
+  </section>
+
+  <div class="button-row">
+    <a href="index.html" class="continue-link">
+      <img src="continue.png" class="continue-image">
+    </a>
+  </div>
+
+</main>
+
 </body>
 </html>
