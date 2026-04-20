@@ -96,6 +96,7 @@
       display: flex;
       justify-content: center;
       width: 100%;
+      z-index: 1;
     }
 
     .trilogy-button {
@@ -112,6 +113,14 @@
     .trilogy-button img {
       width: 100%;
       display: block;
+    }
+
+    /* FIX: ensure hovered item comes above button */
+    .products > a:hover,
+    .album-stack a:hover,
+    .arcolith-wrap > a:hover {
+      position: relative;
+      z-index: 10;
     }
 
     .products > a:hover img,
