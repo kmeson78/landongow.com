@@ -1,197 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>The Arcolith Trilogy | Landon L Gow</title>
+<meta charset="UTF-8">
+<title>The Arcolith Trilogy | Landon L Gow</title>
 
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="manifest" href="site.webmanifest">
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family: Arial, sans-serif;
+  color: #111;
+  background: #000 url("arc_background copy.png") center/cover no-repeat fixed;
+}
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      min-height: 100%;
-      font-family: Arial, sans-serif;
-      color: #111;
-      background-color: #000;
-      background-image: url("arc_background copy.png");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-    }
+* { box-sizing: border-box; }
 
-    * {
-      box-sizing: border-box;
-    }
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 44px 36px 32px;
+}
 
-    .page {
-      min-height: 100vh;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 48px 40px 36px;
-    }
+.content {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 44px;
+  align-items: center;
+}
 
-    .content {
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 48px;
-      align-items: center;
-    }
+/* BOOK */
 
-    .book-link {
-      display: inline-block;
-      justify-self: center;
-      perspective: 900px;
-    }
+.book-link {
+  justify-self: center;
+  perspective: 900px;
+}
 
-    .book-image {
-      width: 100%;
-      max-width: 300px;
-      height: auto;
-      display: block;
-      transition: transform 0.45s ease;
-    }
+.book-image {
+  max-width: 260px;
+  width: 100%;
+  transition: transform 0.45s ease;
+}
 
-    @keyframes hoverBreath {
-      0%   { transform: translateX(8px) rotateY(-6deg) translateZ(20px) scale(1.2); }
-      50%  { transform: translateX(10px) rotateY(-7deg) translateZ(22px) scale(1.22); }
-      100% { transform: translateX(8px) rotateY(-6deg) translateZ(20px) scale(1.2); }
-    }
+.book-link:hover .book-image {
+  transform: translateX(8px) rotateY(-6deg) scale(1.18);
+}
 
-    .book-link:hover .book-image {
-      transform: translateX(8px) rotateY(-6deg) translateZ(20px) scale(1.2);
-      animation: hoverBreath 1.8s ease-in-out infinite;
-    }
+/* TEXT */
 
-    .text-block {
-      max-width: 600px;
-    }
+.text-block {
+  max-width: 520px; /* CRITICAL FIX */
+}
 
-    .text-block h1 {
-      margin: 0 0 14px;
-      font-size: clamp(1.1rem, 1.4vw, 1.5rem);
-      line-height: 1.2;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
+.text-block h1 {
+  margin: 0 0 12px;
+  font-size: 1.15rem; /* smaller + controlled */
+  line-height: 1.25;
+  font-weight: 700;
+  text-transform: uppercase;
+}
 
-    .text-block p {
-      margin: 0 0 16px;
-      font-size: clamp(0.9rem, 0.95vw, 1rem);
-      line-height: 1.6;
-    }
+.text-block p {
+  margin: 0 0 14px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
 
-    .text-block .sublead {
-      font-size: clamp(0.95rem, 1vw, 1.05rem);
-    }
+.sublead {
+  font-size: 0.98rem;
+}
 
-    .text-block .breach {
-      margin: 18px 0;
-      font-size: clamp(1rem, 1.1vw, 1.15rem);
-      font-style: italic;
-    }
+.breach {
+  margin: 16px 0;
+  font-size: 1.05rem;
+  font-style: italic;
+}
 
-    .text-block .planned {
-      font-weight: 700;
-    }
+.planned {
+  font-weight: 700;
+}
 
-    .button-row {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      margin-top: 28px;
-    }
+/* BUTTON */
 
-    .continue-link {
-      display: inline-block;
-      opacity: 0.88;
-      transition: opacity 0.2s ease;
-    }
+.button-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
 
-    .continue-link:hover {
-      opacity: 1;
-    }
+.continue-image {
+  max-width: 180px; /* MATCHES HOMEPAGE */
+  width: 100%;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
 
-    .continue-image {
-      display: block;
-      width: 100%;
-      max-width: 360px;
-      height: auto;
-    }
+.continue-image:hover {
+  opacity: 1;
+}
 
-    @media (max-width: 900px) {
-      .content {
-        grid-template-columns: 1fr;
-        text-align: center;
-      }
+/* MOBILE */
 
-      .text-block {
-        margin: 0 auto;
-      }
+@media (max-width: 900px) {
+  .content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
 
-      .book-image {
-        max-width: 260px;
-      }
-    }
-  </style>
+  .text-block {
+    margin: 0 auto;
+  }
+}
+</style>
 </head>
 
 <body>
 
-  <main class="page">
-    <section class="content">
+<main class="page">
 
-      <a class="book-link" href="https://www.amazon.com/dp/B0GWWZR7D7" target="_blank">
-        <img src="1775684283.png" class="book-image">
-      </a>
+  <section class="content">
 
-      <div class="text-block">
-        <h1>
-          WHAT IF A SOCIETY COULD ELIMINATE SUFFERING BY REMOVING THE ABILITY TO EXPERIENCE IT?
-        </h1>
+    <a class="book-link" href="https://www.amazon.com/dp/B0GWWZR7D7" target="_blank">
+      <img src="1775684283.png" class="book-image">
+    </a>
 
-        <p class="sublead">
-          What would it build? What would it cost? What happens when it fails?
-        </p>
+    <div class="text-block">
 
-        <p>
-          In a controlled system where behavior is regulated at the biological level, one worker begins to encounter failures that cannot be explained or contained. Told in two voices, one intimate, one institutional, this is a story about compliance written into the body and the feeling that eventually breaks through.
-        </p>
+      <h1>
+        WHAT IF A SOCIETY COULD ELIMINATE SUFFERING BY REMOVING THE ABILITY TO EXPERIENCE IT?
+      </h1>
 
-        <p class="breach">Connection is the breach.</p>
+      <p class="sublead">
+        What would it build? What would it cost? What happens when it fails?
+      </p>
 
-        <p>
-          The Arcolith Trilogy is a science fiction series about a civilization that solved suffering by redesigning the human condition, and the fracture that begins when that design starts to fail. Told across multiple perspectives, it follows the tension between control and emergence, between what is engineered and what cannot be contained.
-        </p>
+      <p>
+        In a controlled system where behavior is regulated at the biological level, one worker begins to encounter failures that cannot be explained or contained. Told in two voices, one intimate, one institutional, this is a story about compliance written into the body and the feeling that eventually breaks through.
+      </p>
 
-        <p class="planned">
-          A planned three-part work. One continuous arc. Book II currently in development.
-        </p>
+      <p class="breach">Connection is the breach.</p>
 
-        <p>
-          As the structure begins to show strain, the question is no longer whether it can be maintained, but what remains when it is no longer believed.
-        </p>
-      </div>
+      <p>
+        The Arcolith Trilogy is a science fiction series about a civilization that solved suffering by redesigning the human condition, and the fracture that begins when that design starts to fail. Told across multiple perspectives, it follows the tension between control and emergence, between what is engineered and what cannot be contained.
+      </p>
 
-    </section>
+      <p class="planned">
+        A planned three-part work. One continuous arc. Book II currently in development.
+      </p>
 
-    <div class="button-row">
-      <a href="index.html" class="continue-link">
-        <img src="continue.png" class="continue-image">
-      </a>
+      <p>
+        As the structure begins to show strain, the question is no longer whether it can be maintained, but what remains when it is no longer believed.
+      </p>
+
     </div>
 
-  </main>
+  </section>
+
+  <div class="button-row">
+    <a href="index.html">
+      <img src="continue.png" class="continue-image">
+    </a>
+  </div>
+
+</main>
 
 </body>
 </html>
