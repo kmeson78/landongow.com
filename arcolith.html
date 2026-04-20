@@ -34,28 +34,11 @@ html, body {
   max-width: 1080px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 320px 500px;
+  grid-template-columns: 500px 320px;
   gap: 52px;
   align-items: center;
   justify-content: center;
-  transform: translateX(-20px);
-}
-
-/* BOOK */
-
-.book-link {
-  justify-self: end;
-  perspective: 900px;
-}
-
-.book-image {
-  width: 100%;
-  max-width: 300px;
-  transition: transform 0.45s ease;
-}
-
-.book-link:hover .book-image {
-  transform: translateX(8px) rotateY(-6deg) scale(1.18);
+  transform: translateX(20px);
 }
 
 /* TEXT PANEL */
@@ -94,12 +77,29 @@ html, body {
 .breach { margin: 16px 0; font-style: italic; }
 .planned { font-weight: 700; }
 
+/* BOOK */
+
+.book-link {
+  justify-self: start;
+  perspective: 900px;
+}
+
+.book-image {
+  width: 100%;
+  max-width: 300px;
+  transition: transform 0.45s ease;
+}
+
+.book-link:hover .book-image {
+  transform: translateX(-8px) rotateY(6deg) scale(1.18);
+}
+
 /* BUTTON — MATCHES HOMEPAGE BEHAVIOR */
 
 .button-row {
   display: flex;
   justify-content: center;
-  margin-top: 18px; /* tighter, like homepage */
+  margin-top: 18px;
 }
 
 .continue-link {
@@ -112,7 +112,7 @@ html, body {
 }
 
 .continue-image {
-  max-width: 180px; /* exact match to homepage */
+  max-width: 180px;
   display: block;
 }
 
@@ -126,7 +126,11 @@ html, body {
     gap: 28px;
   }
 
-  .book-link { justify-self: center; }
+  /* Put the book above the text on mobile for visual hierarchy */
+  .book-link {
+    justify-self: center;
+    order: -1;
+  }
   .text-block { margin: 0 auto; }
 
   .button-row {
@@ -142,10 +146,6 @@ html, body {
 
   <section class="content">
 
-    <a class="book-link" href="https://www.amazon.com/dp/B0GWWZR7D7" target="_blank">
-      <img src="1775684283.png" class="book-image">
-    </a>
-
     <div class="text-block">
 
       <img src="fm3 copy.png" class="classified-mark">
@@ -159,24 +159,24 @@ html, body {
       </p>
 
       <p>
-        In a controlled system where behavior is regulated at the biological level, one worker begins to encounter failures that cannot be explained or contained. Told in two voices, one intimate, one institutional, this is a story about compliance written into the body and the feeling that eventually breaks through.
+        In a system where behavior is regulated at the biological level, one worker begins to encounter failures that cannot be explained or contained. Told in two voices, one intimate, one institutional, <em>The Arcolith</em> is a story about compliance written into the body, and the feeling that breaks through.
       </p>
 
       <p class="breach">Connection is the breach.</p>
-
-      <p>
-        The Arcolith Trilogy is a science fiction series about a civilization that solved suffering by redesigning the human condition, and the fracture that begins when that design starts to fail. Told across multiple perspectives, it follows the tension between control and emergence, between what is engineered and what cannot be contained.
-      </p>
 
       <p class="planned">
         A planned three-part work. One continuous arc. Book II currently in development.
       </p>
 
       <p>
-        As the structure begins to show strain, the question is no longer whether it can be maintained, but what remains when it is no longer believed.
+        As the structure shows strain, the question is no longer whether it can be maintained, but what remains when it is no longer believed.
       </p>
 
     </div>
+
+    <a class="book-link" href="https://www.amazon.com/dp/B0GWWZR7D7" target="_blank">
+      <img src="1775684283.png" class="book-image">
+    </a>
 
   </section>
 
