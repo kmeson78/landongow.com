@@ -37,11 +37,11 @@ html, body {
   max-width: 1080px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 310px 500px;
+  grid-template-columns: 320px 520px;
   gap: 52px;
   align-items: center;
   justify-content: center;
-  transform: translateX(-34px);
+  transform: translateX(-24px);
 }
 
 .book-link {
@@ -53,7 +53,7 @@ html, body {
 
 .book-image {
   width: 100%;
-  max-width: 290px;
+  max-width: 305px;
   height: auto;
   display: block;
   transition: transform 0.45s ease;
@@ -65,8 +65,22 @@ html, body {
 
 .text-block {
   width: 100%;
-  max-width: 500px;
+  max-width: 520px;
   justify-self: start;
+  background: rgba(185, 180, 170, 0.18);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  padding: 18px 20px 16px;
+  border-radius: 4px;
+}
+
+.classified-mark {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  margin: 0 0 16px;
+  opacity: 0.58;
 }
 
 .text-block h1 {
@@ -103,7 +117,7 @@ html, body {
   margin: 22px auto 0;
   display: flex;
   justify-content: flex-start;
-  padding-left: 528px;
+  padding-left: 548px;
 }
 
 .continue-link {
@@ -140,12 +154,17 @@ html, body {
   }
 
   .book-image {
-    max-width: 250px;
+    max-width: 260px;
   }
 
   .text-block {
     max-width: 560px;
     justify-self: center;
+    padding: 16px 16px 14px;
+  }
+
+  .classified-mark {
+    margin: 0 auto 14px;
   }
 
   .button-row {
@@ -168,6 +187,8 @@ html, body {
     </a>
 
     <div class="text-block">
+      <img src="fm3 copy.png" alt="Sovereignty Classified" class="classified-mark">
+
       <h1>WHAT IF A SOCIETY COULD ELIMINATE SUFFERING BY REMOVING THE ABILITY TO EXPERIENCE IT?</h1>
 
       <p class="sublead">What would it build? What would it cost? What happens when it fails?</p>
