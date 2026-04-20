@@ -1,1 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Arcolith Trilogy | Landon L Gow</title>
 
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+
+  <meta name="keywords" content="The Arcolith Trilogy, The Arcolith, Landon L Gow, science fiction, dystopian fiction, speculative fiction">
+  <meta name="description" content="The Arcolith Trilogy by Landon L Gow. A planned science fiction trilogy about engineered suffering, control, fracture, and emergence.">
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: Arial, sans-serif;
+      color: #111;
+      background-color: #000;
+      background-image: url("arc_background copy.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .hidden-seo {
+      position: absolute;
+      left: -9999px;
+      top: -9999px;
+    }
+
+    .page {
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 56px 42px 40px;
+    }
+
+    .content {
+      width: 100%;
+      max-width: 1300px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(300px, 430px) minmax(460px, 650px);
+      gap: 72px;
+      align-items: center;
+    }
+
+    .book-link {
+      display: inline-block;
+      justify-self: center;
+      perspective: 900px;
+      perspective-origin: center;
+    }
+
+    .book-image {
+      width: 100%;
+      max-width: 430px;
+      height: auto;
+      display: block;
+      background: transparent;
+      transform-origin: 50% 50%;
+      backface-visibility: hidden;
+      transform: translateZ(0);
+      transition: transform 0.45s ease;
+    }
+
+    @keyframes hoverBreath {
+      0%   { transform: translateX(10px) rotateY(-8deg) translateZ(30px) scale(1.35); }
+      50%  { transform: translateX(12px) rotateY(-9deg) translateZ(32px) scale(1.36); }
+      100% { transform: translateX(10px) rotateY(-8deg) translateZ(30px) scale(1.35); }
+    }
+
+    .book-link:hover .book-image {
+      position: relative;
+      z-index: 10;
+      will-change: transform;
+      transform: translateX(10px) rotateY(-8deg) translateZ(30px) scale(1.35);
+      animation: hoverBreath 1.8s ease-in-out infinite;
+    }
+
+    .text-block {
+      max-width: 640px;
+      color: #111;
+      text-shadow: 0 0 1px rgba(255,255,255,0.08);
+    }
+
+    .text-block h1 {
+      margin: 0 0 20px;
+      font-size: clamp(1.55rem, 2.15vw, 2.35rem);
+      line-height: 1.14;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+    }
+
+    .text-block p {
+      margin: 0 0 18px;
+      font-size: clamp(1rem, 1.02vw, 1.08rem);
+      line-height: 1.66;
+      font-weight: 400;
+    }
+
+    .text-block .sublead {
+      margin-bottom: 22px;
+      font-size: clamp(1.04rem, 1.08vw, 1.14rem);
+      line-height: 1.55;
+    }
+
+    .text-block .breach {
+      margin: 24px 0;
+      font-size: clamp(1.14rem, 1.28vw, 1.34rem);
+      line-height: 1.4;
+      font-style: italic;
+    }
+
+    .text-block .planned {
+      font-weight: 700;
+    }
+
+    .button-row {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-top: 42px;
+    }
+
+    .continue-link {
+      display: inline-block;
+      opacity: 0.88;
+      transition: opacity 0.2s ease;
+    }
+
+    .continue-link:hover {
+      opacity: 1;
+    }
+
+    .continue-image {
+      display: block;
+      width: 100%;
+      max-width: 520px;
+      height: auto;
+    }
+
+    @media (hover: none) {
+      .book-link:hover .book-image {
+        transform: none;
+        animation: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .book-image {
+        transition: none;
+      }
+
+      .book-link:hover .book-image {
+        animation: none;
+      }
+
+      .continue-link {
+        transition: none;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .page {
+        padding: 46px 26px 34px;
+      }
+
+      .content {
+        grid-template-columns: 1fr;
+        gap: 34px;
+        text-align: center;
+      }
+
+      .text-block {
+        max-width: 760px;
+        margin: 0 auto;
+      }
+
+      .book-image {
+        max-width: 350px;
+      }
+
+      .button-row {
+        margin-top: 30px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .page {
+        padding: 30px 18px 24px;
+      }
+
+      .book-image {
+        max-width: 290px;
+      }
+
+      .continue-image {
+        max-width: 420px;
+      }
+
+      .text-block h1 {
+        margin-bottom: 16px;
+      }
+
+      .text-block p {
+        line-height: 1.58;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="hidden-seo">
+    The Arcolith Trilogy, The Arcolith, Landon L Gow, science fiction trilogy
+  </div>
+
+  <main class="page">
+    <section class="content">
+      <a class="book-link" href="https://www.amazon.com/dp/B0GWWZR7D7" target="_blank" rel="noopener noreferrer">
+        <img src="1775684283.png" alt="The Arcolith by Landon L Gow" class="book-image" loading="lazy">
+      </a>
+
+      <div class="text-block">
+        <h1>WHAT IF A SOCIETY COULD ELIMINATE SUFFERING BY REMOVING THE ABILITY TO EXPERIENCE IT?</h1>
+
+        <p class="sublead">What would it build? What would it cost? What happens when it fails?</p>
+
+        <p>
+          In a controlled system where behavior is regulated at the biological level, one worker begins to encounter failures that cannot be explained or contained. Told in two voices, one intimate, one institutional, this is a story about compliance written into the body and the feeling that eventually breaks through.
+        </p>
+
+        <p class="breach">Connection is the breach.</p>
+
+        <p>
+          The Arcolith Trilogy is a science fiction series about a civilization that solved suffering by redesigning the human condition, and the fracture that begins when that design starts to fail. Told across multiple perspectives, it follows the tension between control and emergence, between what is engineered and what cannot be contained.
+        </p>
+
+        <p class="planned">A planned three-part work. One continuous arc. Book II currently in development.</p>
+
+        <p>
+          As the structure begins to show strain, the question is no longer whether it can be maintained, but what remains when it is no longer believed.
+        </p>
+      </div>
+    </section>
+
+    <div class="button-row">
+      <a href="index.html" class="continue-link">
+        <img src="continue.png" alt="Continue to Main Site" class="continue-image" loading="lazy">
+      </a>
+    </div>
+  </main>
+</body>
+</html>
