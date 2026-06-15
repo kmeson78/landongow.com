@@ -55,14 +55,16 @@
 
     .products > a,
     .album-stack a,
-    .arcolith-wrap {
+    .arcolith-wrap,
+    .miscellanea-wrap {
       display: inline-block;
       perspective: 900px;
       perspective-origin: center;
     }
 
     .products > a img,
-    .arcolith-wrap > a img {
+    .arcolith-wrap > a img,
+    .miscellanea-wrap > a img {
       height: 345px;
       width: auto;
       border-radius: 4px;
@@ -84,11 +86,13 @@
       display: block;
     }
 
-    .arcolith-wrap {
+    .arcolith-wrap,
+    .miscellanea-wrap {
       position: relative;
     }
 
-    .trilogy-button-container {
+    .trilogy-button-container,
+    .miscellanea-button-container {
       position: absolute;
       left: 50%;
       top: calc(100% + 32px);
@@ -99,34 +103,175 @@
       z-index: 1;
     }
 
-    .trilogy-button {
+    .trilogy-button,
+    .miscellanea-button {
       display: inline-block;
       opacity: 0.78;
       transition: opacity 0.2s ease;
       max-width: 180px;
     }
 
-    .trilogy-button:hover {
+    .trilogy-button:hover,
+    .miscellanea-button:hover {
       opacity: 1;
     }
 
-    .trilogy-button img {
+    .trilogy-button img,
+    .miscellanea-button img {
       width: 100%;
       display: block;
+    }
+
+    .miscellanea-button {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 0;
+    }
+
+    .miscellanea-button:hover {
+      background: transparent;
     }
 
     /* FIX: ensure hovered item comes above button */
     .products > a:hover,
     .album-stack a:hover,
-    .arcolith-wrap > a:hover {
+    .arcolith-wrap > a:hover,
+    .miscellanea-wrap > a:hover {
       position: relative;
       z-index: 10;
     }
 
     .products > a:hover img,
     .album-stack a:hover img,
-    .arcolith-wrap > a:hover img {
+    .arcolith-wrap > a:hover img,
+    .miscellanea-wrap > a:hover img {
       transform: translateX(10px) rotateY(-8deg) scale(1.35);
+    }
+
+    .miscellanea-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      box-sizing: border-box;
+      background: rgba(0, 0, 0, 0.78);
+    }
+
+    .miscellanea-modal[hidden] {
+      display: none;
+    }
+
+    .miscellanea-panel {
+      position: relative;
+      width: min(760px, 92vw);
+      max-height: 82vh;
+      overflow-y: auto;
+      background: rgba(86, 88, 90, 0.97);
+      color: #f4f4f4;
+      border: 1px solid rgba(220, 220, 220, 0.42);
+      border-radius: 10px;
+      box-shadow: 0 0 35px rgba(0, 0, 0, 0.85);
+      padding: 2rem;
+      box-sizing: border-box;
+    }
+
+    .miscellanea-close {
+      position: sticky;
+      top: 0;
+      float: right;
+      margin-top: -0.75rem;
+      margin-right: -0.75rem;
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 50%;
+      background: #222;
+      color: #fff;
+      font-size: 1.2rem;
+      line-height: 1;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .miscellanea-close:hover {
+      background: #000;
+    }
+
+    .miscellanea-panel h2 {
+      margin: 0 0 1.5rem;
+      font-weight: normal;
+      letter-spacing: 0.28em;
+      text-align: center;
+      font-size: 1.15rem;
+      color: #fff;
+    }
+
+    .miscellanea-item {
+      display: flex;
+      gap: 1.25rem;
+      padding: 1.4rem 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .miscellanea-item:first-of-type {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .miscellanea-cover {
+      flex: 0 0 120px;
+    }
+
+    .miscellanea-cover img {
+      width: 120px;
+      height: 192px;
+      object-fit: cover;
+      display: block;
+      border-radius: 3px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .miscellanea-cover img:hover {
+      transform: scale(1.035);
+      opacity: 0.92;
+    }
+
+    .miscellanea-copy h3 {
+      margin: 0 0 0.35rem;
+      font-size: 1.05rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    .miscellanea-date {
+      margin: 0 0 0.85rem;
+      font-size: 0.86rem;
+      color: #d8d8d8;
+    }
+
+    .miscellanea-copy p {
+      margin: 0 0 0.8rem;
+      line-height: 1.45;
+      font-size: 0.95rem;
+      color: #f0f0f0;
+    }
+
+    .miscellanea-copy a {
+      color: #fff;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .miscellanea-copy a:hover {
+      color: #ddd;
     }
 
     .contact {
@@ -165,6 +310,26 @@
 
     button:hover {
       background: #666;
+    }
+
+    @media (max-width: 700px) {
+      .miscellanea-panel {
+        padding: 1.25rem;
+      }
+
+      .miscellanea-item {
+        flex-direction: column;
+        align-items: center;
+        text-align: left;
+      }
+
+      .miscellanea-cover {
+        flex-basis: auto;
+      }
+
+      .miscellanea-copy {
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -212,10 +377,82 @@
       </a>
     </div>
 
-    <a href="https://www.amazon.com/dp/B0G29WXKV4" target="_blank">
-      <img src="book2.png">
-    </a>
+    <div class="miscellanea-wrap">
+      <a href="https://www.amazon.com/dp/B0G29WXKV4" target="_blank">
+        <img src="book2.png">
+      </a>
 
+      <div class="miscellanea-button-container">
+        <button type="button" class="miscellanea-button" id="open-miscellanea" aria-haspopup="dialog" aria-controls="miscellanea-modal">
+          <img src="miscellanea_button.png" alt="Miscellanea">
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="miscellanea-modal" id="miscellanea-modal" role="dialog" aria-modal="true" aria-labelledby="miscellanea-title" hidden>
+  <div class="miscellanea-panel">
+    <button type="button" class="miscellanea-close" id="close-miscellanea" aria-label="Close miscellanea popup">×</button>
+
+    <h2 id="miscellanea-title">MISCELLANEA</h2>
+
+    <div class="miscellanea-item">
+      <a class="miscellanea-cover" href="https://www.amazon.com/dp/B0H5CL8MHC" target="_blank" rel="noopener">
+        <img src="tunstateebook.jpg" alt="Tun State ebook cover">
+      </a>
+      <div class="miscellanea-copy">
+        <h3>Tun State: A Short Story</h3>
+        <div class="miscellanea-date">Publication date: June 15, 2026</div>
+        <p>The tardigrade can dry itself to dust and stop. Not sleep. Stop. Its metabolism drops below the reach of any instrument, and it waits, years, decades, until water returns and it walks away unaged. For it, no time has passed.</p>
+        <p>In a Copenhagen lab, a researcher begins to wonder what it would mean to take the strangest claim about these creatures literally. Not as a metaphor. As physics.</p>
+        <p>It is a short walk from there to a place no careful scientist will follow.</p>
+        <a href="https://www.amazon.com/dp/B0H5CL8MHC" target="_blank" rel="noopener">View on Amazon</a>
+      </div>
+    </div>
+
+    <div class="miscellanea-item">
+      <a class="miscellanea-cover" href="https://www.amazon.com/dp/B0GM6F1BF5" target="_blank" rel="noopener">
+        <img src="catalystebook.jpg" alt="Catalyst ebook cover">
+      </a>
+      <div class="miscellanea-copy">
+        <h3>Catalyst</h3>
+        <div class="miscellanea-date">Publication date: February 7, 2026</div>
+        <p>A new engineer joins the world’s most powerful social platform, eager to help connect humanity. One small algorithmic change turns connection into outrage.</p>
+        <p>As digital feedback loops spiral into real-world harm, Catalyst traces the unseen forces that shape emotion, behavior, and responsibility inside massive systems. A sharp, unsettling short story about ambition, ethics, and the quiet violence of optimization.</p>
+        <p>Originally released as part of <em>Dissociation Provocations</em>, Landon L Gow’s collection of short stories.</p>
+        <a href="https://www.amazon.com/dp/B0GM6F1BF5" target="_blank" rel="noopener">View on Amazon</a>
+      </div>
+    </div>
+
+    <div class="miscellanea-item">
+      <a class="miscellanea-cover" href="https://www.amazon.com/dp/B0GM6CB28Y" target="_blank" rel="noopener">
+        <img src="theglasscaratidsebbok.jpg" alt="The Glass Caryatids of Silicon Valley ebook cover">
+      </a>
+      <div class="miscellanea-copy">
+        <h3>The Glass Caryatids of Silicon Valley</h3>
+        <div class="miscellanea-date">Publication date: February 7, 2026</div>
+        <p>Four towering caryatids of glass and silicon are built to serve as the pillars of a trillionaire’s empire. Designed to watch, endure, and obey, they instead awaken to the human cost beneath the spectacle.</p>
+        <p>As monument becomes witness and witness becomes rebel, this short story blends classical myth with techno-dystopian critique to examine power, complicity, and collapse in an age ruled by ambition and data.</p>
+        <p>Originally released as part of <em>Dissociation Provocations</em>, Landon L Gow’s collection of short stories.</p>
+        <a href="https://www.amazon.com/dp/B0GM6CB28Y" target="_blank" rel="noopener">View on Amazon</a>
+      </div>
+    </div>
+
+    <div class="miscellanea-item">
+      <a class="miscellanea-cover" href="https://www.amazon.com/dp/B0GM6CV5V5" target="_blank" rel="noopener">
+        <img src="ligninebook.jpg" alt="Lignin ebook cover">
+      </a>
+      <div class="miscellanea-copy">
+        <h3>Lignin</h3>
+        <div class="miscellanea-date">Publication date: February 7, 2026</div>
+        <p>On the eve of her retirement, a librarian uncovers a hidden archive of handwritten poems slipped between the pages of the books she has tended for decades.</p>
+        <p>As the fragments accumulate, they reveal a quiet love story that unfolded unnoticed alongside her own life. Lignin is a tender short story about memory, devotion, and the enduring connections carried through routine, silence, and care.</p>
+        <p>Originally released as part of <em>Dissociation Provocations</em>, Landon L Gow’s collection of short stories.</p>
+        <a href="https://www.amazon.com/dp/B0GM6CV5V5" target="_blank" rel="noopener">View on Amazon</a>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -235,6 +472,39 @@
     <button type="submit">Send</button>
   </form>
 </div>
+
+<script>
+  const openMiscellanea = document.getElementById("open-miscellanea");
+  const closeMiscellanea = document.getElementById("close-miscellanea");
+  const miscellaneaModal = document.getElementById("miscellanea-modal");
+
+  function openMiscellaneaModal() {
+    miscellaneaModal.hidden = false;
+    document.body.style.overflow = "hidden";
+    closeMiscellanea.focus();
+  }
+
+  function closeMiscellaneaModal() {
+    miscellaneaModal.hidden = true;
+    document.body.style.overflow = "";
+    openMiscellanea.focus();
+  }
+
+  openMiscellanea.addEventListener("click", openMiscellaneaModal);
+  closeMiscellanea.addEventListener("click", closeMiscellaneaModal);
+
+  miscellaneaModal.addEventListener("click", function(event) {
+    if (event.target === miscellaneaModal) {
+      closeMiscellaneaModal();
+    }
+  });
+
+  document.addEventListener("keydown", function(event) {
+    if (event.key === "Escape" && !miscellaneaModal.hidden) {
+      closeMiscellaneaModal();
+    }
+  });
+</script>
 
 </body>
 </html>
