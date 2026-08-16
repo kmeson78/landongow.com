@@ -10,6 +10,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
+<link rel="preload" as="image" href="arcolith_wave_toggle_active.gif">
 
 <style>
 html, body {
@@ -78,10 +79,18 @@ html, body {
 .breach { margin: 16px 0; font-style: italic; }
 .planned { font-weight: 700; }
 
-/* BOOK */
+/* BOOK + WIND CONTROL */
+
+.book-column {
+  justify-self: start;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
 .book-link {
-  justify-self: start;
+  display: block;
   perspective: 900px;
 }
 
@@ -93,6 +102,53 @@ html, body {
 
 .book-link:hover .book-image {
   transform: translateX(-8px) rotateY(6deg) scale(1.18);
+}
+
+/*
+  The wave is a diegetic master sound switch.
+  Still PNG = wind off.
+  Animated GIF + faint glow = wind on.
+*/
+.wind-toggle {
+  display: block;
+  width: 230px;
+  margin: 48px auto 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  opacity: 0.46;
+  filter: drop-shadow(0 0 0 rgba(255,255,255,0));
+  transition: opacity 0.25s ease, filter 0.35s ease;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.wind-toggle:hover {
+  opacity: 0.68;
+}
+
+.wind-toggle.wind-on {
+  opacity: 0.76;
+  filter: drop-shadow(0 0 8px rgba(255,255,255,0.18));
+}
+
+.wind-toggle.wind-on:hover {
+  opacity: 0.88;
+}
+
+.wind-toggle:focus-visible {
+  outline: 1px solid rgba(35, 35, 35, 0.45);
+  outline-offset: 5px;
+  border-radius: 3px;
+}
+
+.wind-toggle img {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* BUTTON — MATCHES HOMEPAGE BEHAVIOR */
@@ -149,16 +205,26 @@ html, body {
     gap: 24px;
   }
 
-  /* Book becomes the opening artifact on portrait mobile. */
-  .book-link {
+  /* Book + wind control become the opening artifact on portrait mobile. */
+  .book-column {
     justify-self: center;
     order: -1;
+    width: min(280px, 76vw);
+  }
+
+  .book-link {
+    display: block;
   }
 
   .book-image {
     width: auto;
     max-width: min(240px, 62vw);
     max-height: 42svh;
+  }
+
+  .wind-toggle {
+    width: min(205px, 58vw);
+    margin-top: 30px;
   }
 
   .text-block {
@@ -219,15 +285,25 @@ html, body {
     align-items: start;
   }
 
-  .book-link {
+  .book-column {
     order: 0;
     justify-self: end;
     align-self: start;
+    width: min(230px, 30vw);
+  }
+
+  .book-link {
+    display: block;
   }
 
   .book-image {
     max-width: min(210px, 27vw);
     max-height: 62svh;
+  }
+
+  .wind-toggle {
+    width: min(170px, 22vw);
+    margin-top: 24px;
   }
 
   .text-block {
@@ -280,6 +356,14 @@ html, body {
 
   .continue-link:hover {
     opacity: 0.78;
+  }
+
+  .wind-toggle:hover {
+    opacity: 0.46;
+  }
+
+  .wind-toggle.wind-on:hover {
+    opacity: 0.76;
   }
 }
 
@@ -379,9 +463,29 @@ html, body {
 
     </div>
 
-    <a class="book-link" href="https://www.amazon.com/dp/B0GWWZR7D7" target="_blank">
-      <img src="1775684283.png" class="book-image">
-    </a>
+    <div class="book-column">
+
+      <a class="book-link" href="https://www.amazon.com/dp/B0GWWZR7D7" target="_blank">
+        <img src="1775684283.png" class="book-image">
+      </a>
+
+      <button
+        type="button"
+        class="wind-toggle"
+        id="wind-toggle"
+        aria-pressed="false"
+        aria-label="Toggle wind ambience"
+        title="Wind"
+      >
+        <img
+          id="wind-toggle-image"
+          src="arcolith_wave_toggle_still.png"
+          alt=""
+          aria-hidden="true"
+        >
+      </button>
+
+    </div>
 
   </section>
 
@@ -395,59 +499,106 @@ html, body {
 
 <script>
   const arcolithWind = document.getElementById("arcolith-wind");
+  const windToggle = document.getElementById("wind-toggle");
+  const windToggleImage = document.getElementById("wind-toggle-image");
 
   const WIND_SETTINGS = {
     volume: 1.0,
-    fadeInMs: 1000
+    fadeInMs: 1000,
+    fadeOutMs: 650,
+    stillImage: "arcolith_wave_toggle_still.png",
+    activeImage: "arcolith_wave_toggle_active.gif"
   };
 
   let fadeFrame = null;
-  let windStarted = false;
+  let windEnabled = false;
 
   /*
-    Start silent in JavaScript so that if autoplay is permitted,
-    the wind still fades in rather than appearing abruptly.
+    False means the visitor has not made an explicit choice yet.
+    Once they click the wave off, fallback clicks elsewhere are not
+    allowed to turn the ambience back on.
+  */
+  let userHasChosen = false;
+  let userChoseOff = false;
+
+  /*
+    Start silent in JavaScript so successful autoplay fades in softly.
   */
   arcolithWind.volume = 0;
 
-  function fadeWindIn() {
+  /* Preload the animated state. */
+  const activeWavePreload = new Image();
+  activeWavePreload.src = WIND_SETTINGS.activeImage;
+
+  function setWindVisualState(isOn) {
+    windToggle.classList.toggle("wind-on", isOn);
+    windToggle.setAttribute("aria-pressed", isOn ? "true" : "false");
+
+    const wantedSource = isOn
+      ? WIND_SETTINGS.activeImage
+      : WIND_SETTINGS.stillImage;
+
+    if (!windToggleImage.src.endsWith(wantedSource)) {
+      windToggleImage.src = wantedSource;
+    }
+  }
+
+  function cancelWindFade() {
     if (fadeFrame !== null) {
       cancelAnimationFrame(fadeFrame);
+      fadeFrame = null;
     }
+  }
+
+  function fadeWindTo(targetVolume, durationMs, whenDone) {
+    cancelWindFade();
 
     const startVolume = arcolithWind.volume;
-    const start = performance.now();
+    const startTime = performance.now();
 
     function step(now) {
-      const progress = Math.min((now - start) / WIND_SETTINGS.fadeInMs, 1);
+      const progress = Math.min((now - startTime) / durationMs, 1);
       const eased = progress * progress * (3 - 2 * progress);
 
       arcolithWind.volume =
-        startVolume + (WIND_SETTINGS.volume - startVolume) * eased;
+        startVolume + (targetVolume - startVolume) * eased;
 
       if (progress < 1) {
         fadeFrame = requestAnimationFrame(step);
       } else {
         fadeFrame = null;
-        arcolithWind.volume = WIND_SETTINGS.volume;
+        arcolithWind.volume = targetVolume;
+
+        if (typeof whenDone === "function") {
+          whenDone();
+        }
       }
     }
 
     fadeFrame = requestAnimationFrame(step);
   }
 
-  function startWind() {
-    /*
-      If the audio is already running, simply make sure it reaches
-      the intended level.
-    */
+  function enableWind(options = {}) {
+    const { explicit = false } = options;
+
+    if (explicit) {
+      userHasChosen = true;
+      userChoseOff = false;
+    } else if (userHasChosen && userChoseOff) {
+      return;
+    }
+
     if (!arcolithWind.paused) {
-      if (!windStarted) {
-        windStarted = true;
-        fadeWindIn();
+      windEnabled = true;
+      setWindVisualState(true);
+
+      if (arcolithWind.volume < WIND_SETTINGS.volume) {
+        fadeWindTo(WIND_SETTINGS.volume, WIND_SETTINGS.fadeInMs);
       }
       return;
     }
+
+    arcolithWind.volume = 0;
 
     try {
       const playPromise = arcolithWind.play();
@@ -455,57 +606,125 @@ html, body {
       if (playPromise && typeof playPromise.then === "function") {
         playPromise
           .then(function() {
-            if (!windStarted) {
-              windStarted = true;
-              fadeWindIn();
-            }
+            windEnabled = true;
+            setWindVisualState(true);
+            fadeWindTo(
+              WIND_SETTINGS.volume,
+              WIND_SETTINGS.fadeInMs
+            );
           })
           .catch(function() {
             /*
-              Direct audible autoplay is blocked on some visits.
-              A later click/tap/key press will call startWind again.
+              Direct audible autoplay may be blocked. The wave stays
+              static/off until playback actually succeeds.
             */
+            windEnabled = false;
+            setWindVisualState(false);
           });
       } else {
-        if (!windStarted) {
-          windStarted = true;
-          fadeWindIn();
-        }
+        windEnabled = true;
+        setWindVisualState(true);
+        fadeWindTo(
+          WIND_SETTINGS.volume,
+          WIND_SETTINGS.fadeInMs
+        );
       }
     } catch (error) {
-      /* Decorative audio must never affect the page itself. */
+      windEnabled = false;
+      setWindVisualState(false);
+    }
+  }
+
+  function disableWind() {
+    userHasChosen = true;
+    userChoseOff = true;
+    windEnabled = false;
+    setWindVisualState(false);
+
+    fadeWindTo(0, WIND_SETTINGS.fadeOutMs, function() {
+      arcolithWind.pause();
+    });
+  }
+
+  function toggleWind() {
+    if (windEnabled || !arcolithWind.paused) {
+      disableWind();
+    } else {
+      enableWind({ explicit: true });
     }
   }
 
   /*
-    Attempt immediately. This is the path that can work when the visitor
-    arrives through a user-initiated link such as the Trilogy button.
+    The wave itself is the master switch.
   */
-  startWind();
+  windToggle.addEventListener("click", function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleWind();
+  });
 
   /*
-    Retry at harmless lifecycle moments. Hover itself cannot override a
-    browser autoplay block, but retrying here costs nothing and helps when
-    autoplay permission has already become available.
+    Attempt autoplay immediately.
+
+    If it succeeds, the page starts with wind + animated wave.
+    If it fails, the wave remains still.
   */
-  window.addEventListener("pageshow", startWind);
-  window.addEventListener("focus", startWind);
-  document.addEventListener("pointerenter", startWind, { once: true, capture: true });
+  enableWind();
 
   /*
-    A real interaction reliably unlocks playback when the browser requires it.
-    Keep the listeners instead of using { once: true } so a refused attempt
-    can be retried later.
+    Preserve the useful fallback behavior from the existing page:
+    if autoplay was blocked and the visitor interacts somewhere else,
+    attempt playback again.
+
+    Important: once the visitor explicitly turns the wind OFF with the wave,
+    these fallback interactions no longer restart it.
   */
-  document.addEventListener("pointerdown", startWind, { capture: true });
-  document.addEventListener("click", startWind, { capture: true });
-  document.addEventListener("keydown", startWind, { capture: true });
+  function fallbackWindStart(event) {
+    if (event && event.target && event.target.closest("#wind-toggle")) {
+      return;
+    }
+
+    if (!windEnabled && !(userHasChosen && userChoseOff)) {
+      enableWind();
+    }
+  }
+
+  window.addEventListener("pageshow", function() {
+    if (!windEnabled && !(userHasChosen && userChoseOff)) {
+      enableWind();
+    }
+  });
+
+  window.addEventListener("focus", function() {
+    if (!windEnabled && !(userHasChosen && userChoseOff)) {
+      enableWind();
+    }
+  });
+
+  document.addEventListener("pointerenter", function() {
+    if (!windEnabled && !(userHasChosen && userChoseOff)) {
+      enableWind();
+    }
+  }, { once: true, capture: true });
+
+  document.addEventListener("pointerdown", fallbackWindStart, { capture: true });
+
+  document.addEventListener("keydown", function(event) {
+    /*
+      Enter/Space on the wave is handled by the button's native click.
+      Any other keyboard interaction may unlock autoplay if it was blocked.
+    */
+    if (document.activeElement === windToggle) {
+      return;
+    }
+
+    fallbackWindStart(event);
+  }, { capture: true });
 
   /*
-    Deliberately DO NOT pause the wind when this tab becomes hidden.
-    If the first click opens Amazon in a new tab, that same click unlocks
-    the wind and it is allowed to continue instead of being immediately
-    silenced by our own visibility-change code.
+    Deliberately do not pause the wind when the tab becomes hidden.
+    If a product link opens in a new tab, the ambience is allowed to
+    continue rather than being stopped by our own page code.
   */
 </script>
 
