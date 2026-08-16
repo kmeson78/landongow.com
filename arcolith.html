@@ -208,20 +208,28 @@ html, body {
   };
 
   let fadeFrame = null;
+  let windStarted = false;
+
+  /*
+    Start silent in JavaScript so that if autoplay is permitted,
+    the wind still fades in rather than appearing abruptly.
+  */
+  arcolithWind.volume = 0;
 
   function fadeWindIn() {
     if (fadeFrame !== null) {
       cancelAnimationFrame(fadeFrame);
     }
 
-    arcolithWind.volume = 0;
+    const startVolume = arcolithWind.volume;
     const start = performance.now();
 
     function step(now) {
       const progress = Math.min((now - start) / WIND_SETTINGS.fadeInMs, 1);
       const eased = progress * progress * (3 - 2 * progress);
 
-      arcolithWind.volume = WIND_SETTINGS.volume * eased;
+      arcolithWind.volume =
+        startVolume + (WIND_SETTINGS.volume - startVolume) * eased;
 
       if (progress < 1) {
         fadeFrame = requestAnimationFrame(step);
@@ -235,54 +243,76 @@ html, body {
   }
 
   function startWind() {
+    /*
+      If the audio is already running, simply make sure it reaches
+      the intended level.
+    */
     if (!arcolithWind.paused) {
+      if (!windStarted) {
+        windStarted = true;
+        fadeWindIn();
+      }
       return;
     }
-
-    arcolithWind.volume = 0;
 
     try {
       const playPromise = arcolithWind.play();
 
       if (playPromise && typeof playPromise.then === "function") {
         playPromise
-          .then(fadeWindIn)
+          .then(function() {
+            if (!windStarted) {
+              windStarted = true;
+              fadeWindIn();
+            }
+          })
           .catch(function() {
-            /* Browser blocked autoplay. First interaction will retry. */
+            /*
+              Direct audible autoplay is blocked on some visits.
+              A later click/tap/key press will call startWind again.
+            */
           });
       } else {
-        fadeWindIn();
+        if (!windStarted) {
+          windStarted = true;
+          fadeWindIn();
+        }
       }
     } catch (error) {
-      /* Decorative audio failure should never affect the page. */
+      /* Decorative audio must never affect the page itself. */
     }
   }
 
-  /* Try as soon as the page loads. */
+  /*
+    Attempt immediately. This is the path that can work when the visitor
+    arrives through a user-initiated link such as the Trilogy button.
+  */
   startWind();
 
   /*
-    If audible autoplay is blocked, any normal visitor interaction
-    gives the browser the user gesture it requires.
+    Retry at harmless lifecycle moments. Hover itself cannot override a
+    browser autoplay block, but retrying here costs nothing and helps when
+    autoplay permission has already become available.
   */
-  function unlockWind() {
-    startWind();
-  }
-
-  document.addEventListener("pointerdown", unlockWind, { capture: true });
-  document.addEventListener("keydown", unlockWind, { capture: true });
+  window.addEventListener("pageshow", startWind);
+  window.addEventListener("focus", startWind);
+  document.addEventListener("pointerenter", startWind, { once: true, capture: true });
 
   /*
-    Avoid leaving the ambience running in a hidden tab.
-    Resume softly when the visitor returns.
+    A real interaction reliably unlocks playback when the browser requires it.
+    Keep the listeners instead of using { once: true } so a refused attempt
+    can be retried later.
   */
-  document.addEventListener("visibilitychange", function() {
-    if (document.hidden) {
-      arcolithWind.pause();
-    } else {
-      startWind();
-    }
-  });
+  document.addEventListener("pointerdown", startWind, { capture: true });
+  document.addEventListener("click", startWind, { capture: true });
+  document.addEventListener("keydown", startWind, { capture: true });
+
+  /*
+    Deliberately DO NOT pause the wind when this tab becomes hidden.
+    If the first click opens Amazon in a new tab, that same click unlocks
+    the wind and it is allowed to continue instead of being immediately
+    silenced by our own visibility-change code.
+  */
 </script>
 
 </body>
