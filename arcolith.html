@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Arcolith Trilogy | Landon L Gow</title>
 
 <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -119,28 +120,221 @@ html, body {
 /* MOBILE */
 
 @media (max-width: 900px) {
-  .content {
-    grid-template-columns: 1fr;
-    text-align: center;
-    transform: none;
-    gap: 28px;
+  html, body {
+    width: 100%;
+    min-height: 100%;
   }
 
-  /* Put the book above the text on mobile for visual hierarchy */
+  body {
+    overflow-x: hidden;
+    background-attachment: scroll;
+  }
+
+  .page {
+    min-height: 100svh;
+    justify-content: flex-start;
+    padding:
+      max(24px, env(safe-area-inset-top))
+      max(16px, env(safe-area-inset-right))
+      max(82px, calc(env(safe-area-inset-bottom) + 72px))
+      max(16px, env(safe-area-inset-left));
+  }
+
+  .content {
+    width: 100%;
+    max-width: 560px;
+    grid-template-columns: 1fr;
+    text-align: left;
+    transform: none;
+    gap: 24px;
+  }
+
+  /* Book becomes the opening artifact on portrait mobile. */
   .book-link {
     justify-self: center;
     order: -1;
   }
-  .text-block { margin: 0 auto; }
+
+  .book-image {
+    width: auto;
+    max-width: min(240px, 62vw);
+    max-height: 42svh;
+  }
+
+  .text-block {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 16px 16px 14px;
+    background: rgba(175,168,155,0.40);
+  }
+
+  .classified-mark {
+    max-width: min(260px, 76vw);
+    margin-bottom: 14px;
+  }
+
+  .text-block h1 {
+    font-size: 1.02rem;
+    line-height: 1.28;
+  }
+
+  .text-block p {
+    font-size: 0.93rem;
+    line-height: 1.55;
+  }
+
+  .sublead {
+    font-size: 0.96rem;
+  }
 
   .button-row {
     margin-top: 20px;
+  }
+
+  .continue-image {
+    width: auto;
+    max-width: 160px;
+  }
+}
+
+/*
+  Landscape phones get a compact dossier + artifact layout rather than
+  an unnecessarily tall single column.
+*/
+@media (max-width: 900px) and (orientation: landscape) {
+  .page {
+    min-height: 100svh;
+    padding:
+      max(16px, env(safe-area-inset-top))
+      max(18px, env(safe-area-inset-right))
+      max(64px, calc(env(safe-area-inset-bottom) + 54px))
+      max(18px, env(safe-area-inset-left));
+  }
+
+  .content {
+    max-width: 900px;
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 220px);
+    gap: 22px;
+    align-items: start;
+  }
+
+  .book-link {
+    order: 0;
+    justify-self: end;
+    align-self: start;
+  }
+
+  .book-image {
+    max-width: min(210px, 27vw);
+    max-height: 62svh;
+  }
+
+  .text-block {
+    max-width: none;
+    padding: 13px 15px 12px;
+  }
+
+  .classified-mark {
+    max-width: min(190px, 30vw);
+    margin-bottom: 10px;
+  }
+
+  .text-block h1 {
+    margin-bottom: 9px;
+    font-size: 0.92rem;
+    line-height: 1.22;
+  }
+
+  .text-block p {
+    margin-bottom: 10px;
+    font-size: 0.82rem;
+    line-height: 1.42;
+  }
+
+  .sublead {
+    font-size: 0.86rem;
+  }
+
+  .breach {
+    margin: 11px 0;
+  }
+
+  .button-row {
+    margin-top: 14px;
+  }
+
+  .continue-image {
+    max-width: 145px;
+  }
+}
+
+/*
+  Touchscreens can emulate :hover and leave the book enlarged after a tap.
+  Disable only that hover-only behavior where there is no precise mouse.
+*/
+@media (hover: none), (pointer: coarse) {
+  .book-link:hover .book-image {
+    transform: none;
+  }
+
+  .continue-link:hover {
+    opacity: 0.78;
+  }
+}
+
+/* MOBILE-ONLY TERMINAL RECOMMENDATION */
+
+.mobile-terminal-note {
+  display: none;
+}
+
+@keyframes terminalRecommendPulse {
+  0%, 100% { opacity: 0.18; }
+  50% { opacity: 0.48; }
+}
+
+@media (max-width: 900px) {
+  .mobile-terminal-note {
+    position: fixed;
+    left: 50%;
+    bottom: max(0.7rem, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    display: block;
+    z-index: 70;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    white-space: nowrap;
+    font-size: clamp(0.56rem, 2.2vw, 0.72rem);
+    font-weight: 400;
+    letter-spacing: 0.16em;
+    color: rgba(35, 35, 35, 0.74);
+    text-shadow: 0 0 5px rgba(235, 235, 235, 0.20);
+    animation: terminalRecommendPulse 3.8s ease-in-out infinite;
+  }
+}
+
+@media (max-width: 900px) and (orientation: landscape) {
+  .mobile-terminal-note {
+    bottom: max(0.45rem, env(safe-area-inset-bottom));
+    font-size: 0.54rem;
+    letter-spacing: 0.14em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-terminal-note {
+    animation: none;
+    opacity: 0.34;
   }
 }
 </style>
 </head>
 
 <body>
+
+<div class="mobile-terminal-note">DESKTOP TERMINAL RECOMMENDED</div>
 
 <!--
   ARCOLITH WIND AMBIENCE
