@@ -79,24 +79,55 @@
     .scroll-cue {
       position: absolute;
       left: 50%;
-      top: calc(50% + 250px);
+      top: calc(50% + 275px);
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      opacity: 0.34;
+      transition: opacity 0.2s ease;
+      z-index: 2;
+      cursor: default;
+    }
+
+    .scroll-cue:hover {
+      opacity: 0.72;
+    }
+
+    .scroll-cue span {
+      display: block;
+      border-right: 1px solid rgba(180, 180, 180, 0.58);
+      border-bottom: 1px solid rgba(180, 180, 180, 0.58);
+      transform: rotate(45deg);
+      animation: scrollCuePulse 2.8s ease-in-out infinite;
+    }
+
+    .scroll-cue span:nth-child(1) {
       width: 12px;
       height: 12px;
-      border-right: 1px solid rgba(180, 180, 180, 0.55);
-      border-bottom: 1px solid rgba(180, 180, 180, 0.55);
-      transform: translateX(-50%) rotate(45deg);
-      opacity: 0.35;
-      animation: scrollCuePulse 3s ease-in-out infinite;
-      pointer-events: none;
+      animation-delay: 0s;
+    }
+
+    .scroll-cue span:nth-child(2) {
+      width: 10px;
+      height: 10px;
+      animation-delay: 0.18s;
+    }
+
+    .scroll-cue span:nth-child(3) {
+      width: 8px;
+      height: 8px;
+      animation-delay: 0.36s;
     }
 
     @keyframes scrollCuePulse {
       0%, 100% {
-        opacity: 0.15;
+        opacity: 0.14;
       }
 
       50% {
-        opacity: 0.55;
+        opacity: 0.62;
       }
     }
 
@@ -403,55 +434,59 @@
 
     <div class="products">
 
-    <a href="https://www.amazon.com/dp/B0FVTB26S2" target="_blank">
-      <img src="book3.png">
-    </a>
-
-    <div class="album-stack">
-      <a href="https://elasticstage.com/amnad/releases/before-i-forget-album" target="_blank">
-        <img src="album2.png">
-      </a>
-      <a href="https://elasticstage.com/amnad/releases/that-which-does-not-kill-you-circles-back-again-and-again-album" target="_blank">
-        <img src="album3.png">
-      </a>
-    </div>
-
-    <div class="arcolith-wrap">
-      <a href="https://www.amazon.com/dp/B0GWX8HHRP" target="_blank">
-        <img src="book.png">
+      <a href="https://www.amazon.com/dp/B0FVTB26S2" target="_blank">
+        <img src="book3.png">
       </a>
 
-      <div class="trilogy-button-container">
-        <a href="arcolith.html" class="trilogy-button">
-          <img src="seriesbutton.png">
+      <div class="album-stack">
+        <a href="https://elasticstage.com/amnad/releases/before-i-forget-album" target="_blank">
+          <img src="album2.png">
+        </a>
+        <a href="https://elasticstage.com/amnad/releases/that-which-does-not-kill-you-circles-back-again-and-again-album" target="_blank">
+          <img src="album3.png">
         </a>
       </div>
-    </div>
 
-    <div class="album-stack">
-      <a href="https://elasticstage.com/amnad/releases/shadows-fall-album" target="_blank">
-        <img src="album.png">
-      </a>
-      <a href="https://allmynightsaredreams.bandcamp.com/album/once-through" target="_blank">
-        <img src="album4.png">
-      </a>
-    </div>
+      <div class="arcolith-wrap">
+        <a href="https://www.amazon.com/dp/B0GWX8HHRP" target="_blank">
+          <img src="book.png">
+        </a>
 
-    <div class="miscellanea-wrap">
-      <a href="https://www.amazon.com/dp/B0G29WXKV4" target="_blank">
-        <img src="book2.png">
-      </a>
-
-      <div class="miscellanea-button-container">
-        <button type="button" class="miscellanea-button" id="open-miscellanea" aria-haspopup="dialog" aria-controls="miscellanea-modal">
-          <img src="miscellanea_button.png" alt="Miscellanea">
-        </button>
+        <div class="trilogy-button-container">
+          <a href="arcolith.html" class="trilogy-button">
+            <img src="seriesbutton.png">
+          </a>
+        </div>
       </div>
-    </div>
+
+      <div class="album-stack">
+        <a href="https://elasticstage.com/amnad/releases/shadows-fall-album" target="_blank">
+          <img src="album.png">
+        </a>
+        <a href="https://allmynightsaredreams.bandcamp.com/album/once-through" target="_blank">
+          <img src="album4.png">
+        </a>
+      </div>
+
+      <div class="miscellanea-wrap">
+        <a href="https://www.amazon.com/dp/B0G29WXKV4" target="_blank">
+          <img src="book2.png">
+        </a>
+
+        <div class="miscellanea-button-container">
+          <button type="button" class="miscellanea-button" id="open-miscellanea" aria-haspopup="dialog" aria-controls="miscellanea-modal">
+            <img src="miscellanea_button.png" alt="Miscellanea">
+          </button>
+        </div>
+      </div>
 
     </div>
 
-    <div class="scroll-cue" aria-hidden="true"></div>
+    <div class="scroll-cue" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
 
   </div>
 </div>
