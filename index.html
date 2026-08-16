@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Landon L Gow | Author of the Arcolith Trilogy</title>
 
   <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -434,6 +435,179 @@
         width: 100%;
       }
     }
+  
+    /*
+      ------------------------------------------------------------
+      MOBILE / TOUCH SUPPORT
+      ------------------------------------------------------------
+      Desktop layout above is intentionally left unchanged.
+      On phones, the main product row remains a horizontal "shelf"
+      rather than becoming a conventional stacked storefront.
+    */
+
+    @media (max-width: 900px) {
+      html, body {
+        width: 100%;
+        min-height: 100%;
+        height: auto;
+      }
+
+      body {
+        overflow-x: hidden;
+        /* Mobile Safari/Chrome are more reliable without fixed backgrounds. */
+        background-attachment: scroll;
+      }
+
+      .hero {
+        min-height: 100svh;
+        justify-content: flex-start;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 0 1rem;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+        scrollbar-width: thin;
+      }
+
+      /*
+        Important: centering an element wider than the viewport can make the
+        left edge unreachable in a horizontal scroller. On mobile the stage
+        therefore begins at the left and can be deliberately swiped sideways.
+      */
+      .hero-stage {
+        min-height: 100svh;
+        width: max-content;
+        padding: 0 1rem;
+      }
+
+      .products {
+        gap: 1.25rem;
+      }
+
+      .products > a img,
+      .arcolith-wrap > a img,
+      .miscellanea-wrap > a img {
+        height: 275px;
+      }
+
+      .album-stack {
+        gap: 1.25rem;
+      }
+
+      .album-stack a img {
+        width: 128px;
+      }
+
+      .trilogy-button-container,
+      .miscellanea-button-container {
+        top: calc(100% + 24px);
+      }
+
+      .trilogy-button,
+      .miscellanea-button {
+        max-width: 150px;
+      }
+
+      /*
+        The badge is also the master sound switch. Keep it reachable without
+        forcing a phone visitor to swipe to the far end of the product shelf.
+      */
+      .no-socials-badge {
+        position: fixed;
+        top: max(0.75rem, env(safe-area-inset-top));
+        right: max(0.75rem, env(safe-area-inset-right));
+        width: min(210px, 58vw);
+        z-index: 60;
+      }
+
+      /*
+        Keep the downward cue near the initially visible viewport rather than
+        the geometric center of the much wider product shelf.
+      */
+      .scroll-cue {
+        left: 50vw;
+        top: calc(100svh - 88px);
+      }
+
+      .contact {
+        padding-top: 85svh;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        box-sizing: border-box;
+      }
+
+      .logo-container img {
+        max-width: min(300px, calc(100vw - 2rem));
+        height: auto;
+      }
+
+      form {
+        width: min(300px, calc(100vw - 2rem));
+      }
+
+      .miscellanea-modal {
+        padding: max(0.75rem, env(safe-area-inset-top))
+                 max(0.75rem, env(safe-area-inset-right))
+                 max(0.75rem, env(safe-area-inset-bottom))
+                 max(0.75rem, env(safe-area-inset-left));
+      }
+
+      .miscellanea-panel {
+        width: min(760px, 96vw);
+        max-height: 88svh;
+      }
+    }
+
+    /*
+      Phones/tablets can emulate :hover after a tap and leave an item enlarged.
+      Disable only the hover-only visual transformations on devices that do
+      not have a precise hovering pointer. Desktop mouse behavior is untouched.
+    */
+    @media (hover: none), (pointer: coarse) {
+      .products > a:hover img,
+      .album-stack a:hover img,
+      .arcolith-wrap > a:hover img,
+      .miscellanea-wrap > a:hover img,
+      .miscellanea-cover img:hover {
+        transform: none;
+      }
+
+      .products > a:hover,
+      .album-stack a:hover,
+      .arcolith-wrap > a:hover,
+      .miscellanea-wrap > a:hover {
+        z-index: auto;
+      }
+
+      .trilogy-button:hover,
+      .miscellanea-button:hover {
+        opacity: 0.78;
+      }
+
+      .no-socials-badge:hover {
+        opacity: 0.48;
+      }
+
+      .no-socials-badge.sound-on:hover {
+        opacity: 0.72;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .miscellanea-panel {
+        padding: 1.1rem;
+      }
+
+      .miscellanea-item {
+        gap: 0.9rem;
+      }
+
+      .miscellanea-cover img {
+        width: 110px;
+        height: 176px;
+      }
+    }
+
   </style>
 </head>
 
