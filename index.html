@@ -423,20 +423,22 @@
 
 <!--
   SITE AUDIO
-  Keep these files in the same folder as this HTML file.
-  The WAV master is intentionally not referenced by the page.
+  These six audio files belong in the same GitHub folder as index.html.
+  No visible audio controls are created.
 -->
 <audio id="site-ambience" loop autoplay preload="auto" playsinline aria-hidden="true">
-  <source src="mechanical_room_passby_loop_12s(1).ogg" type="audio/ogg">
-  <source src="mechanical_room_passby_loop_12s(1).mp3" type="audio/mpeg">
+  <source src="ambience.ogg" type="audio/ogg">
+  <source src="ambience.mp3" type="audio/mpeg">
 </audio>
 
 <audio id="product-hover-audio" preload="auto" playsinline aria-hidden="true">
-  <source src="site_product_hover_soft_mechanical(1).ogg" type="audio/ogg">
+  <source src="hover-product.ogg" type="audio/ogg">
+  <source src="hover-product.mp3" type="audio/mpeg">
 </audio>
 
 <audio id="control-hover-audio" preload="auto" playsinline aria-hidden="true">
-  <source src="site_control_hover_soft_activation(1).ogg" type="audio/ogg">
+  <source src="hover-control.ogg" type="audio/ogg">
+  <source src="hover-control.mp3" type="audio/mpeg">
 </audio>
 
 <div class="hidden-seo">
@@ -605,12 +607,12 @@
 
 <script>
   /*
-    ------------------------------------------------------------
     SITE AUDIO
-    ------------------------------------------------------------
-    Browsers may block audible autoplay until the visitor first
-    clicks/taps/presses a key. The page attempts playback on load
-    and, if blocked, quietly retries on the first real interaction.
+
+    Audible autoplay is attempted immediately. Some browsers block sound
+    until the visitor interacts with the page. In that case, the first
+    click/tap/key press silently unlocks the audio. There is no visible
+    play/pause control.
   */
 
   const siteAmbience = document.getElementById("site-ambience");
@@ -621,75 +623,110 @@
     ambienceVolume: 1.0,
     productHoverVolume: 1.0,
     controlHoverVolume: 1.0,
-    productCooldownMs: 420,
-    controlCooldownMs: 220
+    productCooldownMs: 450,
+    controlCooldownMs: 250
   };
 
   siteAmbience.volume = AUDIO_SETTINGS.ambienceVolume;
   productHoverAudio.volume = AUDIO_SETTINGS.productHoverVolume;
   controlHoverAudio.volume = AUDIO_SETTINGS.controlHoverVolume;
 
-  let audioUnlocked = false;
   let lastProductHover = -Infinity;
   let lastControlHover = -Infinity;
+  let productAudioPrimed = false;
+  let controlAudioPrimed = false;
   let resumeAmbienceWhenVisible = false;
 
-  async function startAmbience() {
+  function attemptAmbience() {
     if (!siteAmbience.paused) {
-      audioUnlocked = true;
       return;
     }
 
     try {
-      await siteAmbience.play();
-      audioUnlocked = true;
+      const playPromise = siteAmbience.play();
+
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(function() {
+          // The browser is blocking audible autoplay for now.
+          // A later real interaction will call this function again.
+        });
+      }
     } catch (error) {
-      // Audible autoplay was blocked. The first user interaction
-      // below will retry without displaying a prompt or control.
+      // Decorative audio must never interfere with the page.
     }
   }
 
-  async function silentlyUnlockHoverAudio(audio) {
-    const originalVolume = audio.volume;
+  function primeHoverAudio(audio, markPrimed) {
+    if (markPrimed()) {
+      return;
+    }
 
     try {
-      audio.volume = 0;
+      audio.muted = true;
       audio.currentTime = 0;
-      await audio.play();
-      audio.pause();
-      audio.currentTime = 0;
+
+      const playPromise = audio.play();
+
+      if (playPromise && typeof playPromise.then === "function") {
+        playPromise.then(function() {
+          audio.pause();
+          audio.currentTime = 0;
+          audio.muted = false;
+          markPrimed(true);
+        }).catch(function() {
+          audio.muted = false;
+        });
+      } else {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.muted = false;
+        markPrimed(true);
+      }
     } catch (error) {
-      // Nothing else is required if the browser declines this.
-    } finally {
-      audio.volume = originalVolume;
+      audio.muted = false;
     }
   }
 
-  function unlockSiteAudio() {
-    startAmbience();
+  function productPrimed(value) {
+    if (value === true) productAudioPrimed = true;
+    return productAudioPrimed;
+  }
 
-    if (!audioUnlocked) {
-      silentlyUnlockHoverAudio(productHoverAudio);
-      silentlyUnlockHoverAudio(controlHoverAudio);
-      audioUnlocked = true;
+  function controlPrimed(value) {
+    if (value === true) controlAudioPrimed = true;
+    return controlAudioPrimed;
+  }
+
+  function unlockAudioFromGesture() {
+    /*
+      Keep the play() calls directly inside the visitor's interaction.
+      This gives browsers the best chance of authorizing all three sounds.
+    */
+    attemptAmbience();
+
+    if (!productAudioPrimed) {
+      primeHoverAudio(productHoverAudio, productPrimed);
+    }
+
+    if (!controlAudioPrimed) {
+      primeHoverAudio(controlHoverAudio, controlPrimed);
     }
   }
 
-  /*
-    Try immediately. If the browser's autoplay policy allows it,
-    the ambience begins with the page. Otherwise it begins after
-    the visitor's first click/tap/key press.
-  */
-  startAmbience();
-
-  document.addEventListener("pointerdown", unlockSiteAudio, { once: true });
-  document.addEventListener("keydown", unlockSiteAudio, { once: true });
+  // Try immediately for browsers/site settings that allow audible autoplay.
+  attemptAmbience();
 
   /*
-    Pause the ambience while the tab is hidden, then resume it
-    when the visitor comes back. This avoids leaving the loop
-    playing indefinitely from a background tab.
+    Keep these listeners available rather than removing them after one try.
+    If a browser declines one interaction, a later interaction can retry.
   */
+  document.addEventListener("pointerdown", unlockAudioFromGesture, { capture: true });
+  document.addEventListener("click", unlockAudioFromGesture, { capture: true });
+  document.addEventListener("keydown", unlockAudioFromGesture, { capture: true });
+
+  // A harmless extra attempt when a desktop pointer first enters the page.
+  document.addEventListener("pointerenter", attemptAmbience, { once: true, capture: true });
+
   document.addEventListener("visibilitychange", function() {
     if (document.hidden) {
       if (!siteAmbience.paused) {
@@ -698,15 +735,14 @@
       }
     } else if (resumeAmbienceWhenVisible) {
       resumeAmbienceWhenVisible = false;
-      startAmbience();
+      attemptAmbience();
     }
   });
 
+  window.addEventListener("pageshow", attemptAmbience);
+
   function playHoverSound(audio, kind) {
-    /*
-      Hover audio is desktop-only. Touch devices do not get
-      accidental sounds from finger movement.
-    */
+    // Hover sounds are for a real mouse/trackpad pointer, not touchscreens.
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
       return;
     }
@@ -718,26 +754,29 @@
         return;
       }
       lastProductHover = now;
+      audio.volume = AUDIO_SETTINGS.productHoverVolume;
     } else {
       if (now - lastControlHover < AUDIO_SETTINGS.controlCooldownMs) {
         return;
       }
       lastControlHover = now;
+      audio.volume = AUDIO_SETTINGS.controlHoverVolume;
     }
 
     try {
+      audio.muted = false;
       audio.pause();
       audio.currentTime = 0;
+
       const playPromise = audio.play();
 
-      if (playPromise !== undefined) {
+      if (playPromise && typeof playPromise.catch === "function") {
         playPromise.catch(function() {
-          // If hover playback is still blocked, the first click/key
-          // interaction will unlock audio and later hovers will work.
+          // If playback is still locked, a later click/key press retries.
         });
       }
     } catch (error) {
-      // Audio is decorative; a playback failure should never affect the page.
+      // Decorative audio must never interfere with the page.
     }
   }
 
@@ -765,6 +804,9 @@
     });
   });
 
+  /*
+    Existing Miscellanea modal behavior.
+  */
   const openMiscellanea = document.getElementById("open-miscellanea");
   const closeMiscellanea = document.getElementById("close-miscellanea");
   const miscellaneaModal = document.getElementById("miscellanea-modal");
