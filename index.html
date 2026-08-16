@@ -608,10 +608,143 @@
       }
     }
 
+  
+    /* Mobile-only terminal recommendation */
+    .mobile-terminal-note {
+      display: none;
+    }
+
+    @keyframes terminalRecommendPulse {
+      0%, 100% { opacity: 0.18; }
+      50% { opacity: 0.48; }
+    }
+
+    @media (max-width: 900px) {
+      .mobile-terminal-note {
+        position: fixed;
+        left: 50%;
+        bottom: max(0.7rem, env(safe-area-inset-bottom));
+        transform: translateX(-50%);
+        display: block;
+        z-index: 70;
+        pointer-events: none;
+        user-select: none;
+        -webkit-user-select: none;
+        white-space: nowrap;
+        font-size: clamp(0.56rem, 2.2vw, 0.72rem);
+        font-weight: 400;
+        letter-spacing: 0.16em;
+        color: rgba(220, 220, 220, 0.8);
+        text-shadow: 0 0 6px rgba(255, 255, 255, 0.08);
+        animation: terminalRecommendPulse 3.8s ease-in-out infinite;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .mobile-terminal-note {
+        animation: none;
+        opacity: 0.34;
+      }
+    }
+
+  
+    /*
+      ------------------------------------------------------------
+      MOBILE POLISH: SCROLL CUE + LANDSCAPE BADGE
+      ------------------------------------------------------------
+      These overrides affect only screens 900px wide or narrower.
+      Desktop presentation remains unchanged.
+    */
+
+    @media (max-width: 900px) {
+      /*
+        Keep the arrows tied to the visible phone screen rather than to the
+        extra-wide horizontal product shelf. They sit above the terminal note.
+      */
+      .scroll-cue {
+        position: fixed;
+        left: 50%;
+        top: auto;
+        bottom: max(3.35rem, calc(env(safe-area-inset-bottom) + 3.35rem));
+        transform: translateX(-50%);
+        z-index: 65;
+        pointer-events: none;
+        opacity: 0.42;
+        visibility: visible;
+        transition: opacity 0.28s ease, visibility 0.28s ease;
+      }
+
+      .scroll-cue.mobile-cue-hidden {
+        opacity: 0 !important;
+        visibility: hidden;
+      }
+    }
+
+    /*
+      Landscape phones have very little vertical room. The sound badge stops
+      being fixed and becomes part of the beginning of the wide shelf instead,
+      so it cannot sit on top of products while the visitor swipes sideways.
+    */
+    @media (max-width: 900px) and (orientation: landscape) {
+      .hero-stage {
+        padding-top: 4rem;
+        padding-bottom: 3.5rem;
+      }
+
+      .no-socials-badge {
+        position: absolute;
+        top: 0.45rem;
+        left: 1rem;
+        right: auto;
+        width: min(150px, 30vw);
+      }
+
+      .products {
+        gap: 1rem;
+      }
+
+      .products > a img,
+      .arcolith-wrap > a img,
+      .miscellanea-wrap > a img {
+        height: min(220px, 54svh);
+      }
+
+      .album-stack {
+        gap: 1rem;
+      }
+
+      .album-stack a img {
+        width: min(104px, 26svh);
+      }
+
+      .trilogy-button-container,
+      .miscellanea-button-container {
+        top: calc(100% + 12px);
+      }
+
+      .trilogy-button,
+      .miscellanea-button {
+        max-width: 125px;
+      }
+
+      .scroll-cue {
+        bottom: max(2.9rem, calc(env(safe-area-inset-bottom) + 2.9rem));
+      }
+
+      .mobile-terminal-note {
+        bottom: max(0.45rem, env(safe-area-inset-bottom));
+        font-size: 0.54rem;
+        letter-spacing: 0.14em;
+      }
+    }
+
   </style>
 </head>
 
 <body>
+
+  <div class="mobile-terminal-note">DESKTOP TERMINAL RECOMMENDED</div>
+
 
 <!--
   SITE AUDIO
@@ -1156,6 +1289,42 @@
       closeMiscellaneaModal();
     }
   });
+</script>
+
+
+<script>
+  /*
+    Mobile scroll cue:
+    keep the arrows visible while the opening product room is on screen,
+    then quietly remove them once the visitor has actually scrolled downward.
+  */
+  (function() {
+    const cue = document.querySelector(".scroll-cue");
+    const hero = document.querySelector(".hero");
+    const mobileQuery = window.matchMedia("(max-width: 900px)");
+
+    if (!cue || !hero) {
+      return;
+    }
+
+    function updateMobileCue() {
+      if (!mobileQuery.matches) {
+        cue.classList.remove("mobile-cue-hidden");
+        return;
+      }
+
+      const heroRect = hero.getBoundingClientRect();
+      const hideCue = heroRect.bottom < window.innerHeight * 0.45;
+
+      cue.classList.toggle("mobile-cue-hidden", hideCue);
+    }
+
+    updateMobileCue();
+
+    window.addEventListener("scroll", updateMobileCue, { passive: true });
+    window.addEventListener("resize", updateMobileCue);
+    window.addEventListener("orientationchange", updateMobileCue);
+  })();
 </script>
 
 </body>
