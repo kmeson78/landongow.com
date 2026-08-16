@@ -76,6 +76,30 @@
       display: block;
     }
 
+    .scroll-cue {
+      position: absolute;
+      left: 50%;
+      top: calc(50% + 250px);
+      width: 12px;
+      height: 12px;
+      border-right: 1px solid rgba(180, 180, 180, 0.55);
+      border-bottom: 1px solid rgba(180, 180, 180, 0.55);
+      transform: translateX(-50%) rotate(45deg);
+      opacity: 0.35;
+      animation: scrollCuePulse 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes scrollCuePulse {
+      0%, 100% {
+        opacity: 0.15;
+      }
+
+      50% {
+        opacity: 0.55;
+      }
+    }
+
     .products {
       display: flex;
       gap: 2rem;
@@ -426,6 +450,9 @@
     </div>
 
     </div>
+
+    <div class="scroll-cue" aria-hidden="true"></div>
+
   </div>
 </div>
 
