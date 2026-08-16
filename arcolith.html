@@ -142,6 +142,17 @@ html, body {
 
 <body>
 
+<!--
+  ARCOLITH WIND AMBIENCE
+
+  The page attempts audible autoplay immediately.
+  If the browser blocks it, the first click/tap/key press starts it.
+  There are no visible audio controls.
+-->
+<audio id="arcolith-wind" loop autoplay preload="auto" playsinline aria-hidden="true">
+  <source src="arcolith_broken_warehouse_wind_loop_12s.ogg" type="audio/ogg">
+</audio>
+
 <main class="page">
 
   <section class="content">
@@ -187,6 +198,92 @@ html, body {
   </div>
 
 </main>
+
+<script>
+  const arcolithWind = document.getElementById("arcolith-wind");
+
+  const WIND_SETTINGS = {
+    volume: 1.0,
+    fadeInMs: 1000
+  };
+
+  let fadeFrame = null;
+
+  function fadeWindIn() {
+    if (fadeFrame !== null) {
+      cancelAnimationFrame(fadeFrame);
+    }
+
+    arcolithWind.volume = 0;
+    const start = performance.now();
+
+    function step(now) {
+      const progress = Math.min((now - start) / WIND_SETTINGS.fadeInMs, 1);
+      const eased = progress * progress * (3 - 2 * progress);
+
+      arcolithWind.volume = WIND_SETTINGS.volume * eased;
+
+      if (progress < 1) {
+        fadeFrame = requestAnimationFrame(step);
+      } else {
+        fadeFrame = null;
+        arcolithWind.volume = WIND_SETTINGS.volume;
+      }
+    }
+
+    fadeFrame = requestAnimationFrame(step);
+  }
+
+  function startWind() {
+    if (!arcolithWind.paused) {
+      return;
+    }
+
+    arcolithWind.volume = 0;
+
+    try {
+      const playPromise = arcolithWind.play();
+
+      if (playPromise && typeof playPromise.then === "function") {
+        playPromise
+          .then(fadeWindIn)
+          .catch(function() {
+            /* Browser blocked autoplay. First interaction will retry. */
+          });
+      } else {
+        fadeWindIn();
+      }
+    } catch (error) {
+      /* Decorative audio failure should never affect the page. */
+    }
+  }
+
+  /* Try as soon as the page loads. */
+  startWind();
+
+  /*
+    If audible autoplay is blocked, any normal visitor interaction
+    gives the browser the user gesture it requires.
+  */
+  function unlockWind() {
+    startWind();
+  }
+
+  document.addEventListener("pointerdown", unlockWind, { capture: true });
+  document.addEventListener("keydown", unlockWind, { capture: true });
+
+  /*
+    Avoid leaving the ambience running in a hidden tab.
+    Resume softly when the visitor returns.
+  */
+  document.addEventListener("visibilitychange", function() {
+    if (document.hidden) {
+      arcolithWind.pause();
+    } else {
+      startWind();
+    }
+  });
+</script>
 
 </body>
 </html>
