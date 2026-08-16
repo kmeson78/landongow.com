@@ -61,19 +61,37 @@
       right: 0;
       width: 280px;
       opacity: 0.48;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.25s ease, filter 0.35s ease;
       z-index: 2;
-      cursor: default;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .no-socials-badge:hover {
       opacity: 0.68;
     }
 
+    /* Secret master sound switch: only a very faint visual change when active. */
+    .no-socials-badge.sound-on {
+      opacity: 0.72;
+      filter: drop-shadow(0 0 7px rgba(255, 255, 255, 0.12));
+    }
+
+    .no-socials-badge.sound-on:hover {
+      opacity: 0.82;
+    }
+
+    .no-socials-badge:focus-visible {
+      outline: 1px solid rgba(255, 255, 255, 0.35);
+      outline-offset: 5px;
+    }
+
     .no-socials-badge img {
       width: 100%;
       height: auto;
       display: block;
+      pointer-events: none;
     }
 
     .scroll-cue {
@@ -426,7 +444,7 @@
   These six audio files belong in the same GitHub folder as index.html.
   No visible audio controls are created.
 -->
-<audio id="site-ambience" loop autoplay preload="auto" playsinline aria-hidden="true">
+<audio id="site-ambience" loop preload="auto" playsinline aria-hidden="true">
   <source src="ambience.ogg" type="audio/ogg">
   <source src="ambience.mp3" type="audio/mpeg">
 </audio>
@@ -448,7 +466,15 @@
 <div class="hero">
   <div class="hero-stage">
 
-    <div class="no-socials-badge">
+    <div
+      class="no-socials-badge"
+      id="sound-toggle"
+      role="button"
+      tabindex="0"
+      aria-pressed="false"
+      aria-label="Toggle site sound"
+      title="Sound"
+    >
       <img src="no_socials.png" alt="No socials — don’t feed the trillionaires">
     </div>
 
@@ -609,140 +635,259 @@
   /*
     SITE AUDIO
 
-    Audible autoplay is attempted immediately. Some browsers block sound
-    until the visitor interacts with the page. In that case, the first
-    click/tap/key press silently unlocks the audio. There is no visible
-    play/pause control.
+    The page always loads silent.
+
+    The "NO SOCIALS" badge is the hidden master switch:
+      click once  -> ambience fades in and hover sounds become active
+      click again -> ambience fades out and all hover sounds are disabled
+
+    Because the visitor explicitly clicks the badge, this also satisfies
+    the browser's normal requirement for user interaction before audio.
   */
 
   const siteAmbience = document.getElementById("site-ambience");
   const productHoverAudio = document.getElementById("product-hover-audio");
   const controlHoverAudio = document.getElementById("control-hover-audio");
+  const soundToggle = document.getElementById("sound-toggle");
 
   const AUDIO_SETTINGS = {
     ambienceVolume: 1.0,
     productHoverVolume: 1.0,
     controlHoverVolume: 1.0,
+    fadeInMs: 900,
+    fadeOutMs: 650,
     productCooldownMs: 450,
     controlCooldownMs: 250
   };
 
-  siteAmbience.volume = AUDIO_SETTINGS.ambienceVolume;
-  productHoverAudio.volume = AUDIO_SETTINGS.productHoverVolume;
-  controlHoverAudio.volume = AUDIO_SETTINGS.controlHoverVolume;
-
+  let soundEnabled = false;
+  let fadeAnimationFrame = null;
   let lastProductHover = -Infinity;
   let lastControlHover = -Infinity;
   let productAudioPrimed = false;
   let controlAudioPrimed = false;
-  let resumeAmbienceWhenVisible = false;
+  let resumeAfterVisibility = false;
 
-  function attemptAmbience() {
-    if (!siteAmbience.paused) {
-      return;
-    }
+  // Guarantee silence on initial page load.
+  siteAmbience.volume = 0;
+  productHoverAudio.volume = AUDIO_SETTINGS.productHoverVolume;
+  controlHoverAudio.volume = AUDIO_SETTINGS.controlHoverVolume;
 
-    try {
-      const playPromise = siteAmbience.play();
+  function setToggleAppearance(isOn) {
+    soundToggle.classList.toggle("sound-on", isOn);
+    soundToggle.setAttribute("aria-pressed", isOn ? "true" : "false");
+  }
 
-      if (playPromise && typeof playPromise.catch === "function") {
-        playPromise.catch(function() {
-          // The browser is blocking audible autoplay for now.
-          // A later real interaction will call this function again.
-        });
-      }
-    } catch (error) {
-      // Decorative audio must never interfere with the page.
+  function cancelVolumeFade() {
+    if (fadeAnimationFrame !== null) {
+      cancelAnimationFrame(fadeAnimationFrame);
+      fadeAnimationFrame = null;
     }
   }
 
-  function primeHoverAudio(audio, markPrimed) {
-    if (markPrimed()) {
+  function fadeAmbienceTo(targetVolume, durationMs, whenDone) {
+    cancelVolumeFade();
+
+    const startVolume = siteAmbience.volume;
+    const startTime = performance.now();
+
+    function step(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / durationMs, 1);
+
+      // Smoothstep easing: soft start and soft finish.
+      const eased = progress * progress * (3 - 2 * progress);
+      siteAmbience.volume =
+        startVolume + (targetVolume - startVolume) * eased;
+
+      if (progress < 1) {
+        fadeAnimationFrame = requestAnimationFrame(step);
+      } else {
+        fadeAnimationFrame = null;
+        siteAmbience.volume = targetVolume;
+
+        if (typeof whenDone === "function") {
+          whenDone();
+        }
+      }
+    }
+
+    fadeAnimationFrame = requestAnimationFrame(step);
+  }
+
+  function primeHoverAudio(audio, kind) {
+    if (
+      (kind === "product" && productAudioPrimed) ||
+      (kind === "control" && controlAudioPrimed)
+    ) {
       return;
     }
 
+    const originalMuted = audio.muted;
+    const originalVolume = audio.volume;
+
     try {
       audio.muted = true;
+      audio.volume = 0;
       audio.currentTime = 0;
 
-      const playPromise = audio.play();
+      const promise = audio.play();
 
-      if (playPromise && typeof playPromise.then === "function") {
-        playPromise.then(function() {
+      if (promise && typeof promise.then === "function") {
+        promise.then(function() {
           audio.pause();
           audio.currentTime = 0;
-          audio.muted = false;
-          markPrimed(true);
+          audio.muted = originalMuted;
+          audio.volume = originalVolume;
+
+          if (kind === "product") {
+            productAudioPrimed = true;
+          } else {
+            controlAudioPrimed = true;
+          }
         }).catch(function() {
-          audio.muted = false;
+          audio.muted = originalMuted;
+          audio.volume = originalVolume;
         });
       } else {
         audio.pause();
         audio.currentTime = 0;
-        audio.muted = false;
-        markPrimed(true);
+        audio.muted = originalMuted;
+        audio.volume = originalVolume;
+
+        if (kind === "product") {
+          productAudioPrimed = true;
+        } else {
+          controlAudioPrimed = true;
+        }
       }
     } catch (error) {
-      audio.muted = false;
+      audio.muted = originalMuted;
+      audio.volume = originalVolume;
     }
   }
 
-  function productPrimed(value) {
-    if (value === true) productAudioPrimed = true;
-    return productAudioPrimed;
-  }
+  function enableSiteSound() {
+    if (soundEnabled) {
+      return;
+    }
 
-  function controlPrimed(value) {
-    if (value === true) controlAudioPrimed = true;
-    return controlAudioPrimed;
-  }
-
-  function unlockAudioFromGesture() {
     /*
-      Keep the play() calls directly inside the visitor's interaction.
-      This gives browsers the best chance of authorizing all three sounds.
+      These play() calls happen directly as a result of clicking the badge,
+      which is the browser-approved moment to unlock the three audio files.
     */
-    attemptAmbience();
+    siteAmbience.muted = false;
+    siteAmbience.volume = 0;
 
-    if (!productAudioPrimed) {
-      primeHoverAudio(productHoverAudio, productPrimed);
-    }
+    const playPromise = siteAmbience.play();
 
-    if (!controlAudioPrimed) {
-      primeHoverAudio(controlHoverAudio, controlPrimed);
+    // Prime the two short effects during the same user gesture.
+    primeHoverAudio(productHoverAudio, "product");
+    primeHoverAudio(controlHoverAudio, "control");
+
+    if (playPromise && typeof playPromise.then === "function") {
+      playPromise.then(function() {
+        soundEnabled = true;
+        setToggleAppearance(true);
+        fadeAmbienceTo(
+          AUDIO_SETTINGS.ambienceVolume,
+          AUDIO_SETTINGS.fadeInMs
+        );
+      }).catch(function() {
+        // If a browser unexpectedly refuses playback, remain visibly "off".
+        soundEnabled = false;
+        setToggleAppearance(false);
+        siteAmbience.pause();
+        siteAmbience.volume = 0;
+      });
+    } else {
+      soundEnabled = true;
+      setToggleAppearance(true);
+      fadeAmbienceTo(
+        AUDIO_SETTINGS.ambienceVolume,
+        AUDIO_SETTINGS.fadeInMs
+      );
     }
   }
 
-  // Try immediately for browsers/site settings that allow audible autoplay.
-  attemptAmbience();
+  function disableSiteSound() {
+    if (!soundEnabled) {
+      return;
+    }
 
-  /*
-    Keep these listeners available rather than removing them after one try.
-    If a browser declines one interaction, a later interaction can retry.
-  */
-  document.addEventListener("pointerdown", unlockAudioFromGesture, { capture: true });
-  document.addEventListener("click", unlockAudioFromGesture, { capture: true });
-  document.addEventListener("keydown", unlockAudioFromGesture, { capture: true });
+    soundEnabled = false;
+    setToggleAppearance(false);
+    resumeAfterVisibility = false;
 
-  // A harmless extra attempt when a desktop pointer first enters the page.
-  document.addEventListener("pointerenter", attemptAmbience, { once: true, capture: true });
+    // Stop any short UI effect immediately.
+    productHoverAudio.pause();
+    productHoverAudio.currentTime = 0;
+    controlHoverAudio.pause();
+    controlHoverAudio.currentTime = 0;
 
-  document.addEventListener("visibilitychange", function() {
-    if (document.hidden) {
-      if (!siteAmbience.paused) {
-        resumeAmbienceWhenVisible = true;
-        siteAmbience.pause();
-      }
-    } else if (resumeAmbienceWhenVisible) {
-      resumeAmbienceWhenVisible = false;
-      attemptAmbience();
+    fadeAmbienceTo(0, AUDIO_SETTINGS.fadeOutMs, function() {
+      siteAmbience.pause();
+      // Keep the position so rapidly toggling back on feels continuous.
+    });
+  }
+
+  function toggleSiteSound() {
+    if (soundEnabled) {
+      disableSiteSound();
+    } else {
+      enableSiteSound();
+    }
+  }
+
+  soundToggle.addEventListener("click", function(event) {
+    event.preventDefault();
+    toggleSiteSound();
+  });
+
+  soundToggle.addEventListener("keydown", function(event) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      toggleSiteSound();
     }
   });
 
-  window.addEventListener("pageshow", attemptAmbience);
+  /*
+    If the tab is hidden, pause the ambience.
+    If sound was enabled, resume it softly when the visitor returns.
+  */
+  document.addEventListener("visibilitychange", function() {
+    if (document.hidden) {
+      if (soundEnabled && !siteAmbience.paused) {
+        resumeAfterVisibility = true;
+        cancelVolumeFade();
+        siteAmbience.pause();
+      }
+    } else if (resumeAfterVisibility && soundEnabled) {
+      resumeAfterVisibility = false;
+      siteAmbience.volume = 0;
+
+      const promise = siteAmbience.play();
+
+      if (promise && typeof promise.then === "function") {
+        promise.then(function() {
+          fadeAmbienceTo(
+            AUDIO_SETTINGS.ambienceVolume,
+            450
+          );
+        }).catch(function() {
+          disableSiteSound();
+        });
+      }
+    }
+  });
 
   function playHoverSound(audio, kind) {
-    // Hover sounds are for a real mouse/trackpad pointer, not touchscreens.
+    // The badge is the master switch. No badge click = no hover audio.
+    if (!soundEnabled) {
+      return;
+    }
+
+    // Hover sounds are only for a mouse/trackpad, not touch movement.
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
       return;
     }
@@ -772,11 +917,11 @@
 
       if (playPromise && typeof playPromise.catch === "function") {
         playPromise.catch(function() {
-          // If playback is still locked, a later click/key press retries.
+          // Decorative audio failure should never affect the site.
         });
       }
     } catch (error) {
-      // Decorative audio must never interfere with the page.
+      // Decorative audio failure should never affect the site.
     }
   }
 
