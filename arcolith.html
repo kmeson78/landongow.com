@@ -121,6 +121,9 @@ html, body {
   transition: opacity 0.25s ease, filter 0.35s ease;
   cursor: pointer;
   line-height: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  box-shadow: none;
 }
 
 .wind-toggle:hover {
@@ -137,9 +140,9 @@ html, body {
 }
 
 .wind-toggle:focus-visible {
-  outline: 1px solid rgba(35, 35, 35, 0.45);
-  outline-offset: 5px;
-  border-radius: 3px;
+  outline: none;
+  opacity: 0.72;
+  filter: drop-shadow(0 0 8px rgba(255,255,255,0.16));
 }
 
 .wind-toggle img {
@@ -427,7 +430,7 @@ html, body {
   If the browser blocks it, the first click/tap/key press starts it.
   There are no visible audio controls.
 -->
-<audio id="arcolith-wind" loop autoplay preload="auto" playsinline aria-hidden="true">
+<audio id="arcolith-wind" loop preload="auto" playsinline aria-hidden="true">
   <source src="arcolith_broken_warehouse_wind_loop_12s.ogg" type="audio/ogg">
 </audio>
 
@@ -513,20 +516,7 @@ html, body {
   let fadeFrame = null;
   let windEnabled = false;
 
-  /*
-    False means the visitor has not made an explicit choice yet.
-    Once they click the wave off, fallback clicks elsewhere are not
-    allowed to turn the ambience back on.
-  */
-  let userHasChosen = false;
-  let userChoseOff = false;
-
-  /*
-    Start silent in JavaScript so successful autoplay fades in softly.
-  */
-  arcolithWind.volume = 0;
-
-  /* Preload the animated state. */
+  /* Preload only the animated image, not the sound playback state. */
   const activeWavePreload = new Image();
   activeWavePreload.src = WIND_SETTINGS.activeImage;
 
@@ -548,6 +538,30 @@ html, body {
       cancelAnimationFrame(fadeFrame);
       fadeFrame = null;
     }
+  }
+
+  function hardResetWind() {
+    /*
+      This is deliberately aggressive.
+
+      Every time this page is entered, reloaded, restored from history,
+      or left, the ambience is forced OFF. Browsers sometimes preserve
+      media state in their back/forward cache; this prevents that from
+      resurrecting the wind automatically.
+    */
+    cancelWindFade();
+    windEnabled = false;
+
+    try {
+      arcolithWind.pause();
+      arcolithWind.currentTime = 0;
+      arcolithWind.volume = 0;
+      arcolithWind.muted = false;
+    } catch (error) {
+      /* Decorative audio must never affect the page. */
+    }
+
+    setWindVisualState(false);
   }
 
   function fadeWindTo(targetVolume, durationMs, whenDone) {
@@ -578,27 +592,19 @@ html, body {
     fadeFrame = requestAnimationFrame(step);
   }
 
-  function enableWind(options = {}) {
-    const { explicit = false } = options;
-
-    if (explicit) {
-      userHasChosen = true;
-      userChoseOff = false;
-    } else if (userHasChosen && userChoseOff) {
+  function enableWind() {
+    if (windEnabled) {
       return;
     }
 
-    if (!arcolithWind.paused) {
-      windEnabled = true;
-      setWindVisualState(true);
-
-      if (arcolithWind.volume < WIND_SETTINGS.volume) {
-        fadeWindTo(WIND_SETTINGS.volume, WIND_SETTINGS.fadeInMs);
-      }
-      return;
-    }
-
+    /*
+      IMPORTANT:
+      This function is never called automatically.
+      It is invoked only from the wave button's click handler below.
+    */
+    arcolithWind.currentTime = 0;
     arcolithWind.volume = 0;
+    arcolithWind.muted = false;
 
     try {
       const playPromise = arcolithWind.play();
@@ -608,41 +614,42 @@ html, body {
           .then(function() {
             windEnabled = true;
             setWindVisualState(true);
+
             fadeWindTo(
               WIND_SETTINGS.volume,
               WIND_SETTINGS.fadeInMs
             );
           })
           .catch(function() {
-            /*
-              Direct audible autoplay may be blocked. The wave stays
-              static/off until playback actually succeeds.
-            */
-            windEnabled = false;
-            setWindVisualState(false);
+            hardResetWind();
           });
       } else {
         windEnabled = true;
         setWindVisualState(true);
+
         fadeWindTo(
           WIND_SETTINGS.volume,
           WIND_SETTINGS.fadeInMs
         );
       }
     } catch (error) {
-      windEnabled = false;
-      setWindVisualState(false);
+      hardResetWind();
     }
   }
 
   function disableWind() {
-    userHasChosen = true;
-    userChoseOff = true;
+    if (!windEnabled && arcolithWind.paused) {
+      hardResetWind();
+      return;
+    }
+
     windEnabled = false;
     setWindVisualState(false);
 
     fadeWindTo(0, WIND_SETTINGS.fadeOutMs, function() {
       arcolithWind.pause();
+      arcolithWind.currentTime = 0;
+      arcolithWind.volume = 0;
     });
   }
 
@@ -650,12 +657,12 @@ html, body {
     if (windEnabled || !arcolithWind.paused) {
       disableWind();
     } else {
-      enableWind({ explicit: true });
+      enableWind();
     }
   }
 
   /*
-    The wave itself is the master switch.
+    THE ONLY SOUND-ON PATH ON THE PAGE.
   */
   windToggle.addEventListener("click", function(event) {
     event.preventDefault();
@@ -664,68 +671,29 @@ html, body {
   });
 
   /*
-    Attempt autoplay immediately.
+    Always enter the page silent.
 
-    If it succeeds, the page starts with wind + animated wave.
-    If it fails, the wave remains still.
+    pageshow also fires when the browser restores this page from its
+    back/forward cache, which is the case most likely to make old media
+    state appear to "autoplay."
   */
-  enableWind();
-
-  /*
-    Preserve the useful fallback behavior from the existing page:
-    if autoplay was blocked and the visitor interacts somewhere else,
-    attempt playback again.
-
-    Important: once the visitor explicitly turns the wind OFF with the wave,
-    these fallback interactions no longer restart it.
-  */
-  function fallbackWindStart(event) {
-    if (event && event.target && event.target.closest("#wind-toggle")) {
-      return;
-    }
-
-    if (!windEnabled && !(userHasChosen && userChoseOff)) {
-      enableWind();
-    }
-  }
+  hardResetWind();
 
   window.addEventListener("pageshow", function() {
-    if (!windEnabled && !(userHasChosen && userChoseOff)) {
-      enableWind();
-    }
+    hardResetWind();
   });
-
-  window.addEventListener("focus", function() {
-    if (!windEnabled && !(userHasChosen && userChoseOff)) {
-      enableWind();
-    }
-  });
-
-  document.addEventListener("pointerenter", function() {
-    if (!windEnabled && !(userHasChosen && userChoseOff)) {
-      enableWind();
-    }
-  }, { once: true, capture: true });
-
-  document.addEventListener("pointerdown", fallbackWindStart, { capture: true });
-
-  document.addEventListener("keydown", function(event) {
-    /*
-      Enter/Space on the wave is handled by the button's native click.
-      Any other keyboard interaction may unlock autoplay if it was blocked.
-    */
-    if (document.activeElement === windToggle) {
-      return;
-    }
-
-    fallbackWindStart(event);
-  }, { capture: true });
 
   /*
-    Deliberately do not pause the wind when the tab becomes hidden.
-    If a product link opens in a new tab, the ambience is allowed to
-    continue rather than being stopped by our own page code.
+    Also kill the audio as the visitor leaves, so there is no playback
+    state for the browser to preserve.
   */
+  window.addEventListener("pagehide", function() {
+    hardResetWind();
+  });
+
+  window.addEventListener("beforeunload", function() {
+    hardResetWind();
+  });
 </script>
 
 </body>
