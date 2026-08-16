@@ -46,6 +46,36 @@
       box-sizing: border-box;
     }
 
+    .hero-stage {
+      position: relative;
+      display: flex;
+      align-items: center;
+      min-height: 100vh;
+      width: max-content;
+      flex-shrink: 0;
+    }
+
+    .no-socials-badge {
+      position: absolute;
+      top: 2.75rem;
+      right: 0;
+      width: 230px;
+      opacity: 0.48;
+      transition: opacity 0.2s ease;
+      z-index: 2;
+      cursor: default;
+    }
+
+    .no-socials-badge:hover {
+      opacity: 0.68;
+    }
+
+    .no-socials-badge img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
     .products {
       display: flex;
       gap: 2rem;
@@ -341,7 +371,13 @@
 </div>
 
 <div class="hero">
-  <div class="products">
+  <div class="hero-stage">
+
+    <div class="no-socials-badge">
+      <img src="no_socials.png" alt="No socials — don’t feed the trillionaires">
+    </div>
+
+    <div class="products">
 
     <a href="https://www.amazon.com/dp/B0FVTB26S2" target="_blank">
       <img src="book3.png">
@@ -389,6 +425,7 @@
       </div>
     </div>
 
+    </div>
   </div>
 </div>
 
