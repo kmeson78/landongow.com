@@ -347,6 +347,24 @@
       opacity: 0.92;
     }
 
+    /* Square artwork used by the vinyl and Bandcamp miscellanea entries. */
+    .miscellanea-covers-row {
+      display: flex;
+      gap: 0.85rem;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .miscellanea-cover.square {
+      flex: 0 0 auto;
+    }
+
+    .miscellanea-cover.square img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+    }
+
     .miscellanea-copy h3 {
       margin: 0 0 0.35rem;
       font-size: 1.05rem;
@@ -605,6 +623,15 @@
       .miscellanea-cover img {
         width: 110px;
         height: 176px;
+      }
+
+      .miscellanea-cover.square img {
+        width: 110px;
+        height: 110px;
+      }
+
+      .miscellanea-covers-row {
+        justify-content: center;
       }
     }
 
@@ -878,6 +905,27 @@
     </div>
 
     <div class="miscellanea-item">
+      <div class="miscellanea-covers-row">
+        <a class="miscellanea-cover square" href="https://elasticstage.com/amnad/releases/hasty-recordings-misc-demos-volume-1-album" target="_blank" rel="noopener">
+          <img src="hasty_recordings_volume_1.jpg" alt="Hasty Recordings &amp; Misc. Demos Volume I cover">
+        </a>
+        <a class="miscellanea-cover square" href="https://elasticstage.com/amnad/releases/hasty-recordings-misc-demos-volume-2-album" target="_blank" rel="noopener">
+          <img src="hasty_recordings_volume_2.jpg" alt="Hasty Recordings &amp; Misc. Demos Volume II cover">
+        </a>
+      </div>
+      <div class="miscellanea-copy">
+        <h3>Hasty Recordings &amp; Misc. Demos — Volumes I &amp; II</h3>
+        <p>A limited-run, two-volume collection of demos, rough recordings, and assorted musical debris.</p>
+        <p>Volume I and Volume II are available separately.</p>
+        <p>
+          <a href="https://elasticstage.com/amnad/releases/hasty-recordings-misc-demos-volume-1-album" target="_blank" rel="noopener">Volume I</a>
+          &nbsp;|&nbsp;
+          <a href="https://elasticstage.com/amnad/releases/hasty-recordings-misc-demos-volume-2-album" target="_blank" rel="noopener">Volume II</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="miscellanea-item">
       <a class="miscellanea-cover" href="https://www.amazon.com/dp/B0GM6F1BF5" target="_blank" rel="noopener">
         <img src="catalystebook.jpg" alt="Catalyst ebook cover">
       </a>
@@ -916,6 +964,18 @@
         <p>As the fragments accumulate, they reveal a quiet love story that unfolded unnoticed alongside her own life. Lignin is a tender short story about memory, devotion, and the enduring connections carried through routine, silence, and care.</p>
         <p>Originally released as part of <em>Dissociation Provocations</em>, Landon L Gow’s collection of short stories.</p>
         <a href="https://www.amazon.com/dp/B0GM6CV5V5" target="_blank" rel="noopener">View on Amazon</a>
+      </div>
+    </div>
+
+    <div class="miscellanea-item">
+      <a class="miscellanea-cover square" href="https://allmynightsaredreams.bandcamp.com/" target="_blank" rel="noopener">
+        <img src="wilt_josey_records.jpg" alt="Wilt Josey Records imprint">
+      </a>
+      <div class="miscellanea-copy">
+        <h3>All My Nights Are Dreams — Bandcamp</h3>
+        <p>Music from All My Nights Are Dreams, collected in one place under the Wilt Josey Records imprint.</p>
+        <p>Albums, individual releases, and other recordings are available on Bandcamp.</p>
+        <a href="https://allmynightsaredreams.bandcamp.com/" target="_blank" rel="noopener">Browse on Bandcamp</a>
       </div>
     </div>
   </div>
