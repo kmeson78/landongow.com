@@ -1,6 +1,7 @@
 const FM_MIN = 88.1;
 const FM_MAX = 107.9;
 const FM_STEP = 0.2;
+const TUNE_ANIMATION_MS = 300;
 
 // Fixed station map. The playlist IDs are stable; YouTube remains the live
 // source of every station's actual playlist contents.
@@ -29,7 +30,6 @@ const STATIONS = [
 
 let stations = STATIONS;
 let currentIndex = 0;
-let seekTimer = null;
 let deferredInstallPrompt = null;
 
 // One persistent YouTube player. Nothing is loaded until POWER is pressed.
@@ -37,6 +37,19 @@ let ytPlayer = null;
 let playerReady = false;
 let powered = false;
 let requestedStation = null;
+
+// Tuning state. These two flags are the whole race fix:
+// - animating is true only while the cosmetic frequency sweep is running.
+// - tuneInFlight is true from the moment we call loadPlaylist() until the
+//   YouTube player actually confirms (via onStateChange PLAYING) that the
+//   requested station is the one making sound. While either is true, AUTO
+//   TUNE and POWER are disabled, so a second command can never be issued
+//   before the first one has resolved. That's what eliminates the old
+//   "display says one station, audio is another" drift: there is never a
+//   moment where two loadPlaylist() calls are in flight at once.
+let animating = false;
+let tuneInFlight = false;
+let pendingIndex = null;
 
 const receiver = document.querySelector('.receiver');
 const monitorBay = document.querySelector('.monitor-bay');
@@ -107,7 +120,9 @@ async function refreshStationMetadata(force = false) {
     localStorage.setItem(OEMBED_CACHE_KEY, JSON.stringify({ ...previous, ...updates }));
   }
   localStorage.setItem(`${OEMBED_CACHE_KEY}.updated`, String(Date.now()));
-  if (!seekTimer) renderStation(stations[currentIndex]);
+  // Don't repaint the display mid-tune — that's exactly the kind of stray
+  // write that used to make the name/frequency drift from what's playing.
+  if (!animating && !tuneInFlight) renderStation(stations[currentIndex]);
 }
 
 // ----- Dial UI -----
@@ -119,9 +134,11 @@ function restoreCurrentIndex() {
   currentIndex = index;
 }
 
-function updateButtons() {
-  prevButton.disabled = currentIndex <= 0 || stations.length < 2;
-  nextButton.disabled = currentIndex >= stations.length - 1 || stations.length < 2;
+function syncControlAvailability() {
+  const busy = animating || tuneInFlight;
+  prevButton.disabled = busy || currentIndex <= 0 || stations.length < 2;
+  nextButton.disabled = busy || currentIndex >= stations.length - 1 || stations.length < 2;
+  powerButton.disabled = busy;
 }
 
 function renderStation(station, status = null) {
@@ -132,7 +149,7 @@ function renderStation(station, status = null) {
   if (status) statusEl.textContent = status;
   localStorage.setItem('pyrateDial.lastFrequency', String(station.frequency));
   document.title = `${formatFrequency(station.frequency)} — ${station.name} · Pyrate Dial`;
-  updateButtons();
+  syncControlAvailability();
 }
 
 function setMonitorMessage(message) {
@@ -189,35 +206,71 @@ function updatePowerControl() {
   powerButton.setAttribute('aria-pressed', powered ? 'true' : 'false');
 }
 
-function startStation(station) {
-  // IMPORTANT: This function is called directly from POWER or AUTO TUNE clicks.
-  // That keeps the YouTube playlist load inside the user's tap on iPhone.
+// Fixed-duration sweep, independent of how many stations apart the jump is.
+// The old version stepped 0.2 MHz every 29ms, so a jump from 88.3 to 107.9
+// took nearly 3 seconds of dead time before anything else could happen —
+// that's a real source of the "lag" on AUTO TUNE, separate from the
+// playback race. This always takes the same ~300ms regardless of distance.
+function animateFrequencySweep(fromFreq, toFreq, onDone) {
+  animating = true;
+  syncControlAvailability();
+  const startTime = performance.now();
+
+  function step(now) {
+    const t = Math.min(1, (now - startTime) / TUNE_ANIMATION_MS);
+    const current = fromFreq + (toFreq - fromFreq) * t;
+    frequencyEl.textContent = formatFrequency(Math.round(current / FM_STEP) * FM_STEP);
+    markerEl.style.left = `${clamp(markerPosition(current), 0, 100)}%`;
+
+    if (t < 1) {
+      requestAnimationFrame(step);
+      return;
+    }
+
+    frequencyEl.textContent = formatFrequency(toFreq);
+    markerEl.style.left = `${clamp(markerPosition(toFreq), 0, 100)}%`;
+    animating = false;
+    syncControlAvailability();
+    if (onDone) onDone();
+  }
+
+  requestAnimationFrame(step);
+}
+
+// Called directly from a POWER or AUTO TUNE tap — that keeps the YouTube
+// command inside the user's gesture on iPhone. Muting immediately (before
+// loadPlaylist even fires) means no leftover audio from the previous
+// station can bleed through while the new one loads. The station/display
+// name is NOT updated here — it's finalized only once onStateChange
+// confirms PLAYING for this exact request, in the player events block
+// below. That's what guarantees the display always matches the audio.
+function beginStationLoad(station, targetIndex) {
   if (!powered || !playerReady || !ytPlayer || !station?.playlistId) return;
 
+  tuneInFlight = true;
+  pendingIndex = targetIndex;
   requestedStation = station;
+  syncControlAvailability();
   setMonitorMessage('TUNING');
   statusEl.textContent = 'TUNING';
 
   const startIndex = chooseRandomIndex(station);
 
   try {
-    ytPlayer.unMute();
-    ytPlayer.setVolume(100);
-
-    // loadPlaylist starts playback. Using a random index here avoids the async
-    // playVideoAt shuffle step that was breaking iPhone station changes.
+    ytPlayer.mute();
     ytPlayer.loadPlaylist({
       listType: 'playlist',
       list: station.playlistId,
       index: startIndex,
       startSeconds: 0
     });
-
-    // Keep this call inside the same physical tap as an extra iOS nudge.
     ytPlayer.playVideo();
   } catch (error) {
     console.warn('Pyrate Dial station load failed:', error);
     statusEl.textContent = 'SIGNAL HOLD';
+    tuneInFlight = false;
+    pendingIndex = null;
+    syncControlAvailability();
   }
 }
 
@@ -226,15 +279,18 @@ function powerOnReceiver() {
     statusEl.textContent = 'WARMING UP';
     return;
   }
+  if (tuneInFlight || animating) return;
 
   powered = true;
   updatePowerControl();
-  startStation(stations[currentIndex]);
+  beginStationLoad(stations[currentIndex], currentIndex);
 }
 
 function powerOffReceiver() {
   powered = false;
   requestedStation = null;
+  pendingIndex = null;
+  tuneInFlight = false;
   updatePowerControl();
   try {
     ytPlayer.pauseVideo();
@@ -242,6 +298,7 @@ function powerOffReceiver() {
   } catch (_) {}
   setMonitorMessage('POWER OFF');
   statusEl.textContent = 'POWER OFF';
+  syncControlAvailability();
 }
 
 function togglePower() {
@@ -249,53 +306,40 @@ function togglePower() {
   else powerOnReceiver();
 }
 
-function scanTo(targetIndex, userInitiated = false) {
+// AUTO TUNE. No more "power off, wait, require a second POWER press."
+// If the receiver is on, the new playlist loads immediately, in the same
+// tap — the frequency sweep runs purely as a visual overlay on top of it.
+function scanTo(targetIndex) {
   if (targetIndex < 0 || targetIndex >= stations.length || targetIndex === currentIndex) return;
-
-  // This is the stable iPhone workflow:
-  // AUTO never asks YouTube to change playlists while audio is running.
-  // If the receiver is on, AUTO first powers it fully off. The selected station
-  // changes only in Pyrate Dial. POWER is the only action that loads a playlist.
-  if (powered) powerOffReceiver();
-
-  clearInterval(seekTimer);
-  receiver.classList.add('seeking');
-  statusEl.textContent = 'AUTO SEEK';
-  prevButton.disabled = true;
-  nextButton.disabled = true;
-  powerButton.disabled = true;
-  stationNameEl.textContent = '—';
+  if (tuneInFlight || animating) return;
 
   const startFrequency = stations[currentIndex].frequency;
   const targetStation = stations[targetIndex];
-  const targetFrequency = targetStation.frequency;
-  const direction = targetFrequency > startFrequency ? 1 : -1;
-  let displayed = startFrequency;
 
-  seekTimer = setInterval(() => {
-    displayed = Number((displayed + FM_STEP * direction).toFixed(1));
-    const reached = direction > 0 ? displayed >= targetFrequency : displayed <= targetFrequency;
+  receiver.classList.add('seeking');
+  stationNameEl.textContent = '—';
+  statusEl.textContent = 'AUTO SEEK';
 
-    if (reached) {
-      clearInterval(seekTimer);
-      seekTimer = null;
-      currentIndex = targetIndex;
+  if (powered) {
+    beginStationLoad(targetStation, targetIndex);
+  } else {
+    // Receiver is off: this is just a selection change, nothing to play.
+    currentIndex = targetIndex;
+  }
+
+  animateFrequencySweep(startFrequency, targetStation.frequency, () => {
+    receiver.classList.remove('seeking');
+    if (!powered) {
       renderStation(targetStation, 'POWER OFF');
-      receiver.classList.remove('seeking');
-      setMonitorMessage('POWER OFF');
-      powerButton.disabled = false;
-      updateButtons();
-      return;
     }
-
-    frequencyEl.textContent = formatFrequency(displayed);
-    markerEl.style.left = `${clamp(markerPosition(displayed), 0, 100)}%`;
-  }, 29);
+    // If powered, the display stays on "—" / current values until
+    // onStateChange confirms the new station is actually audible.
+  });
 }
 
 powerButton?.addEventListener('click', togglePower);
-prevButton.addEventListener('click', () => scanTo(currentIndex - 1, true));
-nextButton.addEventListener('click', () => scanTo(currentIndex + 1, true));
+prevButton.addEventListener('click', () => scanTo(currentIndex - 1));
+nextButton.addEventListener('click', () => scanTo(currentIndex + 1));
 
 // ----- Official YouTube IFrame Player API -----
 window.onYouTubeIframeAPIReady = function () {
@@ -323,6 +367,7 @@ window.onYouTubeIframeAPIReady = function () {
         updatePowerControl();
         setMonitorMessage('POWER OFF');
         statusEl.textContent = 'POWER OFF';
+        syncControlAvailability();
       },
       onStateChange: event => {
         if (event.data === YT.PlayerState.PLAYING) {
@@ -331,11 +376,30 @@ window.onYouTubeIframeAPIReady = function () {
             try {
               event.target.unMute();
               event.target.setVolume(100);
-              // Shuffle controls the remainder of the playlist. The first item
-              // was already randomized synchronously by startStation().
+              // Shuffle only reorders what plays NEXT — per YouTube's docs,
+              // shuffling mid-playback does not change the video already
+              // underway. Setting it here, once, after PLAYING is confirmed,
+              // is safe and doesn't cause the jump-to-a-different-song
+              // behavior the old "shuffle right after loadPlaylist" timing
+              // was prone to.
               event.target.setShuffle(true);
             } catch (_) {}
-            statusEl.textContent = 'SIGNAL LOCK';
+
+            if (tuneInFlight) {
+              // This PLAYING event is the confirmation for the request we
+              // most recently issued — nothing else could have queued a
+              // competing loadPlaylist() while tuneInFlight was true, so
+              // there's no stale-event ambiguity to resolve.
+              tuneInFlight = false;
+              if (pendingIndex !== null) {
+                currentIndex = pendingIndex;
+                pendingIndex = null;
+              }
+              renderStation(requestedStation, 'SIGNAL LOCK');
+            } else {
+              // Normal in-playlist advance to the next song — not a tune.
+              statusEl.textContent = 'SIGNAL LOCK';
+            }
           } else {
             try { event.target.pauseVideo(); } catch (_) {}
             setMonitorMessage('POWER OFF');
@@ -343,8 +407,12 @@ window.onYouTubeIframeAPIReady = function () {
         } else if (event.data === YT.PlayerState.BUFFERING) {
           if (powered) statusEl.textContent = 'TUNING';
         } else if (event.data === YT.PlayerState.ENDED) {
-          // The player normally advances automatically. This is a safety net.
-          if (powered) {
+          // Safety net for normal playlist advance only. Skip this while a
+          // tune is in flight — an ENDED event from the OLD video can
+          // arrive just after we've already issued loadPlaylist() for a
+          // new station, and calling nextVideo() here would skip into the
+          // playlist we just switched to, not the one that actually ended.
+          if (powered && !tuneInFlight) {
             try {
               event.target.nextVideo();
               event.target.playVideo();
@@ -353,8 +421,12 @@ window.onYouTubeIframeAPIReady = function () {
         }
       },
       onAutoplayBlocked: () => {
-        // POWER and AUTO TUNE are both deliberate user gestures. If WebKit still
-        // blocks a load, the next button press retries inside a fresh gesture.
+        // POWER and AUTO TUNE are both deliberate user gestures. If WebKit
+        // still blocks a load, clear the in-flight state so the next tap
+        // (a fresh gesture) can retry cleanly.
+        tuneInFlight = false;
+        pendingIndex = null;
+        syncControlAvailability();
         statusEl.textContent = powered ? 'TUNE AGAIN' : 'POWER OFF';
       },
       onError: event => {
@@ -365,6 +437,12 @@ window.onYouTubeIframeAPIReady = function () {
             event.target.playVideo();
           } catch (_) {}
           return;
+        }
+        // A genuine failure mid-tune shouldn't leave the controls locked.
+        if (tuneInFlight) {
+          tuneInFlight = false;
+          pendingIndex = null;
+          syncControlAvailability();
         }
         statusEl.textContent = 'SIGNAL HOLD';
       }
@@ -412,14 +490,14 @@ installButton?.addEventListener('click', async () => {
       <ol>
         <li>Open Pyrate Dial in Safari.</li>
         <li>Tap the Share button.</li>
-        <li>Choose “Add to Home Screen.”</li>
-        <li>Tap “Add.”</li>
+        <li>Choose "Add to Home Screen."</li>
+        <li>Tap "Add."</li>
       </ol>
       <p class="dialog-note">The Home Screen version opens directly as a standalone receiver.</p>
     `;
   } else {
     installInstructions.innerHTML = `
-      <p>Use your browser’s “Install app” or “Add to Home Screen” command to install Pyrate Dial on this device.</p>
+      <p>Use your browser's "Install app" or "Add to Home Screen" command to install Pyrate Dial on this device.</p>
       <p class="dialog-note">Once installed, Pyrate Dial opens as a standalone receiver.</p>
     `;
   }
