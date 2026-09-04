@@ -241,6 +241,7 @@ button { font: inherit; }
 .install-panel h2 { max-width: 430px; margin: 0; color: #b7ac9c; font-size: 16px; line-height: 1.38; font-weight: 500; letter-spacing: .01em; }
 .install-copy { max-width: 480px; margin: 9px 0 0; color: #6f675d; font-size: 12px; line-height: 1.55; }
 .install-button {
+  display: flex; align-items: center; justify-content: center; text-align: center; text-decoration: none;
   width: 100%; min-height: 54px; appearance: none; border: 1px solid #5c482e; border-radius: 2px;
   color: #d69749; background: #17130f; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 10px; letter-spacing: .16em; cursor: pointer;

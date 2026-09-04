@@ -30,32 +30,13 @@ const STATIONS = [
 
 let stations = STATIONS;
 let currentIndex = 0;
-let deferredInstallPrompt = null;
 
 let apiReady = false;
 
-// ONE persistent player for the whole session, built the first time POWER
-// is pressed and reused for every station change after that — never
-// destroyed and rebuilt. This is deliberate: across every version tested,
-// POWER ON (which always used this exact pattern — a real tap directly
-// building or commanding this one player) has autoplayed correctly on
-// iPhone every single time. Every version that instead destroyed and
-// rebuilt a fresh player per tune broke autoplay on every tune after the
-// first. Keeping the same iframe alive for the whole session is what
-// preserves whatever autoplay permission iOS granted it.
 let ytPlayer = null;
+let tuneToken = 0;
 let powered = false;
 let requestedStation = null;
-
-// The real problem with reusing one player is that YouTube's events carry
-// no id tying them to a specific loadPlaylist() call — so a leftover event
-// from the PREVIOUS station can arrive after the next one has already been
-// requested. expectedStartIndex is the fix: it's the exact random index we
-// just asked loadPlaylist() to start at. When a PLAYING event fires, its
-// actual getPlaylistIndex() has to match before it's trusted as real
-// confirmation — a stale event from the last station essentially never
-// coincidentally matches.
-let expectedStartIndex = null;
 
 let animating = false;
 let tuneInFlight = false;
@@ -63,6 +44,7 @@ let pendingIndex = null;
 
 const receiver = document.querySelector('.receiver');
 const monitorBay = document.querySelector('.monitor-bay');
+const monitorScreen = document.querySelector('.monitor-screen');
 const monitorStandby = document.getElementById('monitorStandby');
 const frequencyEl = document.getElementById('frequency');
 const stationNameEl = document.getElementById('stationName');
@@ -71,10 +53,6 @@ const statusEl = document.getElementById('status');
 const prevButton = document.getElementById('prevStation');
 const nextButton = document.getElementById('nextStation');
 const powerButton = document.getElementById('powerButton');
-const installButton = document.getElementById('installButton');
-const installPanel = document.getElementById('installPanel');
-const installDialog = document.getElementById('installDialog');
-const installInstructions = document.getElementById('installInstructions');
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const markerPosition = freq => ((freq - FM_MIN) / (FM_MAX - FM_MIN)) * 100;
@@ -214,7 +192,6 @@ function updatePowerControl() {
   powerButton.setAttribute('aria-pressed', powered ? 'true' : 'false');
 }
 
-// Fixed-duration sweep, independent of how many stations apart the jump is.
 function animateFrequencySweep(fromFreq, toFreq, onDone) {
   animating = true;
   syncControlAvailability();
@@ -241,91 +218,42 @@ function animateFrequencySweep(fromFreq, toFreq, onDone) {
   requestAnimationFrame(step);
 }
 
-// The single onStateChange handler for the player's entire lifetime, across
-// every station it ever plays.
-function handlePlayerStateChange(event) {
-  if (!powered) return;
+function spinUpPlayer(station, targetIndex) {
+  if (!apiReady || !station?.playlistId) return;
 
-  if (event.data === YT.PlayerState.PLAYING) {
-    if (tuneInFlight) {
-      // Verify this PLAYING event is actually the confirmation for what we
-      // just requested, not a leftover from the station before it. There's
-      // no request id on these events, so the check is content-based: the
-      // position currently playing has to match the exact random index we
-      // asked loadPlaylist() to start at.
-      let actualIndex = null;
-      try { actualIndex = event.target.getPlaylistIndex(); } catch (_) {}
-
-      if (actualIndex !== expectedStartIndex) {
-        // Stale event from the previous load — ignore it and keep waiting;
-        // the real confirmation for THIS request is still coming.
-        return;
-      }
-
-      tuneInFlight = false;
-      if (pendingIndex !== null) {
-        currentIndex = pendingIndex;
-        pendingIndex = null;
-      }
-
-      revealPlayer();
-      try {
-        event.target.unMute();
-        event.target.setVolume(100);
-        // Shuffle only reorders what plays NEXT, per YouTube's own docs —
-        // it does not change the video already underway. Safe here.
-        event.target.setShuffle(true);
-      } catch (_) {}
-
-      renderStation(requestedStation, 'SIGNAL LOCK');
-    } else {
-      // Normal in-playlist advance to the next song — not a tune.
-      revealPlayer();
-      statusEl.textContent = 'SIGNAL LOCK';
-    }
-  } else if (event.data === YT.PlayerState.BUFFERING) {
-    statusEl.textContent = 'TUNING';
-  } else if (event.data === YT.PlayerState.ENDED) {
-    if (!tuneInFlight) {
-      try {
-        event.target.nextVideo();
-        event.target.playVideo();
-      } catch (_) {}
-    }
-  }
-}
-
-function handleAutoplayBlocked() {
-  if (!tuneInFlight) return;
-  tuneInFlight = false;
-  pendingIndex = null;
+  const token = ++tuneToken;
+  const outgoingPlayer = ytPlayer;
+  pendingIndex = targetIndex;
+  requestedStation = station;
+  tuneInFlight = true;
   syncControlAvailability();
-  statusEl.textContent = powered ? 'TUNE AGAIN' : 'POWER OFF';
-}
+  setMonitorMessage('TUNING');
+  statusEl.textContent = 'TUNING';
 
-function handlePlayerError(event) {
-  if ([100, 101, 150].includes(event.data)) {
-    statusEl.textContent = 'AUTO SKIP';
-    try {
-      event.target.nextVideo();
-      event.target.playVideo();
-    } catch (_) {}
-    return;
+  if (outgoingPlayer) {
+    try { outgoingPlayer.mute(); } catch (_) {}
   }
-  if (tuneInFlight) {
+
+  const startIndex = chooseRandomIndex(station);
+
+  document.getElementById('youtubePlayer')?.remove();
+
+  const container = document.createElement('div');
+  container.className = 'youtube-player';
+  container.setAttribute('aria-label', 'YouTube station video player');
+  monitorScreen.insertBefore(container, monitorStandby);
+
+  function abandonTune(failedPlayer) {
+    if (token !== tuneToken) return;
     tuneInFlight = false;
     pendingIndex = null;
+    try { failedPlayer?.destroy(); } catch (_) {}
+    if (outgoingPlayer) { try { outgoingPlayer.destroy(); } catch (_) {} }
+    if (ytPlayer === outgoingPlayer) ytPlayer = null;
     syncControlAvailability();
   }
-  statusEl.textContent = 'SIGNAL HOLD';
-}
 
-// Builds the one player instance, only ever called once (the first time
-// POWER is pressed). onReadyCallback runs once the player can accept
-// commands — for this very first call, that's where the initial
-// loadPlaylist() happens, same as every version before this one.
-function ensurePlayer(onReadyCallback) {
-  ytPlayer = new YT.Player('youtubePlayer', {
+  new YT.Player(container, {
     width: '200',
     height: '200',
     playerVars: {
@@ -340,70 +268,92 @@ function ensurePlayer(onReadyCallback) {
     },
     events: {
       onReady: event => {
+        if (token !== tuneToken) return;
         setIframePermissions(event.target);
         try {
           event.target.mute();
           event.target.setVolume(100);
-        } catch (_) {}
-        onReadyCallback(event.target);
+          event.target.loadPlaylist({
+            listType: 'playlist',
+            list: station.playlistId,
+            index: startIndex,
+            startSeconds: 0
+          });
+        } catch (error) {
+          console.warn('Pyrate Dial station load failed:', error);
+          statusEl.textContent = 'SIGNAL HOLD';
+          abandonTune(event.target);
+        }
       },
-      onStateChange: handlePlayerStateChange,
-      onAutoplayBlocked: handleAutoplayBlocked,
-      onError: handlePlayerError
+      onStateChange: event => {
+        if (token !== tuneToken || !powered) return;
+
+        if (event.data === YT.PlayerState.PLAYING) {
+          if (outgoingPlayer) {
+            try { outgoingPlayer.destroy(); } catch (_) {}
+          }
+          ytPlayer = event.target;
+
+          revealPlayer();
+          try {
+            event.target.unMute();
+            event.target.setVolume(100);
+            event.target.setShuffle(true);
+          } catch (_) {}
+
+          if (tuneInFlight) {
+            tuneInFlight = false;
+            if (pendingIndex !== null) {
+              currentIndex = pendingIndex;
+              pendingIndex = null;
+            }
+            renderStation(requestedStation, 'SIGNAL LOCK');
+          } else {
+            statusEl.textContent = 'SIGNAL LOCK';
+          }
+        } else if (event.data === YT.PlayerState.BUFFERING) {
+          statusEl.textContent = 'TUNING';
+        } else if (event.data === YT.PlayerState.ENDED) {
+          if (!tuneInFlight) {
+            try {
+              event.target.nextVideo();
+              event.target.playVideo();
+            } catch (_) {}
+          }
+        }
+      },
+      onAutoplayBlocked: event => {
+        if (token !== tuneToken) return;
+        statusEl.textContent = powered ? 'TUNE AGAIN' : 'POWER OFF';
+        abandonTune(event?.target);
+      },
+      onError: event => {
+        if (token !== tuneToken) return;
+        if ([100, 101, 150].includes(event.data)) {
+          statusEl.textContent = 'AUTO SKIP';
+          try {
+            event.target.nextVideo();
+            event.target.playVideo();
+          } catch (_) {}
+          return;
+        }
+        statusEl.textContent = 'SIGNAL HOLD';
+        if (tuneInFlight) abandonTune(event.target);
+      }
     }
   });
 }
 
-// Called directly from a POWER or AUTO TUNE tap. If the player already
-// exists, loadPlaylist() is called synchronously, right here, on the same
-// live iframe that's been playing since it first earned autoplay
-// permission — never on a freshly built one.
-function startTune(station, targetIndex) {
-  if (!station?.playlistId) return;
-  if (!ytPlayer && !apiReady) {
+function powerOnReceiver() {
+  if (!apiReady) {
     statusEl.textContent = 'WARMING UP';
     return;
   }
-
-  pendingIndex = targetIndex;
-  requestedStation = station;
-  tuneInFlight = true;
-  syncControlAvailability();
-  setMonitorMessage('TUNING');
-  statusEl.textContent = 'TUNING';
-
-  expectedStartIndex = chooseRandomIndex(station);
-
-  const doLoad = player => {
-    try {
-      player.mute();
-      player.loadPlaylist({
-        listType: 'playlist',
-        list: station.playlistId,
-        index: expectedStartIndex,
-        startSeconds: 0
-      });
-    } catch (error) {
-      console.warn('Pyrate Dial station load failed:', error);
-      statusEl.textContent = 'SIGNAL HOLD';
-      tuneInFlight = false;
-      pendingIndex = null;
-      syncControlAvailability();
-    }
-  };
-
-  if (ytPlayer) {
-    doLoad(ytPlayer);
-  } else {
-    ensurePlayer(doLoad);
-  }
-}
-
-function powerOnReceiver() {
   if (tuneInFlight || animating) return;
+
   powered = true;
   updatePowerControl();
-  startTune(stations[currentIndex], currentIndex);
+  spinUpPlayer(stations[currentIndex], currentIndex);
 }
 
 function powerOffReceiver() {
@@ -411,12 +361,11 @@ function powerOffReceiver() {
   requestedStation = null;
   pendingIndex = null;
   tuneInFlight = false;
+  tuneToken++;
   updatePowerControl();
   if (ytPlayer) {
-    try {
-      ytPlayer.pauseVideo();
-      ytPlayer.mute();
-    } catch (_) {}
+    try { ytPlayer.destroy(); } catch (_) {}
+    ytPlayer = null;
   }
   setMonitorMessage('POWER OFF');
   statusEl.textContent = 'POWER OFF';
@@ -428,9 +377,6 @@ function togglePower() {
   else powerOnReceiver();
 }
 
-// AUTO TUNE — loads the new station immediately, in the same tap, no
-// second POWER press required. The frequency sweep is a purely visual
-// overlay running in parallel with the real load.
 function scanTo(targetIndex) {
   if (targetIndex < 0 || targetIndex >= stations.length || targetIndex === currentIndex) return;
   if (tuneInFlight || animating) return;
@@ -443,7 +389,7 @@ function scanTo(targetIndex) {
   statusEl.textContent = 'AUTO SEEK';
 
   if (powered) {
-    startTune(targetStation, targetIndex);
+    spinUpPlayer(targetStation, targetIndex);
   } else {
     currentIndex = targetIndex;
   }
@@ -453,8 +399,6 @@ function scanTo(targetIndex) {
     if (!powered) {
       renderStation(targetStation, 'POWER OFF');
     }
-    // If powered, the display stays on "—" until onStateChange confirms
-    // the new station is actually audible.
   });
 }
 
@@ -478,51 +422,6 @@ window.onYouTubeIframeAPIReady = function () {
   const firstScript = document.getElementsByTagName('script')[0];
   firstScript.parentNode.insertBefore(tag, firstScript);
 })();
-
-// ----- PWA install handling -----
-window.addEventListener('beforeinstallprompt', event => {
-  event.preventDefault();
-  deferredInstallPrompt = event;
-});
-
-window.addEventListener('appinstalled', () => {
-  deferredInstallPrompt = null;
-  if (installPanel) installPanel.hidden = true;
-});
-
-const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
-const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-
-installButton?.addEventListener('click', async () => {
-  if (deferredInstallPrompt) {
-    deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
-    deferredInstallPrompt = null;
-    return;
-  }
-
-  if (isIOS()) {
-    installInstructions.innerHTML = `
-      <p>On iPhone:</p>
-      <ol>
-        <li>Open Pyrate Dial in Safari.</li>
-        <li>Tap the Share button.</li>
-        <li>Choose "Add to Home Screen."</li>
-        <li>Tap "Add."</li>
-      </ol>
-      <p class="dialog-note">The Home Screen version opens directly as a standalone receiver.</p>
-    `;
-  } else {
-    installInstructions.innerHTML = `
-      <p>Use your browser's "Install app" or "Add to Home Screen" command to install Pyrate Dial on this device.</p>
-      <p class="dialog-note">Once installed, Pyrate Dial opens as a standalone receiver.</p>
-    `;
-  }
-
-  installDialog?.showModal();
-});
-
-if (isStandalone() && installPanel) installPanel.hidden = true;
 
 loadCachedStationMetadata();
 restoreCurrentIndex();
