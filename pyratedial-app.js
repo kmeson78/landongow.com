@@ -27,13 +27,17 @@ const stations = STATIONS;
 
 let apiReady = false;
 
-// ONE player, reused across taps rather than destroyed and rebuilt on every
-// single one — but unlike the dial page, every tap here IS its own direct,
-// fresh gesture (there's no automated "auto tune" happening after
-// selection). That's the structural fix: the pattern that's worked without
-// fail all through this project is a real tap driving a command straight
-// into this player, synchronously.
+// Two explicit slots instead of one. ytPlayer is the CONFIRMED, audible
+// player (or null). pendingPlayer is whatever's currently loading and NOT
+// yet confirmed (or null). The intermittent "plays but no video" bug came
+// from only ever tracking the last CONFIRMED player: if a new tap fired
+// before the previous one confirmed, that previous, still-loading iframe
+// was never destroyed by anyone — it just sat in the DOM, silent, ahead of
+// whatever was actually playing, blocking it from view. Every new tap now
+// destroys BOTH slots unconditionally before creating anything, so nothing
+// can ever accumulate.
 let ytPlayer = null;
+let pendingPlayer = null;
 let tuneToken = 0;
 let tuneInFlight = false;
 let activeIndex = null;
@@ -46,9 +50,13 @@ const gridBottom = document.getElementById('stationGridBottom');
 const playerFrequencyEl = document.getElementById('playerFrequency');
 const playerNameEl = document.getElementById('playerName');
 const playerStatusEl = document.getElementById('playerStatus');
-const stopButton = document.getElementById('stopButton');
 
 const formatFrequency = freq => Number(freq).toFixed(1);
+
+function destroyPlayer(player) {
+  if (!player) return;
+  try { player.destroy(); } catch (_) {}
+}
 
 function setStatus(text) {
   playerStatusEl.textContent = text;
@@ -124,7 +132,7 @@ function buildStationButtons() {
     button.className = 'station-button';
     button.dataset.index = String(index);
     renderButtonLabel(button, station);
-    button.addEventListener('click', () => playStation(index));
+    button.addEventListener('click', () => handleStationTap(index));
     (index < 10 ? gridTop : gridBottom).appendChild(button);
   });
 }
@@ -142,22 +150,36 @@ function refreshAllButtonLabels() {
 }
 
 // ----- Playback -----
+// Tapping the currently-active station again stops it; tapping any other
+// station loads and plays it, replacing whatever was playing.
+function handleStationTap(targetIndex) {
+  if (activeIndex === targetIndex && !tuneInFlight) {
+    stopPlayback();
+    return;
+  }
+  playStation(targetIndex);
+}
+
 // Called directly from a station-button tap, so construction/commands
-// happen inside the user's gesture on iPhone. Reuses the double-buffer
-// approach: the outgoing player is muted immediately but not torn down
-// until the incoming one actually confirms PLAYING — cleanup runs after
-// success, never before or during the new player's own creation.
+// happen inside the user's gesture on iPhone.
 function playStation(targetIndex) {
   const station = stations[targetIndex];
   if (!station?.playlistId) return;
-  if (!ytPlayer && !apiReady) {
+  if (!ytPlayer && !pendingPlayer && !apiReady) {
     setStatus('WARMING UP');
     return;
   }
-  if (tuneInFlight && targetIndex === activeIndex) return;
 
   const token = ++tuneToken;
+
+  // Unconditional cleanup of BOTH slots before anything new starts. This
+  // is what guarantees no orphaned iframe can ever accumulate, regardless
+  // of whether the previous tap ever confirmed.
+  destroyPlayer(pendingPlayer);
+  pendingPlayer = null;
   const outgoingPlayer = ytPlayer;
+  ytPlayer = null;
+
   activeIndex = targetIndex;
   tuneInFlight = true;
   updateActiveButtonStyling();
@@ -166,7 +188,6 @@ function playStation(targetIndex) {
   setStatus('TUNING');
   playerFrequencyEl.textContent = formatFrequency(station.frequency);
   playerNameEl.textContent = station.name;
-  stopButton.disabled = false;
 
   if (outgoingPlayer) {
     try { outgoingPlayer.mute(); } catch (_) {}
@@ -186,13 +207,16 @@ function playStation(targetIndex) {
   function abandonTune(failedPlayer) {
     if (token !== tuneToken) return;
     tuneInFlight = false;
+    activeIndex = null;
+    updateActiveButtonStyling();
     setButtonsBusy(false);
-    try { failedPlayer?.destroy(); } catch (_) {}
-    if (outgoingPlayer) { try { outgoingPlayer.destroy(); } catch (_) {} }
-    if (ytPlayer === outgoingPlayer) ytPlayer = null;
+    destroyPlayer(failedPlayer);
+    if (pendingPlayer === failedPlayer) pendingPlayer = null;
+    destroyPlayer(outgoingPlayer);
+    setStatus('SIGNAL HOLD');
   }
 
-  new YT.Player(container, {
+  pendingPlayer = new YT.Player(container, {
     width: '200',
     height: '200',
     playerVars: {
@@ -220,7 +244,6 @@ function playStation(targetIndex) {
           });
         } catch (error) {
           console.warn('Pyrate Dial station load failed:', error);
-          setStatus('SIGNAL HOLD');
           abandonTune(event.target);
         }
       },
@@ -228,10 +251,9 @@ function playStation(targetIndex) {
         if (token !== tuneToken) return;
 
         if (event.data === YT.PlayerState.PLAYING) {
-          if (outgoingPlayer) {
-            try { outgoingPlayer.destroy(); } catch (_) {}
-          }
+          destroyPlayer(outgoingPlayer);
           ytPlayer = event.target;
+          pendingPlayer = null;
 
           revealPlayer();
           try {
@@ -269,31 +291,27 @@ function playStation(targetIndex) {
           } catch (_) {}
           return;
         }
-        setStatus('SIGNAL HOLD');
-        if (tuneInFlight) abandonTune(event.target);
+        abandonTune(event.target);
       }
     }
   });
 }
 
 function stopPlayback() {
-  tuneToken++; // invalidate any tune still in flight
+  tuneToken++; // invalidate anything still in flight
   tuneInFlight = false;
   activeIndex = null;
   updateActiveButtonStyling();
   setButtonsBusy(false);
-  if (ytPlayer) {
-    try { ytPlayer.destroy(); } catch (_) {}
-    ytPlayer = null;
-  }
+  destroyPlayer(pendingPlayer);
+  pendingPlayer = null;
+  destroyPlayer(ytPlayer);
+  ytPlayer = null;
   setMonitorMessage('STANDBY');
   setStatus('STANDBY');
   playerFrequencyEl.textContent = '—';
   playerNameEl.textContent = 'SELECT A STATION';
-  stopButton.disabled = true;
 }
-
-stopButton.addEventListener('click', stopPlayback);
 
 // ----- Official YouTube IFrame Player API -----
 window.onYouTubeIframeAPIReady = function () {

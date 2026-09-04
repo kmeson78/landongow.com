@@ -95,36 +95,47 @@ button { font: inherit; }
   font-size: 7px; letter-spacing: .18em; color: var(--ink-dim);
 }
 
-.monitor-bay { flex: 0 0 auto; }
+.monitor-bay { align-self: stretch; }
 .monitor-bezel {
   padding: 5px; border-radius: 9px;
   background: linear-gradient(180deg, #4b463f 0%, #2b2823 100%);
   box-shadow: inset 0 1px rgba(255,255,255,.08), inset 0 0 0 2px rgba(0,0,0,.3);
 }
 .monitor-screen {
-  position: relative; width: 200px; height: 200px; overflow: hidden; border-radius: 6px;
+  position: relative; width: 100%; height: 200px; overflow: hidden; border-radius: 6px;
   background: radial-gradient(ellipse at 50% 43%, #1a120b 0%, #0b0907 70%);
   box-shadow: inset 0 0 18px rgba(0,0,0,.9);
 }
 .youtube-player, .monitor-screen iframe {
-  display: block; width: 200px !important; height: 200px !important;
-  min-width: 200px; min-height: 200px; border: 0;
+  display: block; width: 100% !important; height: 200px !important;
+  min-height: 200px; border: 0;
+}
+/* Monochrome CRT treatment, same as the dial page — grayscale filter, and
+   the iframe stays invisible (opacity 0) until player-ready is set, so an
+   off-station or not-yet-confirmed frame is never what's shown. */
+.monitor-screen iframe {
+  position: relative; z-index: 1; opacity: 0;
+  filter: grayscale(100%) contrast(1.28) brightness(.78);
+  transition: opacity 120ms linear;
+}
+.monitor-bay.player-ready .monitor-screen iframe { opacity: 1; }
+.monitor-screen::after {
+  content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: 6px;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0, rgba(255,255,255,.025) 1px, rgba(0,0,0,.055) 1px, rgba(0,0,0,.055) 3px),
+    radial-gradient(ellipse at 50% 45%, transparent 48%, rgba(0,0,0,.22) 100%);
+  box-shadow: inset 0 0 18px rgba(0,0,0,.42);
 }
 .monitor-standby {
-  position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none;
+  position: absolute; inset: 0; z-index: 4; display: grid; place-items: center; pointer-events: none;
   color: #6f4a27; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 7px;
   letter-spacing: .18em;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(113deg, rgba(255,255,255,.012) 0 2px, rgba(0,0,0,.03) 2px 5px),
+    radial-gradient(ellipse at 50% 43%, #15110d 0%, #090806 72%);
 }
 .monitor-bay.player-ready .monitor-standby { display: none; }
-
-.stop-button {
-  appearance: none; border: 1px solid #6b3a1c; border-radius: 3px; cursor: pointer;
-  background: linear-gradient(180deg, #d6812f 0%, #a8601c 100%);
-  color: #1c1108; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 9px; letter-spacing: .16em; padding: 6px 22px;
-}
-.stop-button:active { background: #8f5119; }
-.stop-button:disabled { opacity: .4; cursor: default; }
 
 /* Small phones: trim the readout so 200x200 (YouTube's mandatory minimum
    player size) still fits alongside ten buttons per side without scrolling */
