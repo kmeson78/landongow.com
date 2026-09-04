@@ -177,6 +177,18 @@ function attachPlayerBridge(iframe, unmuteButton) {
             event.target.nextVideo();
             event.target.playVideo();
           } catch (_) {}
+        },
+        onError: event => {
+          // A single video in a large playlist can have embedding
+          // disabled, be private, or be deleted — that's a property of
+          // that one video, not the station. Skip it silently rather than
+          // getting stuck on YouTube's own error card.
+          if ([100, 101, 150].includes(event.data)) {
+            try {
+              event.target.nextVideo();
+              event.target.playVideo();
+            } catch (_) {}
+          }
         }
       }
     });
