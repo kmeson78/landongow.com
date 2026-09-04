@@ -25,24 +25,17 @@ const STATIONS = [
 
 const stations = STATIONS;
 
-// No YouTube JS Player API anywhere in this file. Every station is a plain
-// <iframe src="https://www.youtube.com/embed/videoseries?..."> — the same
-// kind of embed YouTube itself gives you to paste into any web page. There
-// is no player object, no state-change events, no confirmation logic, and
-// nothing to keep in sync across multiple in-page loads, because there are
-// no in-page loads: switching stations is a real navigation to
-// pyratedial-app.html?s=<index>, and the iframe is written once, as a
-// direct part of loading that page — not constructed later in response to
-// something happening on an already-loaded page. That's what removes the
-// entire class of bugs this project hit tonight: there's no shared,
-// evolving JS state left for two overlapping actions to race over.
+// No YouTube JS Player state machine here — every station is a plain
+// embed URL, and switching stations is a real navigation to
+// pyratedial-app.html?s=<index>. The one exception is a single minimal
+// Player object built purely as an unmute bridge (see below), since a
+// plain iframe has no way for our own button to talk to it.
 
-const gridTop = document.getElementById('stationGridTop');
-const gridBottom = document.getElementById('stationGridBottom');
+const presetStrip = document.getElementById('presetStrip');
 const playerSlot = document.getElementById('playerSlot');
-const playerFrequencyEl = document.getElementById('playerFrequency');
-const playerNameEl = document.getElementById('playerName');
-const playerStatusEl = document.getElementById('playerStatus');
+const heroFrequencyEl = document.getElementById('heroFrequency');
+const heroNameEl = document.getElementById('heroName');
+const heroStatusEl = document.getElementById('heroStatus');
 
 const formatFrequency = freq => Number(freq).toFixed(1);
 
@@ -101,54 +94,54 @@ function buildEmbedUrl(station) {
   return `https://www.youtube.com/embed/videoseries?${params.toString()}`;
 }
 
-// ----- Station buttons — real links, not click handlers -----
-function renderButtonLabel(link, station) {
-  link.innerHTML = `<span class="freq">${formatFrequency(station.frequency)}</span><span class="name"></span>`;
-  link.querySelector('.name').textContent = station.name;
+// ----- Preset strip -----
+function renderPresetLabel(pill, station) {
+  pill.innerHTML = `<span class="freq">${formatFrequency(station.frequency)}</span><span class="name"></span>`;
+  pill.querySelector('.name').textContent = station.name;
 }
 
-function buildStationButtons(activeIndex) {
+function buildPresetStrip(activeIndex) {
   stations.forEach((station, index) => {
-    const link = document.createElement('a');
-    link.className = 'station-button';
-    link.dataset.index = String(index);
-    // Tapping the already-active station links back to the bare page
-    // (stops); tapping any other station links to it directly (plays).
-    link.href = index === activeIndex ? 'pyratedial-app.html' : `pyratedial-app.html?s=${index}`;
-    renderButtonLabel(link, station);
-    if (index === activeIndex) link.classList.add('is-active');
-    (index < 10 ? gridTop : gridBottom).appendChild(link);
+    const pill = document.createElement('a');
+    pill.className = 'preset-pill';
+    pill.dataset.index = String(index);
+    // Tapping the already-active preset links back to the bare page
+    // (stops); tapping any other preset links to it directly (plays).
+    pill.href = index === activeIndex ? 'pyratedial-app.html' : `pyratedial-app.html?s=${index}`;
+    renderPresetLabel(pill, station);
+    if (index === activeIndex) pill.classList.add('is-active');
+    presetStrip.appendChild(pill);
   });
 }
 
-function refreshAllButtonLabels() {
-  document.querySelectorAll('.station-button').forEach(link => {
-    const index = Number(link.dataset.index);
+function refreshAllPresetLabels() {
+  document.querySelectorAll('.preset-pill').forEach(pill => {
+    const index = Number(pill.dataset.index);
     const station = stations[index];
-    if (station) renderButtonLabel(link, station);
+    if (station) renderPresetLabel(pill, station);
   });
   const activeIndex = getRequestedIndex();
   if (activeIndex !== null) {
     const active = stations[activeIndex];
-    if (active) playerNameEl.textContent = active.name;
+    if (active) heroNameEl.textContent = active.name;
   }
 }
 
 // ----- The player itself -----
 // Minimal use of the YouTube JS API — not for loading or state-tracking
 // (the embed URL already does all of that on its own), only so our own
-// "TAP FOR SOUND" button has something to call .unMute() on. One player
-// object, built once per page load, asked to do exactly one thing.
-let apiReady = false;
+// "TAP FOR SOUND" button has something to call .unMute() on, and so
+// shuffle can actually be turned on for the rest of the playlist once
+// this one video is underway.
 let activePlayer = null;
 
 window.onYouTubeIframeAPIReady = function () {
-  apiReady = true;
+  window.__pyrateApiReady = true;
 };
 
 function loadYouTubeApiScript() {
   if (window.YT?.Player) {
-    apiReady = true;
+    window.__pyrateApiReady = true;
     return;
   }
   const tag = document.createElement('script');
@@ -158,7 +151,7 @@ function loadYouTubeApiScript() {
   firstScript.parentNode.insertBefore(tag, firstScript);
 }
 
-function attachUnmuteBridge(iframe, unmuteButton) {
+function attachPlayerBridge(iframe, unmuteButton) {
   function wire() {
     if (!window.YT?.Player) {
       setTimeout(wire, 50);
@@ -166,7 +159,10 @@ function attachUnmuteBridge(iframe, unmuteButton) {
     }
     activePlayer = new window.YT.Player(iframe, {
       events: {
-        onReady: () => { unmuteButton.disabled = false; }
+        onReady: event => {
+          unmuteButton.disabled = false;
+          try { event.target.setShuffle(true); } catch (_) {}
+        }
       }
     });
   }
@@ -186,17 +182,17 @@ function renderPlayer(activeIndex) {
   activePlayer = null;
 
   if (activeIndex === null) {
-    playerFrequencyEl.textContent = '—';
-    playerNameEl.textContent = 'SELECT A STATION';
-    playerStatusEl.textContent = 'STANDBY';
+    heroFrequencyEl.textContent = '—';
+    heroNameEl.textContent = 'SELECT A STATION';
+    heroStatusEl.textContent = 'STANDBY';
     playerSlot.innerHTML = '<div class="monitor-standby"><span>STANDBY</span></div>';
     return;
   }
 
   const station = stations[activeIndex];
-  playerFrequencyEl.textContent = formatFrequency(station.frequency);
-  playerNameEl.textContent = station.name;
-  playerStatusEl.textContent = 'SIGNAL LOCK';
+  heroFrequencyEl.textContent = formatFrequency(station.frequency);
+  heroNameEl.textContent = station.name;
+  heroStatusEl.textContent = 'SIGNAL LOCK';
 
   const iframe = document.createElement('iframe');
   iframe.className = 'youtube-player';
@@ -216,7 +212,7 @@ function renderPlayer(activeIndex) {
   playerSlot.appendChild(unmuteButton);
 
   loadYouTubeApiScript();
-  attachUnmuteBridge(iframe, unmuteButton);
+  attachPlayerBridge(iframe, unmuteButton);
 }
 
 // ----- Station title refresh (public, no API key — same as the dial page) -----
@@ -267,7 +263,7 @@ async function refreshStationMetadata(force = false) {
     let previous = {};
     try { previous = JSON.parse(localStorage.getItem(OEMBED_CACHE_KEY) || '{}') || {}; } catch (_) {}
     localStorage.setItem(OEMBED_CACHE_KEY, JSON.stringify({ ...previous, ...updates }));
-    refreshAllButtonLabels();
+    refreshAllPresetLabels();
   }
   localStorage.setItem(`${OEMBED_CACHE_KEY}.updated`, String(Date.now()));
 }
@@ -275,9 +271,16 @@ async function refreshStationMetadata(force = false) {
 // ----- Init -----
 loadCachedStationMetadata();
 const activeIndex = getRequestedIndex();
-buildStationButtons(activeIndex);
+buildPresetStrip(activeIndex);
 renderPlayer(activeIndex);
 refreshStationMetadata(true);
+
+// Scroll the active preset into view, centered, so the strip opens right
+// where you are instead of at the far left every time.
+if (activeIndex !== null) {
+  const activePill = presetStrip.querySelector('.preset-pill.is-active');
+  if (activePill) activePill.scrollIntoView({ inline: 'center', block: 'nearest' });
+}
 
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') refreshStationMetadata();
