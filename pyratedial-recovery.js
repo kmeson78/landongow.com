@@ -236,95 +236,28 @@ function animateFrequencySweep(fromFreq, toFreq, onDone) {
   requestAnimationFrame(step);
 }
 
-// Tears down whatever player exists and leaves a clean container in place
-// for a new one. destroy() removes the <iframe> entirely; since the API
-// replaces the original #youtubePlayer div with that iframe on first use,
-// a fresh div has to be rebuilt before constructing the next player.
-function freshPlayerContainer() {
-  if (ytPlayer) {
-    try { ytPlayer.destroy(); } catch (_) {}
-    ytPlayer = null;
-  }
-  const old = document.getElementById('youtubePlayer');
-  if (old) old.remove();
-  const div = document.createElement('div');
-  div.id = 'youtubePlayer';
-  div.className = 'youtube-player';
-  div.setAttribute('aria-label', 'YouTube station video player');
-  monitorScreen.insertBefore(div, monitorStandby);
-}
-
-function handleStateChange(token, event) {
-  if (token !== tuneToken || !powered) return;
-
-  if (event.data === YT.PlayerState.PLAYING) {
-    revealPlayer();
-    try {
-      event.target.unMute();
-      event.target.setVolume(100);
-      // Shuffle only reorders what plays NEXT, per YouTube's own docs — it
-      // does not change the video already underway. Safe to set once here.
-      event.target.setShuffle(true);
-    } catch (_) {}
-
-    if (tuneInFlight) {
-      tuneInFlight = false;
-      if (pendingIndex !== null) {
-        currentIndex = pendingIndex;
-        pendingIndex = null;
-      }
-      renderStation(requestedStation, 'SIGNAL LOCK');
-    } else {
-      statusEl.textContent = 'SIGNAL LOCK';
-    }
-  } else if (event.data === YT.PlayerState.BUFFERING) {
-    statusEl.textContent = 'TUNING';
-  } else if (event.data === YT.PlayerState.ENDED) {
-    // Normal in-playlist advance only — never while a tune is resolving.
-    if (!tuneInFlight) {
-      try {
-        event.target.nextVideo();
-        event.target.playVideo();
-      } catch (_) {}
-    }
-  }
-}
-
-function handleAutoplayBlocked(token) {
-  if (token !== tuneToken) return;
-  tuneInFlight = false;
-  pendingIndex = null;
-  syncControlAvailability();
-  statusEl.textContent = powered ? 'TUNE AGAIN' : 'POWER OFF';
-}
-
-function handleError(token, event) {
-  if (token !== tuneToken) return;
-  if ([100, 101, 150].includes(event.data)) {
-    statusEl.textContent = 'AUTO SKIP';
-    try {
-      event.target.nextVideo();
-      event.target.playVideo();
-    } catch (_) {}
-    return;
-  }
-  if (tuneInFlight) {
-    tuneInFlight = false;
-    pendingIndex = null;
-    syncControlAvailability();
-  }
-  statusEl.textContent = 'SIGNAL HOLD';
-}
-
 // Called directly from a POWER or AUTO TUNE tap, so construction happens
 // inside the user's gesture on iPhone. Builds a brand-new player targeting
-// the given station; the random start index is applied via loadPlaylist()
-// in onReady — the ONE command this fresh instance will ever receive
-// before it's confirmed playing.
+// the given station, in its OWN container appended alongside whatever is
+// currently active. The monitor is a fixed 200x200 box with overflow
+// hidden, so this second stacked element is invisible until the first one
+// is removed — no CSS changes needed for it to stay out of view while it
+// loads.
+//
+// Crucially, the previously-active player (if any) is NOT destroyed here.
+// It's only muted immediately (per spec: the old station stops making
+// sound the instant a tune starts) and left alive until the new one
+// actually confirms PLAYING — only then does cleanup happen. Every prior
+// version of this destroyed the old iframe before building the new one,
+// in the same tap; POWER ON (which never has an old player to destroy)
+// has autoplayed correctly on iPhone in every test, while AUTO TUNE
+// (which always destroyed one first) has not. This removes that
+// destroy-then-create sequence entirely.
 function spinUpPlayer(station, targetIndex) {
   if (!apiReady || !station?.playlistId) return;
 
   const token = ++tuneToken;
+  const outgoingPlayer = ytPlayer;
   pendingIndex = targetIndex;
   requestedStation = station;
   tuneInFlight = true;
@@ -332,10 +265,38 @@ function spinUpPlayer(station, targetIndex) {
   setMonitorMessage('TUNING');
   statusEl.textContent = 'TUNING';
 
-  const startIndex = chooseRandomIndex(station);
-  freshPlayerContainer();
+  if (outgoingPlayer) {
+    try { outgoingPlayer.mute(); } catch (_) {}
+  }
 
-  ytPlayer = new YT.Player('youtubePlayer', {
+  const startIndex = chooseRandomIndex(station);
+
+  // The page ships with a static placeholder div at this id for the very
+  // first load. It's never reused after that (every player after this one
+  // gets its own freshly created container), so remove it here — otherwise
+  // it would sit as a permanent, empty first child ahead of every real
+  // player and hide all of them behind it.
+  document.getElementById('youtubePlayer')?.remove();
+
+  const container = document.createElement('div');
+  container.className = 'youtube-player';
+  container.setAttribute('aria-label', 'YouTube station video player');
+  monitorScreen.insertBefore(container, monitorStandby);
+
+  // Shared failure cleanup for this specific tune attempt — destroys both
+  // the (unconfirmed) new player and the still-alive-but-muted old one,
+  // and clears the tuning state so the controls unlock again.
+  function abandonTune(failedPlayer) {
+    if (token !== tuneToken) return;
+    tuneInFlight = false;
+    pendingIndex = null;
+    try { failedPlayer?.destroy(); } catch (_) {}
+    if (outgoingPlayer) { try { outgoingPlayer.destroy(); } catch (_) {} }
+    if (ytPlayer === outgoingPlayer) ytPlayer = null;
+    syncControlAvailability();
+  }
+
+  new YT.Player(container, {
     width: '200',
     height: '200',
     playerVars: {
@@ -364,16 +325,74 @@ function spinUpPlayer(station, targetIndex) {
         } catch (error) {
           console.warn('Pyrate Dial station load failed:', error);
           statusEl.textContent = 'SIGNAL HOLD';
-          if (token === tuneToken) {
+          abandonTune(event.target);
+        }
+      },
+      onStateChange: event => {
+        if (token !== tuneToken || !powered) return;
+
+        if (event.data === YT.PlayerState.PLAYING) {
+          // This player has proven it can actually play. Promote it, and
+          // only now tear down whatever was active before — cleanup runs
+          // after success, never before or during the new player's own
+          // creation.
+          if (outgoingPlayer) {
+            try { outgoingPlayer.destroy(); } catch (_) {}
+          }
+          ytPlayer = event.target;
+
+          revealPlayer();
+          try {
+            event.target.unMute();
+            event.target.setVolume(100);
+            // Shuffle only reorders what plays NEXT, per YouTube's own
+            // docs — it does not change the video already underway.
+            event.target.setShuffle(true);
+          } catch (_) {}
+
+          if (tuneInFlight) {
             tuneInFlight = false;
-            pendingIndex = null;
-            syncControlAvailability();
+            if (pendingIndex !== null) {
+              currentIndex = pendingIndex;
+              pendingIndex = null;
+            }
+            renderStation(requestedStation, 'SIGNAL LOCK');
+          } else {
+            statusEl.textContent = 'SIGNAL LOCK';
+          }
+        } else if (event.data === YT.PlayerState.BUFFERING) {
+          statusEl.textContent = 'TUNING';
+        } else if (event.data === YT.PlayerState.ENDED) {
+          // Normal in-playlist advance only — never while a tune is
+          // resolving, and only for the currently-active player (a stale
+          // outgoing player's events never reach here, since its token no
+          // longer matches tuneToken by this point).
+          if (!tuneInFlight) {
+            try {
+              event.target.nextVideo();
+              event.target.playVideo();
+            } catch (_) {}
           }
         }
       },
-      onStateChange: event => handleStateChange(token, event),
-      onAutoplayBlocked: () => handleAutoplayBlocked(token),
-      onError: event => handleError(token, event)
+      onAutoplayBlocked: event => {
+        if (token !== tuneToken) return;
+        statusEl.textContent = powered ? 'TUNE AGAIN' : 'POWER OFF';
+        abandonTune(event?.target);
+      },
+      onError: event => {
+        if (token !== tuneToken) return;
+        if ([100, 101, 150].includes(event.data)) {
+          statusEl.textContent = 'AUTO SKIP';
+          try {
+            event.target.nextVideo();
+            event.target.playVideo();
+          } catch (_) {}
+          return;
+        }
+        statusEl.textContent = 'SIGNAL HOLD';
+        if (tuneInFlight) abandonTune(event.target);
+      }
     }
   });
 }
