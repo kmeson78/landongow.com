@@ -25,65 +25,26 @@ const STATIONS = [
 
 const stations = STATIONS;
 
-let apiReady = false;
+// No YouTube JS Player API anywhere in this file. Every station is a plain
+// <iframe src="https://www.youtube.com/embed/videoseries?..."> — the same
+// kind of embed YouTube itself gives you to paste into any web page. There
+// is no player object, no state-change events, no confirmation logic, and
+// nothing to keep in sync across multiple in-page loads, because there are
+// no in-page loads: switching stations is a real navigation to
+// pyratedial-app.html?s=<index>, and the iframe is written once, as a
+// direct part of loading that page — not constructed later in response to
+// something happening on an already-loaded page. That's what removes the
+// entire class of bugs this project hit tonight: there's no shared,
+// evolving JS state left for two overlapping actions to race over.
 
-// ONE player for the whole session, built the first time a station is
-// tapped and reused — never destroyed and rebuilt — for every tap after
-// that. This is a direct correction: the previous version built a brand
-// new iframe on every single tap, and the second tap onward consistently
-// failed to autoplay. That matches something already proven once before in
-// this same project on the dial page — a freshly built iframe, even
-// created synchronously inside a real tap, does not reliably inherit
-// autoplay permission the way a player that's been alive and playing since
-// the first tap does. Reusing one iframe for the whole session is what
-// keeps that permission intact.
-let ytPlayer = null;
-let tuneInFlight = false;
-let activeIndex = null;
-
-// Reusing one player means loadPlaylist() gets called again on a player
-// that's already playing something — which is exactly the scenario that
-// caused the ORIGINAL bug earlier in this project: a leftover event from
-// the station before could arrive after the next one's already been
-// requested, so the audio would land one tune behind the display.
-// expectedStartIndex is the fix: the exact random index just requested.
-// A PLAYING event only counts as real confirmation if the player's actual
-// getPlaylistIndex() matches it — a stale event from the previous station
-// essentially never coincidentally matches.
-let expectedStartIndex = null;
-
-const monitorBay = document.getElementById('monitorBay');
-const monitorStandby = document.getElementById('monitorStandby');
 const gridTop = document.getElementById('stationGridTop');
 const gridBottom = document.getElementById('stationGridBottom');
+const playerSlot = document.getElementById('playerSlot');
 const playerFrequencyEl = document.getElementById('playerFrequency');
 const playerNameEl = document.getElementById('playerName');
 const playerStatusEl = document.getElementById('playerStatus');
 
 const formatFrequency = freq => Number(freq).toFixed(1);
-
-function setStatus(text) {
-  playerStatusEl.textContent = text;
-}
-
-function setMonitorMessage(message) {
-  if (monitorBay) monitorBay.classList.remove('player-ready');
-  if (!monitorStandby) return;
-  monitorStandby.innerHTML = `<span>${message}</span>`;
-  monitorStandby.style.display = 'grid';
-}
-
-function revealPlayer() {
-  if (monitorBay) monitorBay.classList.add('player-ready');
-  if (monitorStandby) monitorStandby.style.display = 'none';
-}
-
-function setIframePermissions(player) {
-  try {
-    const iframe = player.getIframe();
-    iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
-  } catch (_) {}
-}
 
 // ----- Random starting position (identical logic to the dial page) -----
 function recentIndexKey(playlistId) {
@@ -113,235 +74,85 @@ function chooseRandomIndex(station) {
   return index;
 }
 
-// ----- Station buttons -----
-function updateActiveButtonStyling() {
-  document.querySelectorAll('.station-button').forEach(btn => {
-    btn.classList.toggle('is-active', Number(btn.dataset.index) === activeIndex);
+// ----- Which station this page load is for -----
+function getRequestedIndex() {
+  const params = new URLSearchParams(location.search);
+  if (!params.has('s')) return null;
+  const n = Number(params.get('s'));
+  return Number.isInteger(n) && n >= 0 && n < stations.length ? n : null;
+}
+
+function buildEmbedUrl(station) {
+  const startIndex = chooseRandomIndex(station);
+  const params = new URLSearchParams({
+    list: station.playlistId,
+    index: String(startIndex),
+    autoplay: '1',
+    playsinline: '1',
+    rel: '0',
+    cc_load_policy: '0',
+    origin: window.location.origin
   });
+  return `https://www.youtube.com/embed/videoseries?${params.toString()}`;
 }
 
-function setButtonsBusy(busy) {
-  document.querySelectorAll('.station-button').forEach(btn => { btn.disabled = busy; });
+// ----- Station buttons — real links, not click handlers -----
+function renderButtonLabel(link, station) {
+  link.innerHTML = `<span class="freq">${formatFrequency(station.frequency)}</span><span class="name"></span>`;
+  link.querySelector('.name').textContent = station.name;
 }
 
-function renderButtonLabel(button, station) {
-  button.innerHTML = `<span class="freq">${formatFrequency(station.frequency)}</span><span class="name"></span>`;
-  button.querySelector('.name').textContent = station.name;
-}
-
-function buildStationButtons() {
+function buildStationButtons(activeIndex) {
   stations.forEach((station, index) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'station-button';
-    button.dataset.index = String(index);
-    renderButtonLabel(button, station);
-    button.addEventListener('click', () => handleStationTap(index));
-    (index < 10 ? gridTop : gridBottom).appendChild(button);
+    const link = document.createElement('a');
+    link.className = 'station-button';
+    link.dataset.index = String(index);
+    // Tapping the already-active station links back to the bare page
+    // (stops); tapping any other station links to it directly (plays).
+    link.href = index === activeIndex ? 'pyratedial-app.html' : `pyratedial-app.html?s=${index}`;
+    renderButtonLabel(link, station);
+    if (index === activeIndex) link.classList.add('is-active');
+    (index < 10 ? gridTop : gridBottom).appendChild(link);
   });
 }
 
 function refreshAllButtonLabels() {
-  document.querySelectorAll('.station-button').forEach(button => {
-    const index = Number(button.dataset.index);
+  document.querySelectorAll('.station-button').forEach(link => {
+    const index = Number(link.dataset.index);
     const station = stations[index];
-    if (station) renderButtonLabel(button, station);
+    if (station) renderButtonLabel(link, station);
   });
+  const activeIndex = getRequestedIndex();
   if (activeIndex !== null) {
     const active = stations[activeIndex];
     if (active) playerNameEl.textContent = active.name;
   }
 }
 
-// ----- Playback -----
-// Tapping the currently-active station again stops it; tapping any other
-// station loads and plays it, replacing whatever was playing.
-function handleStationTap(targetIndex) {
-  if (activeIndex === targetIndex && !tuneInFlight) {
-    stopPlayback();
-    return;
-  }
-  playStation(targetIndex);
-}
-
-// Called directly from a station-button tap. If the player already exists,
-// loadPlaylist() is called synchronously, right here, on the same live
-// iframe that's been alive since the very first tap — never on a newly
-// built one.
-function playStation(targetIndex) {
-  const station = stations[targetIndex];
-  if (!station?.playlistId) return;
-  if (!ytPlayer && !apiReady) {
-    setStatus('WARMING UP');
+// ----- The player itself -----
+function renderPlayer(activeIndex) {
+  if (activeIndex === null) {
+    playerFrequencyEl.textContent = '—';
+    playerNameEl.textContent = 'SELECT A STATION';
+    playerStatusEl.textContent = 'STANDBY';
+    playerSlot.innerHTML = '<div class="monitor-standby"><span>STANDBY</span></div>';
     return;
   }
 
-  activeIndex = targetIndex;
-  tuneInFlight = true;
-  updateActiveButtonStyling();
-  setButtonsBusy(true);
-  setMonitorMessage('TUNING');
-  setStatus('TUNING');
+  const station = stations[activeIndex];
   playerFrequencyEl.textContent = formatFrequency(station.frequency);
   playerNameEl.textContent = station.name;
+  playerStatusEl.textContent = 'SIGNAL LOCK';
 
-  expectedStartIndex = chooseRandomIndex(station);
-
-  const doLoad = player => {
-    try {
-      player.mute();
-      player.loadPlaylist({
-        listType: 'playlist',
-        list: station.playlistId,
-        index: expectedStartIndex,
-        startSeconds: 0
-      });
-    } catch (error) {
-      console.warn('Pyrate Dial station load failed:', error);
-      setStatus('SIGNAL HOLD');
-      tuneInFlight = false;
-      activeIndex = null;
-      updateActiveButtonStyling();
-      setButtonsBusy(false);
-    }
-  };
-
-  if (ytPlayer) {
-    doLoad(ytPlayer);
-  } else {
-    ytPlayer = new YT.Player('youtubePlayer', {
-      width: '200',
-      height: '200',
-      playerVars: {
-        autoplay: 0,
-        controls: 0,
-        disablekb: 1,
-        fs: 0,
-        playsinline: 1,
-        rel: 0,
-        cc_load_policy: 0,
-        origin: window.location.origin
-      },
-      events: {
-        onReady: event => {
-          setIframePermissions(event.target);
-          try {
-            event.target.mute();
-            event.target.setVolume(100);
-          } catch (_) {}
-          doLoad(event.target);
-        },
-        onStateChange: handlePlayerStateChange,
-        onAutoplayBlocked: handleAutoplayBlocked,
-        onError: handlePlayerError
-      }
-    });
-  }
+  const iframe = document.createElement('iframe');
+  iframe.className = 'youtube-player';
+  iframe.src = buildEmbedUrl(station);
+  iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
+  iframe.setAttribute('allowfullscreen', '');
+  iframe.setAttribute('aria-label', 'YouTube station video player');
+  playerSlot.innerHTML = '';
+  playerSlot.appendChild(iframe);
 }
-
-function handlePlayerStateChange(event) {
-  if (event.data === YT.PlayerState.PLAYING) {
-    if (tuneInFlight) {
-      let actualIndex = null;
-      try { actualIndex = event.target.getPlaylistIndex(); } catch (_) {}
-
-      if (actualIndex !== expectedStartIndex) {
-        // Stale event from the previous station — ignore it and keep
-        // waiting; the real confirmation for THIS request is still coming.
-        return;
-      }
-
-      tuneInFlight = false;
-      setButtonsBusy(false);
-      revealPlayer();
-      try {
-        event.target.unMute();
-        event.target.setVolume(100);
-        // Shuffle only reorders what plays NEXT, per YouTube's own docs —
-        // it does not change the video already underway. Safe here.
-        event.target.setShuffle(true);
-      } catch (_) {}
-      setStatus('SIGNAL LOCK');
-    } else {
-      // Normal in-playlist advance to the next song — not a new tune.
-      revealPlayer();
-      setStatus('SIGNAL LOCK');
-    }
-  } else if (event.data === YT.PlayerState.BUFFERING) {
-    setStatus('TUNING');
-  } else if (event.data === YT.PlayerState.ENDED) {
-    if (!tuneInFlight) {
-      try {
-        event.target.nextVideo();
-        event.target.playVideo();
-      } catch (_) {}
-    }
-  }
-}
-
-function handleAutoplayBlocked() {
-  if (!tuneInFlight) return;
-  tuneInFlight = false;
-  activeIndex = null;
-  updateActiveButtonStyling();
-  setButtonsBusy(false);
-  setStatus('TAP AGAIN');
-}
-
-function handlePlayerError(event) {
-  if ([100, 101, 150].includes(event.data)) {
-    setStatus('AUTO SKIP');
-    try {
-      event.target.nextVideo();
-      event.target.playVideo();
-    } catch (_) {}
-    return;
-  }
-  if (tuneInFlight) {
-    tuneInFlight = false;
-    activeIndex = null;
-    updateActiveButtonStyling();
-    setButtonsBusy(false);
-  }
-  setStatus('SIGNAL HOLD');
-}
-
-// Stopping pauses and mutes rather than destroying the player — keeping
-// the same iframe alive is the whole point, so the next tap after a stop
-// still benefits from the autoplay permission it already earned.
-function stopPlayback() {
-  tuneInFlight = false;
-  activeIndex = null;
-  updateActiveButtonStyling();
-  setButtonsBusy(false);
-  if (ytPlayer) {
-    try {
-      ytPlayer.pauseVideo();
-      ytPlayer.mute();
-    } catch (_) {}
-  }
-  setMonitorMessage('STANDBY');
-  setStatus('STANDBY');
-  playerFrequencyEl.textContent = '—';
-  playerNameEl.textContent = 'SELECT A STATION';
-}
-
-// ----- Official YouTube IFrame Player API -----
-window.onYouTubeIframeAPIReady = function () {
-  apiReady = true;
-};
-
-(function loadYouTubeApi() {
-  if (window.YT?.Player) {
-    apiReady = true;
-    return;
-  }
-  const tag = document.createElement('script');
-  tag.src = 'https://www.youtube.com/iframe_api';
-  tag.async = true;
-  const firstScript = document.getElementsByTagName('script')[0];
-  firstScript.parentNode.insertBefore(tag, firstScript);
-})();
 
 // ----- Station title refresh (public, no API key — same as the dial page) -----
 const OEMBED_REFRESH_MS = 30 * 60 * 1000;
@@ -398,7 +209,9 @@ async function refreshStationMetadata(force = false) {
 
 // ----- Init -----
 loadCachedStationMetadata();
-buildStationButtons();
+const activeIndex = getRequestedIndex();
+buildStationButtons(activeIndex);
+renderPlayer(activeIndex);
 refreshStationMetadata(true);
 
 document.addEventListener('visibilitychange', () => {

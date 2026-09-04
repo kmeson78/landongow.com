@@ -58,7 +58,7 @@ button { font: inherit; }
 .station-button {
   appearance: none; border: 1px solid #3a352e; border-radius: 3px; cursor: pointer;
   background: linear-gradient(180deg, #29261f 0%, #1c1a15 100%);
-  color: var(--ink);
+  color: var(--ink); text-decoration: none;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
   padding: 2px 4px; text-align: center; overflow: hidden; min-height: 0;
 }
@@ -110,15 +110,15 @@ button { font: inherit; }
   display: block; width: 100% !important; height: 200px !important;
   min-height: 200px; border: 0;
 }
-/* Monochrome CRT treatment, same as the dial page — grayscale filter, and
-   the iframe stays invisible (opacity 0) until player-ready is set, so an
-   off-station or not-yet-confirmed frame is never what's shown. */
+/* Monochrome CRT treatment, same as the dial page. There's no JS
+   confirmation event anymore (no Player API), so visibility is simple: the
+   iframe is only ever in the DOM once it's actually the current station —
+   renderPlayer() writes either the iframe or the standby placeholder, never
+   both — so it can just always be visible the moment it exists. */
 .monitor-screen iframe {
-  position: relative; z-index: 1; opacity: 0;
+  display: block; position: relative; z-index: 1;
   filter: grayscale(100%) contrast(1.28) brightness(.78);
-  transition: opacity 120ms linear;
 }
-.monitor-bay.player-ready .monitor-screen iframe { opacity: 1; }
 .monitor-screen::after {
   content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: 6px;
   background:
@@ -146,7 +146,6 @@ button { font: inherit; }
 .monitor-standby span {
   position: relative; z-index: 1; background: rgba(11,9,7,.55); padding: 3px 10px; border-radius: 2px;
 }
-.monitor-bay.player-ready .monitor-standby { display: none; }
 
 /* Small phones: trim the readout so 200x200 (YouTube's mandatory minimum
    player size) still fits alongside ten buttons per side without scrolling */
