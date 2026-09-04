@@ -128,12 +128,23 @@ button { font: inherit; }
 }
 .monitor-standby {
   position: absolute; inset: 0; z-index: 4; display: grid; place-items: center; pointer-events: none;
+  overflow: hidden;
   color: #6f4a27; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 7px;
   letter-spacing: .18em;
   background:
-    repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0 1px, transparent 1px 3px),
-    repeating-linear-gradient(113deg, rgba(255,255,255,.012) 0 2px, rgba(0,0,0,.03) 2px 5px),
-    radial-gradient(ellipse at 50% 43%, #15110d 0%, #090806 72%);
+    repeating-linear-gradient(0deg, rgba(255,255,255,.022) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(113deg, rgba(255,255,255,.015) 0 2px, rgba(0,0,0,.035) 2px 5px),
+    radial-gradient(ellipse at 50% 43%, #17130e 0%, #090806 72%);
+}
+.monitor-standby::before {
+  content: ""; position: absolute; inset: 0;
+  background-color: #6a4522;
+  -webkit-mask: url("pyratedial-ship.png") center 55% / 34% no-repeat;
+  mask: url("pyratedial-ship.png") center 55% / 34% no-repeat;
+  opacity: .3;
+}
+.monitor-standby span {
+  position: relative; z-index: 1; background: rgba(11,9,7,.55); padding: 3px 10px; border-radius: 2px;
 }
 .monitor-bay.player-ready .monitor-standby { display: none; }
 

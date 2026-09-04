@@ -27,24 +27,33 @@ const stations = STATIONS;
 
 let apiReady = false;
 
-// Two explicit slots instead of one. ytPlayer is the CONFIRMED, audible
-// player (or null). pendingPlayer is whatever's currently loading and NOT
-// yet confirmed (or null). The intermittent "plays but no video" bug came
-// from only ever tracking the last CONFIRMED player: if a new tap fired
-// before the previous one confirmed, that previous, still-loading iframe
-// was never destroyed by anyone — it just sat in the DOM, silent, ahead of
-// whatever was actually playing, blocking it from view. Every new tap now
-// destroys BOTH slots unconditionally before creating anything, so nothing
-// can ever accumulate.
+// ONE player for the whole session, built the first time a station is
+// tapped and reused — never destroyed and rebuilt — for every tap after
+// that. This is a direct correction: the previous version built a brand
+// new iframe on every single tap, and the second tap onward consistently
+// failed to autoplay. That matches something already proven once before in
+// this same project on the dial page — a freshly built iframe, even
+// created synchronously inside a real tap, does not reliably inherit
+// autoplay permission the way a player that's been alive and playing since
+// the first tap does. Reusing one iframe for the whole session is what
+// keeps that permission intact.
 let ytPlayer = null;
-let pendingPlayer = null;
-let tuneToken = 0;
 let tuneInFlight = false;
 let activeIndex = null;
 
+// Reusing one player means loadPlaylist() gets called again on a player
+// that's already playing something — which is exactly the scenario that
+// caused the ORIGINAL bug earlier in this project: a leftover event from
+// the station before could arrive after the next one's already been
+// requested, so the audio would land one tune behind the display.
+// expectedStartIndex is the fix: the exact random index just requested.
+// A PLAYING event only counts as real confirmation if the player's actual
+// getPlaylistIndex() matches it — a stale event from the previous station
+// essentially never coincidentally matches.
+let expectedStartIndex = null;
+
 const monitorBay = document.getElementById('monitorBay');
 const monitorStandby = document.getElementById('monitorStandby');
-const monitorScreen = document.querySelector('.monitor-screen');
 const gridTop = document.getElementById('stationGridTop');
 const gridBottom = document.getElementById('stationGridBottom');
 const playerFrequencyEl = document.getElementById('playerFrequency');
@@ -52,11 +61,6 @@ const playerNameEl = document.getElementById('playerName');
 const playerStatusEl = document.getElementById('playerStatus');
 
 const formatFrequency = freq => Number(freq).toFixed(1);
-
-function destroyPlayer(player) {
-  if (!player) return;
-  try { player.destroy(); } catch (_) {}
-}
 
 function setStatus(text) {
   playerStatusEl.textContent = text;
@@ -160,25 +164,17 @@ function handleStationTap(targetIndex) {
   playStation(targetIndex);
 }
 
-// Called directly from a station-button tap, so construction/commands
-// happen inside the user's gesture on iPhone.
+// Called directly from a station-button tap. If the player already exists,
+// loadPlaylist() is called synchronously, right here, on the same live
+// iframe that's been alive since the very first tap — never on a newly
+// built one.
 function playStation(targetIndex) {
   const station = stations[targetIndex];
   if (!station?.playlistId) return;
-  if (!ytPlayer && !pendingPlayer && !apiReady) {
+  if (!ytPlayer && !apiReady) {
     setStatus('WARMING UP');
     return;
   }
-
-  const token = ++tuneToken;
-
-  // Unconditional cleanup of BOTH slots before anything new starts. This
-  // is what guarantees no orphaned iframe can ever accumulate, regardless
-  // of whether the previous tap ever confirmed.
-  destroyPlayer(pendingPlayer);
-  pendingPlayer = null;
-  const outgoingPlayer = ytPlayer;
-  ytPlayer = null;
 
   activeIndex = targetIndex;
   tuneInFlight = true;
@@ -189,124 +185,141 @@ function playStation(targetIndex) {
   playerFrequencyEl.textContent = formatFrequency(station.frequency);
   playerNameEl.textContent = station.name;
 
-  if (outgoingPlayer) {
-    try { outgoingPlayer.mute(); } catch (_) {}
-  }
+  expectedStartIndex = chooseRandomIndex(station);
 
-  const startIndex = chooseRandomIndex(station);
-
-  // Only relevant for the very first tap ever: clears the static
-  // placeholder div so it doesn't sit ahead of every real player.
-  document.getElementById('youtubePlayer')?.remove();
-
-  const container = document.createElement('div');
-  container.className = 'youtube-player';
-  container.setAttribute('aria-label', 'YouTube station video player');
-  monitorScreen.insertBefore(container, monitorStandby);
-
-  function abandonTune(failedPlayer) {
-    if (token !== tuneToken) return;
-    tuneInFlight = false;
-    activeIndex = null;
-    updateActiveButtonStyling();
-    setButtonsBusy(false);
-    destroyPlayer(failedPlayer);
-    if (pendingPlayer === failedPlayer) pendingPlayer = null;
-    destroyPlayer(outgoingPlayer);
-    setStatus('SIGNAL HOLD');
-  }
-
-  pendingPlayer = new YT.Player(container, {
-    width: '200',
-    height: '200',
-    playerVars: {
-      autoplay: 0,
-      controls: 0,
-      disablekb: 1,
-      fs: 0,
-      playsinline: 1,
-      rel: 0,
-      cc_load_policy: 0,
-      origin: window.location.origin
-    },
-    events: {
-      onReady: event => {
-        if (token !== tuneToken) return;
-        setIframePermissions(event.target);
-        try {
-          event.target.mute();
-          event.target.setVolume(100);
-          event.target.loadPlaylist({
-            listType: 'playlist',
-            list: station.playlistId,
-            index: startIndex,
-            startSeconds: 0
-          });
-        } catch (error) {
-          console.warn('Pyrate Dial station load failed:', error);
-          abandonTune(event.target);
-        }
-      },
-      onStateChange: event => {
-        if (token !== tuneToken) return;
-
-        if (event.data === YT.PlayerState.PLAYING) {
-          destroyPlayer(outgoingPlayer);
-          ytPlayer = event.target;
-          pendingPlayer = null;
-
-          revealPlayer();
-          try {
-            event.target.unMute();
-            event.target.setVolume(100);
-            event.target.setShuffle(true);
-          } catch (_) {}
-
-          tuneInFlight = false;
-          setButtonsBusy(false);
-          setStatus('SIGNAL LOCK');
-        } else if (event.data === YT.PlayerState.BUFFERING) {
-          setStatus('TUNING');
-        } else if (event.data === YT.PlayerState.ENDED) {
-          if (!tuneInFlight) {
-            try {
-              event.target.nextVideo();
-              event.target.playVideo();
-            } catch (_) {}
-          }
-        }
-      },
-      onAutoplayBlocked: event => {
-        if (token !== tuneToken) return;
-        setStatus('TAP AGAIN');
-        abandonTune(event?.target);
-      },
-      onError: event => {
-        if (token !== tuneToken) return;
-        if ([100, 101, 150].includes(event.data)) {
-          setStatus('AUTO SKIP');
-          try {
-            event.target.nextVideo();
-            event.target.playVideo();
-          } catch (_) {}
-          return;
-        }
-        abandonTune(event.target);
-      }
+  const doLoad = player => {
+    try {
+      player.mute();
+      player.loadPlaylist({
+        listType: 'playlist',
+        list: station.playlistId,
+        index: expectedStartIndex,
+        startSeconds: 0
+      });
+    } catch (error) {
+      console.warn('Pyrate Dial station load failed:', error);
+      setStatus('SIGNAL HOLD');
+      tuneInFlight = false;
+      activeIndex = null;
+      updateActiveButtonStyling();
+      setButtonsBusy(false);
     }
-  });
+  };
+
+  if (ytPlayer) {
+    doLoad(ytPlayer);
+  } else {
+    ytPlayer = new YT.Player('youtubePlayer', {
+      width: '200',
+      height: '200',
+      playerVars: {
+        autoplay: 0,
+        controls: 0,
+        disablekb: 1,
+        fs: 0,
+        playsinline: 1,
+        rel: 0,
+        cc_load_policy: 0,
+        origin: window.location.origin
+      },
+      events: {
+        onReady: event => {
+          setIframePermissions(event.target);
+          try {
+            event.target.mute();
+            event.target.setVolume(100);
+          } catch (_) {}
+          doLoad(event.target);
+        },
+        onStateChange: handlePlayerStateChange,
+        onAutoplayBlocked: handleAutoplayBlocked,
+        onError: handlePlayerError
+      }
+    });
+  }
 }
 
-function stopPlayback() {
-  tuneToken++; // invalidate anything still in flight
+function handlePlayerStateChange(event) {
+  if (event.data === YT.PlayerState.PLAYING) {
+    if (tuneInFlight) {
+      let actualIndex = null;
+      try { actualIndex = event.target.getPlaylistIndex(); } catch (_) {}
+
+      if (actualIndex !== expectedStartIndex) {
+        // Stale event from the previous station — ignore it and keep
+        // waiting; the real confirmation for THIS request is still coming.
+        return;
+      }
+
+      tuneInFlight = false;
+      setButtonsBusy(false);
+      revealPlayer();
+      try {
+        event.target.unMute();
+        event.target.setVolume(100);
+        // Shuffle only reorders what plays NEXT, per YouTube's own docs —
+        // it does not change the video already underway. Safe here.
+        event.target.setShuffle(true);
+      } catch (_) {}
+      setStatus('SIGNAL LOCK');
+    } else {
+      // Normal in-playlist advance to the next song — not a new tune.
+      revealPlayer();
+      setStatus('SIGNAL LOCK');
+    }
+  } else if (event.data === YT.PlayerState.BUFFERING) {
+    setStatus('TUNING');
+  } else if (event.data === YT.PlayerState.ENDED) {
+    if (!tuneInFlight) {
+      try {
+        event.target.nextVideo();
+        event.target.playVideo();
+      } catch (_) {}
+    }
+  }
+}
+
+function handleAutoplayBlocked() {
+  if (!tuneInFlight) return;
   tuneInFlight = false;
   activeIndex = null;
   updateActiveButtonStyling();
   setButtonsBusy(false);
-  destroyPlayer(pendingPlayer);
-  pendingPlayer = null;
-  destroyPlayer(ytPlayer);
-  ytPlayer = null;
+  setStatus('TAP AGAIN');
+}
+
+function handlePlayerError(event) {
+  if ([100, 101, 150].includes(event.data)) {
+    setStatus('AUTO SKIP');
+    try {
+      event.target.nextVideo();
+      event.target.playVideo();
+    } catch (_) {}
+    return;
+  }
+  if (tuneInFlight) {
+    tuneInFlight = false;
+    activeIndex = null;
+    updateActiveButtonStyling();
+    setButtonsBusy(false);
+  }
+  setStatus('SIGNAL HOLD');
+}
+
+// Stopping pauses and mutes rather than destroying the player — keeping
+// the same iframe alive is the whole point, so the next tap after a stop
+// still benefits from the autoplay permission it already earned.
+function stopPlayback() {
+  tuneInFlight = false;
+  activeIndex = null;
+  updateActiveButtonStyling();
+  setButtonsBusy(false);
+  if (ytPlayer) {
+    try {
+      ytPlayer.pauseVideo();
+      ytPlayer.mute();
+    } catch (_) {}
+  }
   setMonitorMessage('STANDBY');
   setStatus('STANDBY');
   playerFrequencyEl.textContent = '—';
