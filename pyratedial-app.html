@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="theme-color" content="#161412" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Pyrate Dial" />
+  <meta name="description" content="Pyrate Dial — personal frequency receiver, mobile app." />
+  <link rel="manifest" href="pyratedial-app-manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="pyratedial-icon-192.png" />
+  <link rel="stylesheet" href="pyratedial-app.css?v=1" />
+  <title>Pyrate Dial</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="masthead" aria-label="Pyrate Dial">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true"><img src="pyratedial-ship.png" alt="" /></div>
+        <div>
+          <h1>PYRATE DIAL</h1>
+          <p>PERSONAL FREQUENCY RECEIVER</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="station-grid" id="stationGridTop" aria-label="Stations 1 through 10"></section>
+
+    <section class="player-block" aria-label="Now playing">
+      <div class="player-readout">
+        <span class="player-frequency" id="playerFrequency">—</span>
+        <span class="player-name" id="playerName">SELECT A STATION</span>
+        <span class="player-status" id="playerStatus">STANDBY</span>
+      </div>
+      <div class="monitor-bay" id="monitorBay">
+        <div class="monitor-bezel">
+          <div class="monitor-screen">
+            <div id="youtubePlayer" class="youtube-player" aria-label="YouTube station video player"></div>
+            <div class="monitor-standby" id="monitorStandby" aria-hidden="true"><span>STANDBY</span></div>
+          </div>
+        </div>
+      </div>
+      <button id="stopButton" class="stop-button" type="button" disabled>STOP</button>
+    </section>
+
+    <section class="station-grid" id="stationGridBottom" aria-label="Stations 11 through 20"></section>
+  </div>
+
+  <script src="pyratedial-app.js?v=1"></script>
+</body>
+</html>
