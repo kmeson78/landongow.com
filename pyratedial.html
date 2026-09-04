@@ -10,7 +10,7 @@
   <meta name="description" content="Pyrate Dial — a personal frequency receiver." />
   <link rel="manifest" href="pyratedial-manifest.webmanifest" />
   <link rel="apple-touch-icon" href="pyratedial-icon-192.png" />
-  <link rel="stylesheet" href="pyratedial-v4.css" />
+  <link rel="stylesheet" href="pyratedial-v5.css" />
   <title>Pyrate Dial</title>
 </head>
 <body>
@@ -34,7 +34,7 @@
         <span>88—108 MC</span>
       </div>
 
-      <section class="display" aria-live="polite" aria-atomic="true">
+      <section class="display station-readout" aria-live="polite" aria-atomic="true">
         <div class="display-glass"></div>
         <div class="frequency-row">
           <div class="frequency" id="frequency">93.9</div>
@@ -42,6 +42,21 @@
         </div>
         <div class="station-name" id="stationName">Atomic Hits</div>
         <div class="signal-status" id="status">SYNC</div>
+      </section>
+
+      <section class="monitor-bay" aria-label="Station video monitor">
+        <div class="monitor-labels" aria-hidden="true">
+          <span>VIDEO MONITOR</span>
+          <span>200 × 200</span>
+        </div>
+        <div class="monitor-bezel">
+          <div class="monitor-screen">
+            <div id="youtubePlayer" class="youtube-player" aria-label="YouTube station video player"></div>
+            <div class="monitor-standby" id="monitorStandby" aria-hidden="true">
+              <span>STANDBY</span>
+            </div>
+          </div>
+        </div>
       </section>
 
       <div class="dial-scale" aria-hidden="true">
