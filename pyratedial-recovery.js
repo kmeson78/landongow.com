@@ -339,7 +339,10 @@ function spinUpPlayer(station, targetIndex) {
     width: '200',
     height: '200',
     playerVars: {
-      autoplay: 0,
+      // Signals autoplay intent from construction, not just from the later
+      // loadPlaylist() call. Muted autoplay is unconditionally permitted by
+      // WebKit even with no gesture, so this is safe regardless.
+      autoplay: 1,
       controls: 0,
       disablekb: 1,
       fs: 0,
@@ -361,6 +364,13 @@ function spinUpPlayer(station, targetIndex) {
             index: startIndex,
             startSeconds: 0
           });
+          // Explicit nudge. loadPlaylist() is documented to autoplay on its
+          // own, but this call happens inside the async onReady callback of
+          // a brand-new iframe rather than synchronously in the tap — a
+          // weaker position for iOS's autoplay policy than the old
+          // single-player version had. This redundant call is exactly what
+          // the project's own prior code relied on for the same reason.
+          event.target.playVideo();
         } catch (error) {
           console.warn('Pyrate Dial station load failed:', error);
           statusEl.textContent = 'SIGNAL HOLD';
