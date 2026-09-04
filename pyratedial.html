@@ -10,7 +10,7 @@
   <meta name="description" content="Pyrate Dial — a personal frequency receiver." />
   <link rel="manifest" href="pyratedial-manifest.webmanifest" />
   <link rel="apple-touch-icon" href="pyratedial-icon-192.png" />
-  <link rel="stylesheet" href="pyratedial-v7.css" />
+  <link rel="stylesheet" href="pyratedial-v12.css" />
   <title>Pyrate Dial</title>
 </head>
 <body>
@@ -66,10 +66,14 @@
         <div class="scale-line"><span class="scale-marker" id="signalMarker"></span></div>
       </div>
 
-      <section class="controls" aria-label="Station tuning controls">
+      <section class="controls" aria-label="Receiver controls">
         <button id="prevStation" class="seek-button" type="button" aria-label="Auto tune to previous station">
           <span class="arrow">◀</span>
           <span class="button-copy"><small>AUTO</small><b>TUNE</b></span>
+        </button>
+        <button id="powerButton" class="power-button" type="button" aria-label="Power receiver" aria-pressed="false">
+          <span class="power-led" aria-hidden="true"></span>
+          <span class="power-label">POWER</span>
         </button>
         <button id="nextStation" class="seek-button" type="button" aria-label="Auto tune to next station">
           <span class="button-copy"><small>AUTO</small><b>TUNE</b></span>
@@ -113,6 +117,6 @@
     </form>
   </dialog>
 
-  <script src="pyratedial-v10.js"></script>
+  <script src="pyratedial-v12.js"></script>
 </body>
 </html>
