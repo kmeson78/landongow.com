@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#161412" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Pyrate Dial" />
+  <meta name="description" content="Pyrate Dial — a personal frequency receiver." />
+  <link rel="manifest" href="pyratedial-manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="pyratedial-icon-192.png" />
+  <link rel="stylesheet" href="pyratedial.css" />
+  <title>Pyrate Dial</title>
+</head>
+<body>
+  <div class="page-watermark" aria-hidden="true"></div>
+  <div class="page-shell">
+    <header class="masthead" aria-label="Pyrate Dial">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true"><img src="pyratedial-ship.png" alt="" /></div>
+        <div>
+          <h1>PYRATE DIAL</h1>
+          <p>PERSONAL FREQUENCY RECEIVER</p>
+        </div>
+      </div>
+      <div class="build-mark" aria-hidden="true">MODEL 01<br />FM RECEIVER</div>
+    </header>
+
+    <main class="receiver" aria-label="Pyrate Dial radio tuner">
+      <div class="receiver-topline" aria-hidden="true">
+        <span>FM</span>
+        <span>AUTO TUNE</span>
+        <span>88—108 MC</span>
+      </div>
+
+      <section class="display" aria-live="polite" aria-atomic="true">
+        <div class="display-glass"></div>
+        <div class="frequency-row">
+          <div class="frequency" id="frequency">93.9</div>
+          <div class="unit">FM</div>
+        </div>
+        <div class="station-name" id="stationName">Atomic Hits</div>
+        <div class="signal-status" id="status">SYNC</div>
+      </section>
+
+      <div class="dial-scale" aria-hidden="true">
+        <div class="scale-labels">
+          <span>88</span><span>92</span><span>96</span><span>100</span><span>104</span><span>108</span>
+        </div>
+        <div class="scale-line"><span class="scale-marker" id="signalMarker"></span></div>
+      </div>
+
+      <section class="controls" aria-label="Station tuning controls">
+        <button id="prevStation" class="seek-button" type="button" aria-label="Auto tune to previous station">
+          <span class="arrow">◀</span>
+          <span class="button-copy"><small>AUTO</small><b>TUNE</b></span>
+        </button>
+        <button id="nextStation" class="seek-button" type="button" aria-label="Auto tune to next station">
+          <span class="button-copy"><small>AUTO</small><b>TUNE</b></span>
+          <span class="arrow">▶</span>
+        </button>
+      </section>
+
+      <div class="receiver-footer" aria-hidden="true">
+        <span>STEREO SOLID STATE</span>
+        <span>PYRATE INDUSTRIES</span>
+      </div>
+    </main>
+
+    <section class="install-panel" id="installPanel" aria-labelledby="installTitle">
+      <div>
+        <p class="install-kicker">MOBILE RECEIVER</p>
+        <h2 id="installTitle">Download Pyrate Dial App for your mobile device</h2>
+        <p class="install-copy">Install the receiver on your Home Screen for the stripped-down standalone version.</p>
+      </div>
+      <button class="install-button" id="installButton" type="button">INSTALL PYRATE DIAL</button>
+    </section>
+
+    <footer class="site-footer">PYRATE DIAL · PRIVATE BROADCAST RECEIVER</footer>
+  </div>
+
+  <dialog class="install-dialog" id="installDialog">
+    <form method="dialog">
+      <div class="dialog-head">
+        <span>INSTALLATION</span>
+        <button value="cancel" aria-label="Close installation instructions">×</button>
+      </div>
+      <div class="dialog-body" id="installInstructions">
+        <p>On iPhone:</p>
+        <ol>
+          <li>Open Pyrate Dial in Safari.</li>
+          <li>Tap the Share button.</li>
+          <li>Choose “Add to Home Screen.”</li>
+          <li>Tap “Add.”</li>
+        </ol>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="pyratedial-config.js"></script>
+  <script src="pyratedial.js"></script>
+</body>
+</html>
