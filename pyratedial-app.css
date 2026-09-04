@@ -147,6 +147,17 @@ button { font: inherit; }
   position: relative; z-index: 1; background: rgba(11,9,7,.55); padding: 3px 10px; border-radius: 2px;
 }
 
+.unmute-button {
+  position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 5;
+  appearance: none; border: 1px solid #6b3a1c; border-radius: 3px; cursor: pointer;
+  background: linear-gradient(180deg, #d6812f 0%, #a8601c 100%);
+  color: #1c1108; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9px; letter-spacing: .14em; padding: 7px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.5);
+}
+.unmute-button:disabled { opacity: .5; cursor: default; }
+.unmute-button:not(:disabled):active { background: #8f5119; }
+
 /* Small phones: trim the readout so 200x200 (YouTube's mandatory minimum
    player size) still fits alongside ten buttons per side without scrolling */
 @media (max-height: 700px) {

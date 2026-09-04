@@ -88,9 +88,14 @@ function buildEmbedUrl(station) {
     list: station.playlistId,
     index: String(startIndex),
     autoplay: '1',
+    mute: '1',
+    controls: '0',
+    disablekb: '1',
+    fs: '0',
     playsinline: '1',
     rel: '0',
     cc_load_policy: '0',
+    enablejsapi: '1',
     origin: window.location.origin
   });
   return `https://www.youtube.com/embed/videoseries?${params.toString()}`;
@@ -130,7 +135,56 @@ function refreshAllButtonLabels() {
 }
 
 // ----- The player itself -----
+// Minimal use of the YouTube JS API — not for loading or state-tracking
+// (the embed URL already does all of that on its own), only so our own
+// "TAP FOR SOUND" button has something to call .unMute() on. One player
+// object, built once per page load, asked to do exactly one thing.
+let apiReady = false;
+let activePlayer = null;
+
+window.onYouTubeIframeAPIReady = function () {
+  apiReady = true;
+};
+
+function loadYouTubeApiScript() {
+  if (window.YT?.Player) {
+    apiReady = true;
+    return;
+  }
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  tag.async = true;
+  const firstScript = document.getElementsByTagName('script')[0];
+  firstScript.parentNode.insertBefore(tag, firstScript);
+}
+
+function attachUnmuteBridge(iframe, unmuteButton) {
+  function wire() {
+    if (!window.YT?.Player) {
+      setTimeout(wire, 50);
+      return;
+    }
+    activePlayer = new window.YT.Player(iframe, {
+      events: {
+        onReady: () => { unmuteButton.disabled = false; }
+      }
+    });
+  }
+  wire();
+
+  unmuteButton.addEventListener('click', () => {
+    if (!activePlayer) return;
+    try {
+      activePlayer.unMute();
+      activePlayer.setVolume(100);
+    } catch (_) {}
+    unmuteButton.remove();
+  });
+}
+
 function renderPlayer(activeIndex) {
+  activePlayer = null;
+
   if (activeIndex === null) {
     playerFrequencyEl.textContent = '—';
     playerNameEl.textContent = 'SELECT A STATION';
@@ -150,8 +204,19 @@ function renderPlayer(activeIndex) {
   iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
   iframe.setAttribute('allowfullscreen', '');
   iframe.setAttribute('aria-label', 'YouTube station video player');
+
+  const unmuteButton = document.createElement('button');
+  unmuteButton.type = 'button';
+  unmuteButton.className = 'unmute-button';
+  unmuteButton.textContent = 'TAP FOR SOUND';
+  unmuteButton.disabled = true;
+
   playerSlot.innerHTML = '';
   playerSlot.appendChild(iframe);
+  playerSlot.appendChild(unmuteButton);
+
+  loadYouTubeApiScript();
+  attachUnmuteBridge(iframe, unmuteButton);
 }
 
 // ----- Station title refresh (public, no API key — same as the dial page) -----
