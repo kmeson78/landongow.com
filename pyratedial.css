@@ -20,10 +20,11 @@ body {
 button { font: inherit; }
 
 .page-watermark {
-  position: fixed; z-index: 0; pointer-events: none; width: min(62vw, 760px); aspect-ratio: 1;
-  right: max(-90px, calc((100vw - 1000px) / 2 - 120px)); top: 10vh;
-  background: url("pyratedial-ship.png") center / contain no-repeat; opacity: .035;
-  filter: sepia(.3) contrast(1.25); transform: rotate(-4deg);
+  position: fixed; z-index: 0; pointer-events: none; width: min(78vw, 900px); aspect-ratio: 1;
+  left: 50%; top: 50%;
+  background: url("pyratedial-ship.png") center / contain no-repeat; opacity: .075;
+  filter: invert(76%) sepia(20%) saturate(560%) hue-rotate(350deg) brightness(88%) contrast(84%);
+  transform: translate(-50%, -48%) rotate(-4deg);
 }
 .page-shell { position: relative; z-index: 1; }
 
@@ -42,7 +43,10 @@ button { font: inherit; }
   width: 54px; height: 42px; display: grid; place-items: center; overflow: hidden;
   border-bottom: 1px solid #5b5248; opacity: .88;
 }
-.brand-mark img { width: 60px; height: 60px; object-fit: contain; filter: sepia(.3) brightness(.8) contrast(1.2); }
+.brand-mark img {
+  width: 60px; height: 60px; object-fit: contain; opacity: .95;
+  filter: invert(76%) sepia(20%) saturate(560%) hue-rotate(350deg) brightness(88%) contrast(84%);
+}
 .masthead h1 { margin: 0; font-size: 20px; line-height: .95; font-weight: 700; letter-spacing: .18em; }
 .masthead p {
   margin: 6px 0 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
