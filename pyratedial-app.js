@@ -24,6 +24,8 @@ const STATIONS = [
 ].sort((a, b) => a.frequency - b.frequency);
 
 const stations = STATIONS;
+const FM_MIN = 88.1;
+const FM_MAX = 107.9;
 
 // No YouTube JS Player state machine here — every station is a plain
 // embed URL, and switching stations is a real navigation to
@@ -36,8 +38,11 @@ const playerSlot = document.getElementById('playerSlot');
 const heroFrequencyEl = document.getElementById('heroFrequency');
 const heroNameEl = document.getElementById('heroName');
 const heroStatusEl = document.getElementById('heroStatus');
+const signalMarkerEl = document.getElementById('signalMarker');
 
 const formatFrequency = freq => Number(freq).toFixed(1);
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+const markerPosition = freq => clamp(((freq - FM_MIN) / (FM_MAX - FM_MIN)) * 100, 0, 100);
 
 // ----- Random starting position (identical logic to the dial page) -----
 function recentIndexKey(playlistId) {
@@ -161,7 +166,17 @@ function attachPlayerBridge(iframe, unmuteButton) {
       events: {
         onReady: event => {
           unmuteButton.disabled = false;
-          try { event.target.setShuffle(true); } catch (_) {}
+          try {
+            // The URL's own index= param isn't reliably honored by
+            // YouTube's plain embed — this is the part that was actually
+            // guaranteeing variety: shuffle turns on for the whole
+            // playlist, then nextVideo() jumps off whatever the embed
+            // defaulted to (usually track 1) onto a shuffled pick. Muted
+            // at this point, so the jump is silent, not a jarring skip.
+            event.target.setShuffle(true);
+            event.target.nextVideo();
+            event.target.playVideo();
+          } catch (_) {}
         }
       }
     });
@@ -185,6 +200,7 @@ function renderPlayer(activeIndex) {
     heroFrequencyEl.textContent = '—';
     heroNameEl.textContent = 'SELECT A STATION';
     heroStatusEl.textContent = 'STANDBY';
+    signalMarkerEl.style.left = '50%';
     playerSlot.innerHTML = '<div class="monitor-standby"><span>STANDBY</span></div>';
     return;
   }
@@ -193,6 +209,7 @@ function renderPlayer(activeIndex) {
   heroFrequencyEl.textContent = formatFrequency(station.frequency);
   heroNameEl.textContent = station.name;
   heroStatusEl.textContent = 'SIGNAL LOCK';
+  signalMarkerEl.style.left = `${markerPosition(station.frequency)}%`;
 
   const iframe = document.createElement('iframe');
   iframe.className = 'youtube-player';

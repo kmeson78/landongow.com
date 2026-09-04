@@ -152,6 +152,24 @@ button { font: inherit; }
 .unmute-button:disabled { opacity: .5; cursor: default; }
 .unmute-button:not(:disabled):active { background: #8f5119; }
 
+/* ----- Tuning scale + needle — same component as the dial page, recolored
+   for this page's darker background (the original used near-black text
+   meant to sit on a lighter steel bezel). ----- */
+.dial-scale {
+  width: 100%; max-width: 340px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--ink-dim); user-select: none;
+}
+.scale-labels { display: flex; justify-content: space-between; padding: 0 1px; font-size: 8px; letter-spacing: .05em; }
+.scale-line {
+  position: relative; height: 10px; margin-top: 5px; border-top: 1px solid #3a352e;
+  background: repeating-linear-gradient(90deg, #3a352e 0 1px, transparent 1px 8.5%);
+  background-size: 100% 5px; background-repeat: no-repeat;
+}
+.scale-marker {
+  position: absolute; top: -5px; width: 2px; height: 13px; transform: translateX(-1px);
+  background: var(--amber); box-shadow: 0 0 8px rgba(240,167,75,.5); transition: left 380ms cubic-bezier(.2,.8,.2,1);
+}
+
 /* ----- Preset strip — swipe through all 20 stations like radio presets.
    Native momentum scroll with scroll-snap, one row, always reachable with
    a thumb. Tapping a preset navigates directly to it. ----- */
