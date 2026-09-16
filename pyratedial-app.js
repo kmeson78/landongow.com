@@ -1,12 +1,14 @@
 /* Phone receiver. Keep plain iframe loading + real page-navigation presets.
  * The bridge prepares the initial shuffled recording while muted and supplies
- * TAP FOR SOUND. It never asynchronously unmutes on the user's behalf.
+ * TAP FOR SOUND. Live presets use the same button and the shared live controller.
  */
 (() => {
   'use strict';
   const R = window.PyrateDial;
+  const L = window.PyrateLive;
   const heroStatus = document.getElementById('heroStatus');
-  if (!R || !Array.isArray(window.PYRATE_STATIONS)) {
+  if (!R || !L || !Array.isArray(window.PYRATE_STATIONS) ||
+      window.PYRATE_DIRECTORY_BUILD !== R.BUILD || L.BUILD !== R.BUILD) {
     heroStatus.textContent = 'UPDATE FILES MISSING — RELOAD';
     return;
   }
@@ -28,29 +30,16 @@
   let endTimer = null;
   let readyTimer = null;
 
-  function requestedIndex() {
-    const params = new URLSearchParams(location.search);
-    if (params.has('f')) {
-      const value = params.get('f');
-      if (!/^\d{2,3}\.\d$/.test(value || '')) return null;
-      const index = stations.findIndex(s => s.frequency === Number(value));
-      return index < 0 ? null : index;
-    }
-    // Old bookmarks used 20-station array positions. Never reinterpret them as
-    // positions in the expanded directory; first translate through the old map.
-    const value = params.get('s');
-    if (!/^\d+$/.test(value || '')) return null;
-    const frequency = window.PYRATE_LEGACY_APP_FREQUENCIES?.[Number(value)];
-    const index = stations.findIndex(s => s.frequency === frequency);
-    return index < 0 ? null : index;
-  }
-  const activeIndex = requestedIndex();
+  let live = null;
+  const activeIndex = R.requestedStationIndex(stations);
   const station = activeIndex === null ? null : stations[activeIndex];
-  if (station && new URLSearchParams(location.search).has('s')) {
+  if (station) {
+    // Preserve old frequency/index bookmarks, then replace them with stable IDs.
     try {
       const canonical = new URL(location.href);
       canonical.searchParams.delete('s');
-      canonical.searchParams.set('f', format(station.frequency));
+      canonical.searchParams.delete('f');
+      canonical.searchParams.set('station', station.id);
       history.replaceState(null, '', canonical.href);
     } catch (_) {}
   }
@@ -78,7 +67,7 @@
     pill.className = 'preset-pill';
     pill.dataset.index = String(index);
     // Keep real navigation and the existing tap-active-station-to-stop behavior.
-    pill.href = index === activeIndex ? 'pyratedial-app.html' : `pyratedial-app.html?f=${format(entry.frequency)}`;
+    pill.href = index === activeIndex ? 'pyratedial-app.html' : `pyratedial-app.html?station=${encodeURIComponent(entry.id)}`;
     label(pill, entry);
     if (index === activeIndex) {
       pill.classList.add('is-active');
@@ -102,6 +91,45 @@
     nameEl.textContent = 'SELECT A STATION';
     heroStatus.textContent = 'STANDBY';
     marker.style.left = '50%';
+  } else if (station.sourceType === 'live') {
+    frequencyEl.textContent = format(station.frequency);
+    nameEl.textContent = station.name;
+    heroStatus.textContent = 'TAP FOR SOUND';
+    marker.style.left = `${Math.max(0, Math.min(100, (station.frequency - 88.1) / 19.8 * 100))}%`;
+    document.title = `${format(station.frequency)} — ${station.name} · Pyrate Dial`;
+    const card = L.createCard(station);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'unmute-button';
+    button.textContent = 'TAP FOR SOUND';
+    button.setAttribute('aria-label', `Play ${station.name} live`);
+    slot.replaceChildren(card, button);
+    live = L.create({
+      onStop: () => { location.href = 'pyratedial-app.html'; },
+      onState(event) {
+        if (disposed || !event.station || event.station.id !== station.id) return;
+        L.paintCard(card, event.state);
+        const messages = {
+          connecting: 'TUNING LIVE', playing: 'LIVE SIGNAL', buffering: 'SIGNAL HOLD',
+          blocked: 'TAP FOR SOUND', paused: 'TAP TO RESUME',
+          offline: 'NO CONNECTION', error: 'SIGNAL LOST — RETRY'
+        };
+        heroStatus.textContent = messages[event.state] || 'TUNING LIVE';
+        button.hidden = event.state === 'playing' || event.state === 'buffering';
+        button.disabled = event.state === 'connecting';
+        button.textContent = ({
+          connecting: 'CONNECTING', paused: 'TAP TO RESUME', blocked: 'TAP FOR SOUND',
+          error: 'RETRY STATION', offline: 'RETRY CONNECTION'
+        })[event.state] || 'TAP FOR SOUND';
+      }
+    });
+    // A home-screen launch does not grant autoplay. Connect only on this tap;
+    // there is no hidden silent download or pre-roll before the listener starts.
+    button.addEventListener('click', () => {
+      if (disposed) return;
+      if (live.currentStation) live.resume();
+      else live.start(station);
+    });
   } else {
     frequencyEl.textContent = format(station.frequency);
     nameEl.textContent = station.name;
@@ -249,6 +277,7 @@
   });
   window.addEventListener('pagehide', () => {
     disposed = true;
+    live?.destroy();
     arrival?.cancel();
     clearTimeout(readyTimer);
     clearTimeout(audioTimer);

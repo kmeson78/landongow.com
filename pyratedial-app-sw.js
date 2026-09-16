@@ -3,17 +3,19 @@
  * Registered with a page-specific scope by this receiver, not the whole site.
  */
 'use strict';
-const BUILD = '20260915-r2';
+const BUILD = '20260916-live1';
 const CACHE_PREFIX = "pyrate-dial-app-";
 const CACHE_NAME = CACHE_PREFIX + BUILD;
 const BASE = new URL('./', self.location.href);
 const PAGE_URL = new URL("pyratedial-app.html", BASE);
 const ASSETS = [
   "pyratedial-app.html",
-  "pyratedial-app.css?v=20260915-r2",
-  "pyratedial-app.js?v=20260915-r2",
-  "pyratedial-stations.js?v=20260915-r2",
-  "pyratedial-shared.js?v=20260915-r2",
+  "pyratedial-app.css?v=20260916-live1",
+  "pyratedial-app.js?v=20260916-live1",
+  "pyratedial-stations.js?v=20260916-live1",
+  "pyratedial-shared.js?v=20260916-live1",
+  "pyratedial-live.js?v=20260916-live1",
+  "pyratedial-live.css?v=20260916-live1",
   "pyratedial-app-manifest.webmanifest",
   "pyratedial-icon-192.png",
   "pyratedial-icon-512.png",
@@ -22,8 +24,12 @@ const ASSETS = [
 const ALLOWED_PATHS = new Set(ASSETS.map(path => new URL(path, BASE).pathname));
 
 function keyFor(url) {
-  // Query parameters select a station or bust HTTP caches, not different shells.
-  return new URL(url.pathname, BASE).href;
+  // Only station-selection queries share the same document shell. Keep JS/CSS
+  // build versions separate so offline fallback cannot mix different builds.
+  if (url.pathname === PAGE_URL.pathname) return PAGE_URL.href;
+  const key = new URL(url.pathname, BASE);
+  if (url.searchParams.has('v')) key.searchParams.set('v', url.searchParams.get('v'));
+  return key.href;
 }
 async function cacheResponse(request, response) {
   if (!response.ok || response.type === 'opaque') return;

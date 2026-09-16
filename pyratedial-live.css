@@ -1,0 +1,24 @@
+/* Pyrate Dial live-station insert. Existing desktop and phone styling stays intact. */
+.pyrate-live-audio { display: none !important; }
+.pyrate-live-card {
+  position: absolute; inset: 0; z-index: 1;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  gap: 7px; padding: 17px 12px 32px; text-align: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #d99b51;
+  background: radial-gradient(ellipse at 50% 40%, #26180c 0%, #0b0907 76%);
+}
+.pyrate-live-kicker { font-size: 7px; letter-spacing: .19em; color: #99713f; }
+.pyrate-live-ship {
+  width: 51px; height: 51px; object-fit: contain; opacity: .72;
+  filter: invert(72%) sepia(24%) saturate(640%) hue-rotate(350deg) brightness(78%) contrast(90%);
+}
+.pyrate-live-name { font-size: 24px; font-weight: 500; line-height: 1.05; letter-spacing: .1em; text-transform: uppercase; }
+.pyrate-live-place { font-size: 8px; letter-spacing: .14em; color: #9f7846; }
+.pyrate-live-state { font-size: 7px; letter-spacing: .12em; color: #75542f; }
+.pyrate-live-card[data-state="playing"] .pyrate-live-state { color: #ffc46e; }
+.pyrate-live-card[data-state="playing"] .pyrate-live-state::before { content: "● "; }
+.pyrate-live-card[data-state="error"] .pyrate-live-state,
+.pyrate-live-card[data-state="offline"] .pyrate-live-state { color: #d48e54; }
+/* Keep the phone's existing sound button reachable at its normal position. */
+.pyrate-live-card + .unmute-button { min-height: 36px; white-space: nowrap; }

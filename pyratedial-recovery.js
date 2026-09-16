@@ -1,11 +1,13 @@
 /* Desktop receiver. Keep the existing POWER and animated tune controls.
- * Each station still gets a fresh YouTube player; this is not the phone player.
+ * YouTube stations retain a fresh player per tune. Live stations use PyrateLive.
  */
 (() => {
   'use strict';
   const R = window.PyrateDial;
+  const L = window.PyrateLive;
   const statusEl = document.getElementById('status');
-  if (!R || !Array.isArray(window.PYRATE_STATIONS)) {
+  if (!R || !L || !Array.isArray(window.PYRATE_STATIONS) ||
+      window.PYRATE_DIRECTORY_BUILD !== R.BUILD || L.BUILD !== R.BUILD) {
     statusEl.textContent = 'UPDATE FILES MISSING — RELOAD';
     return;
   }
@@ -23,7 +25,7 @@
   const format = value => Number(value).toFixed(1);
   const position = value => Math.max(0, Math.min(100, (value - 88.1) / (107.9 - 88.1) * 100));
 
-  let currentIndex = stations.findIndex(s => s.frequency === Number(R.storage.get('pyrateDial.lastFrequency')));
+  let currentIndex = R.lastStationIndex(stations);
   if (currentIndex < 0) currentIndex = stations.findIndex(s => s.frequency === 93.9);
   if (currentIndex < 0) currentIndex = 0;
   let powered = false;
@@ -42,6 +44,22 @@
   let timeout = null;
   let endTimer = null;
   let audioTimer = null;
+  let liveCard = null;
+  const live = L.create({ onState: liveState, onStop: () => powerOff() });
+
+  function liveState(event) {
+    if (!powered || !event.station || stations[currentIndex].id !== event.station.id) return;
+    L.paintCard(liveCard, event.state);
+    busy = false; // Loading live audio must never trap the listener on a station.
+    failed = event.state === 'error';
+    awaitingTap = event.state === 'blocked' || event.state === 'paused';
+    statusEl.textContent = ({
+      connecting: 'TUNING LIVE', playing: 'LIVE SIGNAL', buffering: 'SIGNAL HOLD',
+      blocked: 'PRESS POWER FOR SOUND', paused: 'PRESS POWER TO RESUME',
+      offline: 'NO CONNECTION', error: 'SIGNAL LOST — PRESS POWER'
+    })[event.state] || 'TUNING LIVE';
+    syncControls();
+  }
 
   function syncControls() {
     prev.disabled = busy || animating || currentIndex === 0;
@@ -58,7 +76,7 @@
     nameEl.textContent = station.name;
     marker.style.left = `${position(station.frequency)}%`;
     document.title = `${format(station.frequency)} — ${station.name} · Pyrate Dial`;
-    R.storage.set('pyrateDial.lastFrequency', station.frequency);
+    R.rememberStation(station);
     syncControls();
   }
   function showStandby(message) {
@@ -74,6 +92,9 @@
     standby.style.display = 'none';
   }
   function clearPlayer() {
+    live.stop();
+    liveCard?.remove();
+    liveCard = null;
     arrival?.cancel();
     arrival = null;
     clearTimeout(timeout);
@@ -138,6 +159,18 @@
     statusEl.textContent = apiReady ? 'TUNING' : 'WARMING UP';
     showStandby('TUNING');
     syncControls();
+
+    if (station.sourceType === 'live') {
+      liveCard = L.createCard(station);
+      screen.insertBefore(liveCard, standby);
+      standby.style.display = 'none';
+      ready = true;
+      busy = false;
+      syncControls();
+      // Still inside POWER/TUNE's click: no YouTube API or awaited request first.
+      live.start(station);
+      return;
+    }
 
     async function createPlayer() {
       try { await R.loadYouTubeApi(); apiReady = true; }
@@ -264,6 +297,14 @@
     renderStation();
   }
   power.addEventListener('click', () => {
+    if (powered && stations[currentIndex].sourceType === 'live') {
+      if (awaitingTap || failed) {
+        awaitingTap = false;
+        failed = false;
+        live.resume();
+      } else { powerOff(); }
+      return;
+    }
     if (powered && awaitingTap && player && ready) {
       // These operations remain directly inside this click, never after an await.
       arrival?.finishForGesture();

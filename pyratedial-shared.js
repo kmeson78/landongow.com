@@ -5,7 +5,7 @@
  */
 (() => {
   'use strict';
-  const BUILD = '20260915-r2';
+  const BUILD = '20260916-live1';
   const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
   const memory = new Map();
   const storage = {
@@ -42,7 +42,7 @@
     return Array.isArray(ids) ? ids.filter(id => VIDEO_ID.test(id)) : [];
   }
   function rememberVideo(station, id) {
-    if (!VIDEO_ID.test(id || '')) return;
+    if (!station?.playlistId || !VIDEO_ID.test(id || '')) return;
     const ids = [id, ...recentIds(station).filter(previous => previous !== id)].slice(0, 8);
     storage.set(recentKey(station), JSON.stringify(ids));
   }
@@ -223,6 +223,48 @@
     };
   }
 
+  // Stable IDs separate station identity from its dial number.
+  function previousFrequency(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return null;
+    return window.PYRATE_PREVIOUS_FREQUENCIES?.[number.toFixed(1)] ?? number;
+  }
+  function requestedStationIndex(stations, search = location.search) {
+    const params = new URLSearchParams(search);
+    if (params.has('station')) {
+      const index = stations.findIndex(station => station.id === params.get('station'));
+      return index < 0 ? null : index;
+    }
+    let frequency = null;
+    if (params.has('f')) {
+      const value = params.get('f');
+      if (!/^\d{2,3}\.\d$/.test(value || '')) return null;
+      frequency = previousFrequency(value);
+    } else if (params.has('s')) {
+      const value = params.get('s');
+      if (!/^\d+$/.test(value || '')) return null;
+      const old = window.PYRATE_LEGACY_APP_FREQUENCIES?.[Number(value)];
+      if (old === undefined) return null;
+      frequency = previousFrequency(old);
+    }
+    const index = stations.findIndex(station => station.frequency === frequency);
+    return index < 0 ? null : index;
+  }
+  function lastStationIndex(stations) {
+    const id = storage.get('pyrateDial.lastStationId.v1');
+    if (id) {
+      const index = stations.findIndex(station => station.id === id);
+      if (index >= 0) return index;
+    }
+    const old = storage.get('pyrateDial.lastFrequency');
+    if (old === null) return -1;
+    return stations.findIndex(station => station.frequency === previousFrequency(old));
+  }
+  function rememberStation(station) {
+    storage.set('pyrateDial.lastStationId.v1', station.id);
+    storage.set('pyrateDial.lastFrequency', station.frequency);
+  }
+
   // Title metadata is optional. Failed requests never block playback.
   // A new namespace prevents the old cached "Standby Signal" label resurfacing.
   const META_KEY = 'pyrateDial.stationMetadata.v2';
@@ -232,6 +274,7 @@
     const saved = storage.json(META_KEY, {});
     for (const station of stations) {
       station.configName = station.name;
+      if (station.sourceType === 'live' || !station.playlistId) continue;
       const entry = saved?.[station.playlistId];
       if (entry?.configName === station.configName && typeof entry.name === 'string') {
         station.name = entry.name;
@@ -244,7 +287,7 @@
     try {
       const saved = storage.json(META_KEY, {});
       const updated = saved && typeof saved === 'object' && !Array.isArray(saved) ? { ...saved } : {};
-      await Promise.all(stations.map(async station => {
+      await Promise.all(stations.filter(station => station.sourceType !== 'live' && station.playlistId).map(async station => {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), 4500);
         try {
@@ -323,6 +366,6 @@
   window.PyrateDial = Object.freeze({
     BUILD, storage, call, currentVideoId, playlist, rememberVideo, chooseVideo,
     randomTuneSeconds, prepareArrival, loadNames, refreshNames, loadYouTubeApi,
-    registerWorker
+    registerWorker, requestedStationIndex, lastStationIndex, rememberStation
   });
 })();
