@@ -1,439 +1,323 @@
-const FM_MIN = 88.1;
-const FM_MAX = 107.9;
-const FM_STEP = 0.2;
-const TUNE_ANIMATION_MS = 300;
+/* Desktop receiver. Keep the existing POWER and animated tune controls.
+ * Each station still gets a fresh YouTube player; this is not the phone player.
+ */
+(() => {
+  'use strict';
+  const R = window.PyrateDial;
+  const statusEl = document.getElementById('status');
+  if (!R || !Array.isArray(window.PYRATE_STATIONS)) {
+    statusEl.textContent = 'UPDATE FILES MISSING — RELOAD';
+    return;
+  }
+  const stations = window.PYRATE_STATIONS.map(station => ({ ...station }));
+  const receiver = document.querySelector('.receiver');
+  const bay = document.querySelector('.monitor-bay');
+  const screen = document.querySelector('.monitor-screen');
+  const standby = document.getElementById('monitorStandby');
+  const frequencyEl = document.getElementById('frequency');
+  const nameEl = document.getElementById('stationName');
+  const marker = document.getElementById('signalMarker');
+  const prev = document.getElementById('prevStation');
+  const next = document.getElementById('nextStation');
+  const power = document.getElementById('powerButton');
+  const format = value => Number(value).toFixed(1);
+  const position = value => Math.max(0, Math.min(100, (value - 88.1) / (107.9 - 88.1) * 100));
 
-// Fixed station map. The playlist IDs are stable; YouTube remains the live
-// source of every station's actual playlist contents.
-const STATIONS = [
-  { frequency: 88.3, name: "Wilt Josey", playlistId: "PLtJfKjV02nK5zvGMYE_m1PTvX2v1ykTTm", videoCount: 120 },
-  { frequency: 89.1, name: "Poet Row", playlistId: "PLf4jefl9i4GE", videoCount: 221 },
-  { frequency: 90.7, name: "Basement Tapes", playlistId: "PLtJfKjV02nK47AU54zBeTv3Xq-RmmW_E3", videoCount: 200 },
-  { frequency: 91.1, name: "Little Red Songbook", playlistId: "PLCcf-gNtNssc", videoCount: 33 },
-  { frequency: 91.7, name: "Test Pattern", playlistId: "PLEZbyDYLyoeg", videoCount: 1 },
-  { frequency: 92.5, name: "The Epidemic", playlistId: "PLPPUTf_kY4p4", videoCount: 17 },
-  { frequency: 93.9, name: "Atomic Hits", playlistId: "PLtJfKjV02nK7H_fNgiYZSwF8wAilPBOcC", videoCount: 46 },
-  { frequency: 94.7, name: "Standby Signal", playlistId: "PLQUHC3DmiKi8", videoCount: 1 },
-  { frequency: 95.7, name: "Martin's Corner", playlistId: "PLtJfKjV02nK5zLBM_-OF4FH46GGVtEYz-", videoCount: 53 },
-  { frequency: 96.9, name: "Dead Air", playlistId: "PLOG7V5TNJmjI", videoCount: 1 },
-  { frequency: 98.3, name: "Tivel Hour", playlistId: "PLtJfKjV02nK6PLkS4mVlWNOiD-q2tIUxe", videoCount: 72 },
-  { frequency: 99.9, name: "Sleepy Mountain", playlistId: "PLtJfKjV02nK5iUqUFnSQvqucBBfg93twL", videoCount: 27 },
-  { frequency: 100.7, name: "Joshua's Barstool", playlistId: "PLtJfKjV02nK6_nR9NkG1JuiRPWP_IANjY", videoCount: 71 },
-  { frequency: 101.5, name: "Sentimental Hits", playlistId: "PLtJfKjV02nK70xTDAe9HERw9vdoFS4sjf", videoCount: 31 },
-  { frequency: 102.3, name: "Bird Song", playlistId: "PLtJfKjV02nK4esMJ3uDBL5Zy2-mCEykui", videoCount: 121 },
-  { frequency: 103.1, name: "H.C. Catalog", playlistId: "PLtJfKjV02nK7uOl7VZ7EwpLk9pfBXOw6P", videoCount: 27 },
-  { frequency: 104.9, name: "Helles Welles", playlistId: "PLtJfKjV02nK7ZhssFluZx_bsEAya0DqtP", videoCount: 108 },
-  { frequency: 105.7, name: "Jurado Way", playlistId: "PLtJfKjV02nK4m5iHY8-6wOGed8wb3pxGe", videoCount: 231 },
-  { frequency: 106.9, name: "Calibration", playlistId: "PLTsu7Jw8TppY", videoCount: 1 },
-  { frequency: 107.9, name: "Ultimate Endless", playlistId: "PLtJfKjV02nK7EiGIkgk8QYFhA1wZRAlSc", videoCount: 273 }
-].sort((a, b) => a.frequency - b.frequency);
+  let currentIndex = stations.findIndex(s => s.frequency === Number(R.storage.get('pyrateDial.lastFrequency')));
+  if (currentIndex < 0) currentIndex = stations.findIndex(s => s.frequency === 93.9);
+  if (currentIndex < 0) currentIndex = 0;
+  let powered = false;
+  let apiReady = false;
+  let player = null;
+  let arrival = null;
+  let token = 0;
+  let busy = false;
+  let animating = false;
+  let animationId = null;
+  let awaitingTap = false;
+  let failed = false;
+  let ready = false;
+  let errors = 0;
+  let lastVideo = '';
+  let timeout = null;
+  let endTimer = null;
+  let audioTimer = null;
 
-let stations = STATIONS;
-let currentIndex = 0;
-
-let apiReady = false;
-
-let ytPlayer = null;
-let tuneToken = 0;
-let powered = false;
-let requestedStation = null;
-
-let animating = false;
-let tuneInFlight = false;
-let pendingIndex = null;
-
-const receiver = document.querySelector('.receiver');
-const monitorBay = document.querySelector('.monitor-bay');
-const monitorScreen = document.querySelector('.monitor-screen');
-const monitorStandby = document.getElementById('monitorStandby');
-const frequencyEl = document.getElementById('frequency');
-const stationNameEl = document.getElementById('stationName');
-const markerEl = document.getElementById('signalMarker');
-const statusEl = document.getElementById('status');
-const prevButton = document.getElementById('prevStation');
-const nextButton = document.getElementById('nextStation');
-const powerButton = document.getElementById('powerButton');
-
-const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-const markerPosition = freq => ((freq - FM_MIN) / (FM_MAX - FM_MIN)) * 100;
-const formatFrequency = freq => Number(freq).toFixed(1);
-
-// ----- Station title refresh (public, no API key) -----
-const OEMBED_REFRESH_MS = 30 * 60 * 1000;
-const OEMBED_CACHE_KEY = 'pyrateDial.stationMetadata';
-
-function parseStationTitle(title, expectedFrequency) {
-  if (typeof title !== 'string') return null;
-  const match = title.trim().match(/^(\d{2,3}\.\d)\s*(?:—|–|-)\s*(.+)$/);
-  if (!match) return null;
-  const frequency = Number(match[1]);
-  const name = match[2].trim();
-  if (!name || Math.abs(frequency - expectedFrequency) > 0.001) return null;
-  return { name };
-}
-
-function loadCachedStationMetadata() {
-  try {
-    const cached = JSON.parse(localStorage.getItem(OEMBED_CACHE_KEY) || '{}');
-    if (!cached || typeof cached !== 'object') return;
-    for (const station of stations) {
-      const entry = cached[station.playlistId];
-      if (entry?.name) station.name = entry.name;
+  function syncControls() {
+    prev.disabled = busy || animating || currentIndex === 0;
+    next.disabled = busy || animating || currentIndex === stations.length - 1;
+    // POWER always remains available to cancel even a stalled tune.
+    power.disabled = false;
+    power.classList.toggle('is-on', powered);
+    power.setAttribute('aria-pressed', String(powered));
+    power.setAttribute('aria-label', awaitingTap ? 'Resume receiver sound' : 'Power receiver');
+  }
+  function renderStation() {
+    const station = stations[currentIndex];
+    frequencyEl.textContent = format(station.frequency);
+    nameEl.textContent = station.name;
+    marker.style.left = `${position(station.frequency)}%`;
+    document.title = `${format(station.frequency)} — ${station.name} · Pyrate Dial`;
+    R.storage.set('pyrateDial.lastFrequency', station.frequency);
+    syncControls();
+  }
+  function showStandby(message) {
+    bay.classList.remove('player-ready');
+    standby.replaceChildren();
+    const span = document.createElement('span');
+    span.textContent = message;
+    standby.appendChild(span);
+    standby.style.display = 'grid';
+  }
+  function revealPlayer() {
+    bay.classList.add('player-ready');
+    standby.style.display = 'none';
+  }
+  function clearPlayer() {
+    arrival?.cancel();
+    arrival = null;
+    clearTimeout(timeout);
+    clearTimeout(endTimer);
+    clearTimeout(audioTimer);
+    R.call(player, 'mute');
+    R.call(player, 'destroy');
+    player = null;
+    ready = false;
+    screen.querySelectorAll('iframe, .youtube-player').forEach(node => node.remove());
+  }
+  function needTap(message = 'PRESS POWER FOR SOUND') {
+    if (!powered) return;
+    busy = false;
+    awaitingTap = true;
+    statusEl.textContent = message;
+    syncControls();
+  }
+  function audioIsPlaying() {
+    return R.call(player, 'getPlayerState') === 1 && R.call(player, 'isMuted') === false;
+  }
+  function confirmAudio(myToken) {
+    clearTimeout(audioTimer);
+    audioTimer = setTimeout(() => {
+      if (myToken !== token || !powered || failed) return;
+      if (audioIsPlaying()) {
+        awaitingTap = false;
+        statusEl.textContent = 'SIGNAL LOCK';
+        syncControls();
+      } else { needTap(); }
+    }, 650);
+  }
+  function rememberCurrent() {
+    const id = R.currentVideoId(player);
+    if (id && id !== lastVideo) {
+      lastVideo = id;
+      R.rememberVideo(stations[currentIndex], id);
     }
-  } catch (_) {}
-}
-
-async function refreshStationMetadata(force = false) {
-  const last = Number(localStorage.getItem(`${OEMBED_CACHE_KEY}.updated`) || 0);
-  if (!force && Date.now() - last < OEMBED_REFRESH_MS) return;
-
-  const updates = {};
-  await Promise.all(stations.map(async station => {
-    try {
-      const playlistUrl = `https://www.youtube.com/playlist?list=${encodeURIComponent(station.playlistId)}`;
-      const oembedUrl = `https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(playlistUrl)}`;
-      const response = await fetch(oembedUrl, { mode: 'cors', cache: 'no-store' });
-      if (!response.ok) return;
-      const data = await response.json();
-      const parsed = parseStationTitle(data.title, station.frequency);
-      if (!parsed) return;
-      station.name = parsed.name;
-      updates[station.playlistId] = { name: parsed.name };
-    } catch (_) {}
-  }));
-
-  if (Object.keys(updates).length) {
-    let previous = {};
-    try { previous = JSON.parse(localStorage.getItem(OEMBED_CACHE_KEY) || '{}') || {}; } catch (_) {}
-    localStorage.setItem(OEMBED_CACHE_KEY, JSON.stringify({ ...previous, ...updates }));
   }
-  localStorage.setItem(`${OEMBED_CACHE_KEY}.updated`, String(Date.now()));
-  if (!animating && !tuneInFlight) renderStation(stations[currentIndex]);
-}
-
-// ----- Dial UI -----
-function restoreCurrentIndex() {
-  const remembered = Number(localStorage.getItem('pyrateDial.lastFrequency'));
-  let index = stations.findIndex(s => s.frequency === remembered);
-  if (index < 0) index = stations.findIndex(s => s.frequency === 93.9);
-  if (index < 0) index = 0;
-  currentIndex = index;
-}
-
-function syncControlAvailability() {
-  const busy = animating || tuneInFlight;
-  prevButton.disabled = busy || currentIndex <= 0 || stations.length < 2;
-  nextButton.disabled = busy || currentIndex >= stations.length - 1 || stations.length < 2;
-  powerButton.disabled = busy;
-}
-
-function renderStation(station, status = null) {
-  if (!station) return;
-  frequencyEl.textContent = formatFrequency(station.frequency);
-  stationNameEl.textContent = station.name;
-  markerEl.style.left = `${clamp(markerPosition(station.frequency), 0, 100)}%`;
-  if (status) statusEl.textContent = status;
-  localStorage.setItem('pyrateDial.lastFrequency', String(station.frequency));
-  document.title = `${formatFrequency(station.frequency)} — ${station.name} · Pyrate Dial`;
-  syncControlAvailability();
-}
-
-function setMonitorMessage(message) {
-  if (monitorBay) monitorBay.classList.remove('player-ready');
-  if (!monitorStandby) return;
-  monitorStandby.innerHTML = `<span>${message}</span>`;
-  monitorStandby.style.display = 'grid';
-}
-
-function revealPlayer() {
-  if (monitorBay) monitorBay.classList.add('player-ready');
-  if (monitorStandby) monitorStandby.style.display = 'none';
-}
-
-// ----- Random starting position -----
-function recentIndexKey(playlistId) {
-  return `pyrateDial.recentStartIndices.${playlistId}`;
-}
-
-function getRecentIndices(playlistId) {
-  try {
-    const value = JSON.parse(localStorage.getItem(recentIndexKey(playlistId)) || '[]');
-    return Array.isArray(value) ? value.filter(Number.isInteger) : [];
-  } catch (_) {
-    return [];
-  }
-}
-
-function chooseRandomIndex(station) {
-  const count = Math.max(1, Number(station.videoCount) || 1);
-  if (count === 1) return 0;
-
-  const recent = new Set(getRecentIndices(station.playlistId));
-  let candidates = Array.from({ length: count }, (_, i) => i).filter(i => !recent.has(i));
-  if (!candidates.length) candidates = Array.from({ length: count }, (_, i) => i);
-
-  const index = candidates[Math.floor(Math.random() * candidates.length)];
-  const nextRecent = [index, ...getRecentIndices(station.playlistId).filter(i => i !== index)].slice(0, Math.min(8, count - 1));
-  localStorage.setItem(recentIndexKey(station.playlistId), JSON.stringify(nextRecent));
-  return index;
-}
-
-// ----- Playback -----
-function setIframePermissions(player) {
-  try {
-    const iframe = player.getIframe();
-    iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
-  } catch (_) {}
-}
-
-function updatePowerControl() {
-  if (!powerButton) return;
-  powerButton.classList.toggle('is-on', powered);
-  powerButton.setAttribute('aria-pressed', powered ? 'true' : 'false');
-}
-
-function animateFrequencySweep(fromFreq, toFreq, onDone) {
-  animating = true;
-  syncControlAvailability();
-  const startTime = performance.now();
-
-  function step(now) {
-    const t = Math.min(1, (now - startTime) / TUNE_ANIMATION_MS);
-    const current = fromFreq + (toFreq - fromFreq) * t;
-    frequencyEl.textContent = formatFrequency(Math.round(current / FM_STEP) * FM_STEP);
-    markerEl.style.left = `${clamp(markerPosition(current), 0, 100)}%`;
-
-    if (t < 1) {
-      requestAnimationFrame(step);
-      return;
-    }
-
-    frequencyEl.textContent = formatFrequency(toFreq);
-    markerEl.style.left = `${clamp(markerPosition(toFreq), 0, 100)}%`;
-    animating = false;
-    syncControlAvailability();
-    if (onDone) onDone();
+  function fatal(message) {
+    arrival?.cancel();
+    clearTimeout(timeout);
+    clearTimeout(endTimer);
+    clearTimeout(audioTimer);
+    R.call(player, 'pauseVideo');
+    failed = true;
+    busy = false;
+    awaitingTap = false;
+    statusEl.textContent = message;
+    syncControls();
   }
 
-  requestAnimationFrame(step);
-}
+  function spinUpPlayer() {
+    const myToken = ++token;
+    clearPlayer();
+    const station = stations[currentIndex];
+    busy = true;
+    awaitingTap = false;
+    failed = false;
+    errors = 0;
+    lastVideo = '';
+    statusEl.textContent = apiReady ? 'TUNING' : 'WARMING UP';
+    showStandby('TUNING');
+    syncControls();
 
-function spinUpPlayer(station, targetIndex) {
-  if (!apiReady || !station?.playlistId) return;
+    async function createPlayer() {
+      try { await R.loadYouTubeApi(); apiReady = true; }
+      catch (_) { if (myToken === token && powered) fatal('YOUTUBE UNAVAILABLE — PRESS POWER'); return; }
+      if (myToken !== token || !powered) return;
+      const container = document.createElement('div');
+      container.className = 'youtube-player';
+      screen.insertBefore(container, standby);
+      timeout = setTimeout(() => {
+        if (myToken !== token || !powered) return;
+        if (ready) { arrival?.blocked(); needTap('SIGNAL HOLD — PRESS POWER'); }
+        else { fatal('PLAYER UNAVAILABLE — PRESS POWER'); }
+      }, 18000);
 
-  const token = ++tuneToken;
-  const outgoingPlayer = ytPlayer;
-  pendingIndex = targetIndex;
-  requestedStation = station;
-  tuneInFlight = true;
-  syncControlAvailability();
-  setMonitorMessage('TUNING');
-  statusEl.textContent = 'TUNING';
-
-  if (outgoingPlayer) {
-    try { outgoingPlayer.mute(); } catch (_) {}
-  }
-
-  const startIndex = chooseRandomIndex(station);
-
-  document.getElementById('youtubePlayer')?.remove();
-
-  const container = document.createElement('div');
-  container.className = 'youtube-player';
-  container.setAttribute('aria-label', 'YouTube station video player');
-  monitorScreen.insertBefore(container, monitorStandby);
-
-  function abandonTune(failedPlayer) {
-    if (token !== tuneToken) return;
-    tuneInFlight = false;
-    pendingIndex = null;
-    try { failedPlayer?.destroy(); } catch (_) {}
-    if (outgoingPlayer) { try { outgoingPlayer.destroy(); } catch (_) {} }
-    if (ytPlayer === outgoingPlayer) ytPlayer = null;
-    syncControlAvailability();
-  }
-
-  new YT.Player(container, {
-    width: '200',
-    height: '200',
-    playerVars: {
-      autoplay: 0,
-      controls: 0,
-      disablekb: 1,
-      fs: 0,
-      playsinline: 1,
-      rel: 0,
-      cc_load_policy: 0,
-      origin: window.location.origin
-    },
-    events: {
-      onReady: event => {
-        if (token !== tuneToken) return;
-        setIframePermissions(event.target);
-        try {
-          event.target.mute();
-          event.target.setVolume(100);
-          event.target.loadPlaylist({
-            listType: 'playlist',
-            list: station.playlistId,
-            index: startIndex,
-            startSeconds: 0
-          });
-        } catch (error) {
-          console.warn('Pyrate Dial station load failed:', error);
-          statusEl.textContent = 'SIGNAL HOLD';
-          abandonTune(event.target);
-        }
-      },
-      onStateChange: event => {
-        if (token !== tuneToken || !powered) return;
-
-        if (event.data === YT.PlayerState.PLAYING) {
-          if (outgoingPlayer) {
-            try { outgoingPlayer.destroy(); } catch (_) {}
-          }
-          ytPlayer = event.target;
-
-          revealPlayer();
-          try {
-            event.target.unMute();
-            event.target.setVolume(100);
-            event.target.setShuffle(true);
-          } catch (_) {}
-
-          if (tuneInFlight) {
-            tuneInFlight = false;
-            if (pendingIndex !== null) {
-              currentIndex = pendingIndex;
-              pendingIndex = null;
-            }
-            renderStation(requestedStation, 'SIGNAL LOCK');
-          } else {
-            statusEl.textContent = 'SIGNAL LOCK';
-          }
-        } else if (event.data === YT.PlayerState.BUFFERING) {
-          statusEl.textContent = 'TUNING';
-        } else if (event.data === YT.PlayerState.ENDED) {
-          if (!tuneInFlight) {
+      player = new window.YT.Player(container, {
+        width: '200', height: '200',
+        playerVars: {
+          autoplay: 0, controls: 0, disablekb: 1, fs: 0, playsinline: 1,
+          rel: 0, cc_load_policy: 0, origin: location.origin
+        },
+        events: {
+          onReady(event) {
+            if (myToken !== token || !powered) { R.call(event.target, 'destroy'); return; }
+            player = event.target;
+            ready = true;
+            const iframe = R.call(player, 'getIframe');
+            iframe?.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
+            iframe?.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+            R.call(player, 'mute');
+            R.call(player, 'setVolume', 100);
+            revealPlayer();
+            // 0 is a real initial position, not a guessed range. Selection follows
+            // only after getPlaylist() returns the playlist actually loaded.
             try {
-              event.target.nextVideo();
-              event.target.playVideo();
-            } catch (_) {}
+              player.loadPlaylist({ listType: 'playlist', list: station.playlistId, index: 0, startSeconds: 0 });
+              arrival = R.prepareArrival(player, station, result => {
+                if (myToken !== token || !powered || failed) return;
+                busy = false;
+                clearTimeout(timeout);
+                if (!animating) renderStation();
+                syncControls();
+                rememberCurrent();
+                if (result.reason === 'autoplay-blocked' || awaitingTap) { needTap(); return; }
+                // Preserve desktop's existing automatic sound attempt. If rejected,
+                // keep THIS player and let POWER resume it within a real gesture.
+                R.call(player, 'unMute');
+                R.call(player, 'setVolume', 100);
+                R.call(player, 'playVideo');
+                confirmAudio(myToken);
+              });
+            } catch (_) { fatal('SIGNAL HOLD — PRESS POWER'); }
+          },
+          onStateChange(event) {
+            if (myToken !== token || !powered || failed) return;
+            if (event.data === 1) {
+              clearTimeout(endTimer);
+              errors = 0;
+              if (!arrival || !arrival.done) return;
+              busy = false;
+              rememberCurrent();
+              if (audioIsPlaying()) {
+                awaitingTap = false;
+                statusEl.textContent = 'SIGNAL LOCK';
+                syncControls();
+              }
+            } else if (event.data === 3) {
+              if (!awaitingTap) statusEl.textContent = 'TUNING';
+            } else if (event.data === 2 && arrival?.done) {
+              needTap();
+            } else if (event.data === 0 && arrival?.done) {
+              // YouTube normally advances the playlist itself. Only intervene if
+              // it remains ended on this same video; never double-skip a song.
+              const endedId = R.currentVideoId(player);
+              clearTimeout(endTimer);
+              endTimer = setTimeout(() => {
+                if (myToken === token && powered && !failed &&
+                    R.call(player, 'getPlayerState') === 0 && R.currentVideoId(player) === endedId) {
+                  R.call(player, 'nextVideo');
+                  R.call(player, 'playVideo');
+                }
+              }, 1800);
+            }
+          },
+          onAutoplayBlocked() {
+            if (myToken !== token || !powered) return;
+            awaitingTap = true;
+            arrival?.blocked();
+            clearTimeout(timeout);
+            needTap();
+          },
+          onError(event) {
+            if (myToken !== token || !powered || failed) return;
+            if ([2, 5, 100, 101, 150].includes(event.data)) {
+              errors += 1;
+              const limit = Math.min(10, R.playlist(event.target).length || 5);
+              if (errors >= limit) { fatal('NO PLAYABLE SIGNAL — RETUNE'); return; }
+              arrival?.videoFailed();
+              statusEl.textContent = 'AUTO SKIP';
+              R.call(event.target, 'nextVideo');
+              R.call(event.target, 'playVideo');
+            } else {
+              fatal(event.data === 153 ? 'EMBED BLOCKED — RETUNE' : 'SIGNAL HOLD — PRESS POWER');
+            }
           }
         }
-      },
-      onAutoplayBlocked: event => {
-        if (token !== tuneToken) return;
-        statusEl.textContent = powered ? 'TUNE AGAIN' : 'POWER OFF';
-        abandonTune(event?.target);
-      },
-      onError: event => {
-        if (token !== tuneToken) return;
-        if ([100, 101, 150].includes(event.data)) {
-          statusEl.textContent = 'AUTO SKIP';
-          try {
-            event.target.nextVideo();
-            event.target.playVideo();
-          } catch (_) {}
-          return;
-        }
-        statusEl.textContent = 'SIGNAL HOLD';
-        if (tuneInFlight) abandonTune(event.target);
-      }
+      });
     }
-  });
-}
-
-function powerOnReceiver() {
-  if (!apiReady) {
-    statusEl.textContent = 'WARMING UP';
-    return;
-  }
-  if (tuneInFlight || animating) return;
-
-  powered = true;
-  updatePowerControl();
-  spinUpPlayer(stations[currentIndex], currentIndex);
-}
-
-function powerOffReceiver() {
-  powered = false;
-  requestedStation = null;
-  pendingIndex = null;
-  tuneInFlight = false;
-  tuneToken++;
-  updatePowerControl();
-  if (ytPlayer) {
-    try { ytPlayer.destroy(); } catch (_) {}
-    ytPlayer = null;
-  }
-  setMonitorMessage('POWER OFF');
-  statusEl.textContent = 'POWER OFF';
-  syncControlAvailability();
-}
-
-function togglePower() {
-  if (powered) powerOffReceiver();
-  else powerOnReceiver();
-}
-
-function scanTo(targetIndex) {
-  if (targetIndex < 0 || targetIndex >= stations.length || targetIndex === currentIndex) return;
-  if (tuneInFlight || animating) return;
-
-  const startFrequency = stations[currentIndex].frequency;
-  const targetStation = stations[targetIndex];
-
-  receiver.classList.add('seeking');
-  stationNameEl.textContent = '—';
-  statusEl.textContent = 'AUTO SEEK';
-
-  if (powered) {
-    spinUpPlayer(targetStation, targetIndex);
-  } else {
-    currentIndex = targetIndex;
+    createPlayer();
   }
 
-  animateFrequencySweep(startFrequency, targetStation.frequency, () => {
+  function powerOff() {
+    powered = false;
+    ++token;
+    clearPlayer();
+    if (animationId !== null) cancelAnimationFrame(animationId);
+    animationId = null;
+    animating = false;
+    busy = false;
+    awaitingTap = false;
+    failed = false;
     receiver.classList.remove('seeking');
-    if (!powered) {
-      renderStation(targetStation, 'POWER OFF');
-    }
-  });
-}
-
-powerButton?.addEventListener('click', togglePower);
-prevButton.addEventListener('click', () => scanTo(currentIndex - 1));
-nextButton.addEventListener('click', () => scanTo(currentIndex + 1));
-
-// ----- Official YouTube IFrame Player API -----
-window.onYouTubeIframeAPIReady = function () {
-  apiReady = true;
-};
-
-(function loadYouTubeApi() {
-  if (window.YT?.Player) {
-    apiReady = true;
-    return;
+    showStandby('POWER OFF');
+    statusEl.textContent = 'POWER OFF';
+    renderStation();
   }
-  const tag = document.createElement('script');
-  tag.src = 'https://www.youtube.com/iframe_api';
-  tag.async = true;
-  const firstScript = document.getElementsByTagName('script')[0];
-  firstScript.parentNode.insertBefore(tag, firstScript);
+  power.addEventListener('click', () => {
+    if (powered && awaitingTap && player && ready) {
+      // These operations remain directly inside this click, never after an await.
+      arrival?.finishForGesture();
+      awaitingTap = false;
+      busy = false;
+      R.call(player, 'unMute');
+      R.call(player, 'setVolume', 100);
+      R.call(player, 'playVideo');
+      statusEl.textContent = 'TUNING';
+      syncControls();
+      confirmAudio(token);
+    } else if (powered && failed) { spinUpPlayer(); }
+    else if (powered) { powerOff(); }
+    else { powered = true; spinUpPlayer(); }
+  });
+
+  function scanTo(index) {
+    if (busy || animating || index < 0 || index >= stations.length || index === currentIndex) return;
+    const from = stations[currentIndex].frequency;
+    currentIndex = index;
+    const to = stations[currentIndex].frequency;
+    animating = true;
+    receiver.classList.add('seeking');
+    nameEl.textContent = '—';
+    statusEl.textContent = 'AUTO SEEK';
+    if (powered) spinUpPlayer();
+    syncControls();
+    const started = performance.now();
+    function frame(now) {
+      const progress = Math.min(1, (now - started) / 300);
+      const value = from + (to - from) * progress;
+      frequencyEl.textContent = format(Math.round(value / 0.2) * 0.2);
+      marker.style.left = `${position(value)}%`;
+      if (progress < 1) { animationId = requestAnimationFrame(frame); return; }
+      animationId = null;
+      animating = false;
+      receiver.classList.remove('seeking');
+      renderStation();
+      if (!powered) statusEl.textContent = 'POWER OFF';
+    }
+    animationId = requestAnimationFrame(frame);
+  }
+  prev.addEventListener('click', () => scanTo(currentIndex - 1));
+  next.addEventListener('click', () => scanTo(currentIndex + 1));
+  R.loadNames(stations);
+  renderStation();
+  showStandby('POWER OFF');
+  statusEl.textContent = 'POWER OFF';
+  R.loadYouTubeApi().then(() => { apiReady = true; }).catch(() => {});
+  const refreshLabels = () => { if (!animating) renderStation(); };
+  R.refreshNames(stations, refreshLabels);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') R.refreshNames(stations, refreshLabels);
+  });
+  window.addEventListener('pagehide', () => powerOff());
+  R.registerWorker('pyratedial-sw.js', 'pyratedial.html');
 })();
-
-loadCachedStationMetadata();
-restoreCurrentIndex();
-renderStation(stations[currentIndex], 'POWER OFF');
-updatePowerControl();
-setMonitorMessage('POWER OFF');
-refreshStationMetadata(true);
-
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') refreshStationMetadata();
-});
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./pyratedial-sw.js').catch(() => {}));
-}
