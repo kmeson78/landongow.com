@@ -1,4 +1,4 @@
-/* Pyrate Dial station directory — the same 27 stations on desktop and phone.
+/* Pyrate Dial station directory — the same 28 stations on desktop and phone.
  * Keep stable IDs when renaming a station or moving its frequency.
  * YouTube playlist IDs are copied from the owner's updated playlist list.
  * Song additions/removals still happen in YouTube, not in this file.
@@ -121,6 +121,13 @@ window.PYRATE_STATIONS = Object.freeze(
     "name": "Martin's Corner",
     "playlistId": "PLtJfKjV02nK5zLBM_-OF4FH46GGVtEYz-",
     "id": "martins-corner",
+    "sourceType": "youtube"
+  },
+  {
+    "frequency": 96.1,
+    "name": "BOX SEATS",
+    "playlistId": "PLGvnTDnJzqb0",
+    "id": "box-seats",
     "sourceType": "youtube"
   },
   {
