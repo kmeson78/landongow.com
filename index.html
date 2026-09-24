@@ -158,6 +158,7 @@
     }
 
     .products > a,
+    .coming-soon-wrap,
     .album-stack a,
     .arcolith-wrap,
     .miscellanea-wrap {
@@ -167,6 +168,7 @@
     }
 
     .products > a img,
+    .coming-soon-wrap img,
     .arcolith-wrap > a img,
     .miscellanea-wrap > a img {
       height: 345px;
@@ -174,6 +176,11 @@
       border-radius: 4px;
       transition: transform 0.45s ease;
       display: block;
+    }
+
+    /* The teaser has product hover effects, but is intentionally not a link. */
+    .coming-soon-wrap {
+      cursor: default;
     }
 
     .album-stack {
@@ -240,6 +247,7 @@
 
     /* FIX: ensure hovered item comes above button */
     .products > a:hover,
+    .coming-soon-wrap:hover,
     .album-stack a:hover,
     .arcolith-wrap > a:hover,
     .miscellanea-wrap > a:hover {
@@ -248,6 +256,7 @@
     }
 
     .products > a:hover img,
+    .coming-soon-wrap:hover img,
     .album-stack a:hover img,
     .arcolith-wrap > a:hover img,
     .miscellanea-wrap > a:hover img {
@@ -340,6 +349,12 @@
       border-radius: 3px;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
       transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    /* Keep this cover's full artwork visible without cropping or stretching. */
+    .miscellanea-cover.rebellion-cover img {
+      height: auto;
+      object-fit: contain;
     }
 
     .miscellanea-cover img:hover {
@@ -503,6 +518,7 @@
       }
 
       .products > a img,
+      .coming-soon-wrap img,
       .arcolith-wrap > a img,
       .miscellanea-wrap > a img {
         height: 275px;
@@ -583,6 +599,7 @@
     */
     @media (hover: none), (pointer: coarse) {
       .products > a:hover img,
+      .coming-soon-wrap:hover img,
       .album-stack a:hover img,
       .arcolith-wrap > a:hover img,
       .miscellanea-wrap > a:hover img,
@@ -591,6 +608,7 @@
       }
 
       .products > a:hover,
+      .coming-soon-wrap:hover,
       .album-stack a:hover,
       .arcolith-wrap > a:hover,
       .miscellanea-wrap > a:hover {
@@ -731,6 +749,7 @@
       }
 
       .products > a img,
+      .coming-soon-wrap img,
       .arcolith-wrap > a img,
       .miscellanea-wrap > a img {
         height: min(220px, 54svh);
@@ -814,9 +833,17 @@
 
     <div class="products">
 
-      <a href="https://www.amazon.com/dp/B0FVTB26S2" target="_blank">
-        <img src="book3.png">
-      </a>
+      <div class="arcolith-wrap">
+        <a href="https://www.amazon.com/dp/B0GWX8HHRP" target="_blank" rel="noopener">
+          <img src="book.png" alt="The Arcolith">
+        </a>
+
+        <div class="trilogy-button-container">
+          <a href="arcolith.html" class="trilogy-button">
+            <img src="seriesbutton.png" alt="The Arcolith Trilogy">
+          </a>
+        </div>
+      </div>
 
       <div class="album-stack">
         <a href="https://elasticstage.com/amnad/releases/before-i-forget-album" target="_blank">
@@ -827,16 +854,10 @@
         </a>
       </div>
 
-      <div class="arcolith-wrap">
-        <a href="https://www.amazon.com/dp/B0GWX8HHRP" target="_blank">
-          <img src="book.png">
-        </a>
-
-        <div class="trilogy-button-container">
-          <a href="arcolith.html" class="trilogy-button">
-            <img src="seriesbutton.png">
-          </a>
-        </div>
+      <div class="coming-soon-wrap">
+        <img src="coming_soon_538x855.png" width="538" height="855"
+             alt="Coming soon: a new collection of short stories. General, speculative, and science fiction examining human bias, memory, belief, and misclassification."
+             onerror="this.onerror=null; this.src='coming_soon_538x855(1).png';">
       </div>
 
       <div class="album-stack">
@@ -849,8 +870,8 @@
       </div>
 
       <div class="miscellanea-wrap">
-        <a href="https://www.amazon.com/dp/B0G29WXKV4" target="_blank">
-          <img src="book2.png">
+        <a href="https://www.amazon.com/dp/B0FVTB26S2" target="_blank" rel="noopener">
+          <img src="book3.png" alt="Dissociation Provocations: Collected Works of Minor Importance">
         </a>
 
         <div class="miscellanea-button-container">
@@ -901,6 +922,17 @@
         <p>In a Copenhagen lab, a researcher begins to wonder what it would mean to take the strangest claim about these creatures literally. Not as a metaphor. As physics.</p>
         <p>It is a short walk from there to a place no careful scientist will follow.</p>
         <a href="https://www.amazon.com/dp/B0H5CL8MHC" target="_blank" rel="noopener">View on Amazon</a>
+      </div>
+    </div>
+
+    <div class="miscellanea-item">
+      <a class="miscellanea-cover rebellion-cover" href="https://www.amazon.com/dp/B0G29WXKV4" target="_blank" rel="noopener">
+        <img src="rebellion_thumbnail.jpg" alt="This Flag Raised in Rebellion book cover" width="326" height="500" loading="lazy">
+      </a>
+      <div class="miscellanea-copy">
+        <h3>This Flag Raised in Rebellion</h3>
+        <p>In 1725 a man hanged twice for piracy became a legend. This novelette reveals the lost history of John Gow, the Orkney sailor who defied the empire and paid the ultimate price.</p>
+        <a href="https://www.amazon.com/dp/B0G29WXKV4" target="_blank" rel="noopener">View on Amazon</a>
       </div>
     </div>
 
@@ -1304,7 +1336,7 @@
   }
 
   const productHoverTargets = document.querySelectorAll(
-    ".products > a, .album-stack a, .arcolith-wrap > a, .miscellanea-wrap > a, .miscellanea-cover"
+    ".products > a, .coming-soon-wrap, .album-stack a, .arcolith-wrap > a, .miscellanea-wrap > a, .miscellanea-cover"
   );
 
   productHoverTargets.forEach(function(element) {
