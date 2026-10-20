@@ -914,7 +914,20 @@
         <p>One of 13 works selected for Spillwords’ 2026 <em>13 Days of Halloween</em> series.</p>
         <p>On a Saturday at Lake Garland, a boy and his grandfather fish, cook their catch, and let the fire burn low. When the boy asks for a scary story, his grandfather gives him one: the summer of 1926, when a search party roped themselves together and walked into the black spruce bog after a missing child.</p>
         <p>Four went in. Not all of them came back, and one of the ones who did came back empty.</p>
-        <a id="pale-gleaner-link" href="https://spillwords.com/the-pale-gleaner/" target="_blank" rel="noopener" hidden>Read on Spillwords</a>
+        <a id="pale-gleaner-link" href="https://spillwords.com/the-pale-gleaner/" target="_blank" rel="noopener">Read on Spillwords</a>
+      </div>
+    </div>
+
+    <div class="miscellanea-item">
+      <a class="miscellanea-cover" href="https://spillwords.com/lignin/" target="_blank" rel="noopener">
+        <img src="spillwords_lignin.jpg" alt="Lignin featured on Spillwords">
+      </a>
+      <div class="miscellanea-copy">
+        <h3>Lignin — Spillwords Featured Post</h3>
+        <div class="miscellanea-date">Publication date: August 16, 2026</div>
+        <p>Spillwords Press is an online literary platform publishing poetry, prose, fiction, essays, and other work by independent and published writers from around the world.</p>
+        <p>In August 2026, Spillwords selected <em>Lignin</em> as a Featured Post. The story was originally published in <em>Dissociation Provocations: Collected Works of Minor Importance</em> and appears here as an independently selected feature.</p>
+        <a href="https://spillwords.com/lignin/" target="_blank" rel="noopener">Read on Spillwords</a>
       </div>
     </div>
 
@@ -940,19 +953,6 @@
         <h3>This Flag Raised in Rebellion</h3>
         <p>In 1725 a man hanged twice for piracy became a legend. This novelette reveals the lost history of John Gow, the Orkney sailor who defied the empire and paid the ultimate price.</p>
         <a href="https://www.amazon.com/dp/B0G29WXKV4" target="_blank" rel="noopener">View on Amazon</a>
-      </div>
-    </div>
-
-    <div class="miscellanea-item">
-      <a class="miscellanea-cover" href="https://spillwords.com/lignin/" target="_blank" rel="noopener">
-        <img src="spillwords_lignin.jpg" alt="Lignin featured on Spillwords">
-      </a>
-      <div class="miscellanea-copy">
-        <h3>Lignin — Spillwords Featured Post</h3>
-        <div class="miscellanea-date">Publication date: August 16, 2026</div>
-        <p>Spillwords Press is an online literary platform publishing poetry, prose, fiction, essays, and other work by independent and published writers from around the world.</p>
-        <p>In August 2026, Spillwords selected <em>Lignin</em> as a Featured Post. The story was originally published in <em>Dissociation Provocations: Collected Works of Minor Importance</em> and appears here as an independently selected feature.</p>
-        <a href="https://spillwords.com/lignin/" target="_blank" rel="noopener">Read on Spillwords</a>
       </div>
     </div>
 
@@ -1078,14 +1078,12 @@
 
 <script>
   /*
-    Enable the story links at the scheduled publication time:
+    Update the story's date label at the scheduled publication time:
     October 22, 2026, 3:30 AM Eastern (07:30 UTC).
   */
   (function() {
     const publicationTime = Date.parse("2026-10-22T03:30:00-04:00");
     const publicationDate = document.getElementById("pale-gleaner-date");
-    const coverLink = document.getElementById("pale-gleaner-cover");
-    const readingLink = document.getElementById("pale-gleaner-link");
     let publicationTimer = null;
 
     function updatePublication() {
@@ -1100,16 +1098,8 @@
       publicationDate.textContent = isPublished
         ? "Publication date: October 22, 2026"
         : "Forthcoming: October 22, 2026 — 3:30 AM ET";
-      readingLink.hidden = !isPublished;
 
-      if (isPublished) {
-        coverLink.setAttribute("href", readingLink.getAttribute("href"));
-        coverLink.removeAttribute("aria-disabled");
-        coverLink.removeAttribute("tabindex");
-      } else {
-        coverLink.removeAttribute("href");
-        coverLink.setAttribute("aria-disabled", "true");
-        coverLink.setAttribute("tabindex", "-1");
+      if (!isPublished) {
         publicationTimer = window.setTimeout(
           updatePublication,
           Math.min(remaining, 2147483647)
