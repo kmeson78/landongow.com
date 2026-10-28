@@ -98,7 +98,7 @@
     .scroll-cue {
       position: absolute;
       left: 50%;
-      top: calc(50% + 275px);
+      top: calc(50% + 307px);
       transform: translateX(-50%);
       display: flex;
       flex-direction: column;
@@ -716,7 +716,7 @@
         position: fixed;
         left: 50%;
         top: auto;
-        bottom: max(3.35rem, calc(env(safe-area-inset-bottom) + 3.35rem));
+        bottom: max(2.35rem, calc(env(safe-area-inset-bottom) + 2.35rem));
         transform: translateX(-50%);
         z-index: 65;
         pointer-events: none;
@@ -780,7 +780,7 @@
       }
 
       .scroll-cue {
-        bottom: max(2.9rem, calc(env(safe-area-inset-bottom) + 2.9rem));
+        bottom: max(1.9rem, calc(env(safe-area-inset-bottom) + 1.9rem));
       }
 
       .mobile-terminal-note {
@@ -791,6 +791,131 @@
     }
 
   </style>
+  <!-- Human-verification opener: matches the existing small product buttons. -->
+  <style id="verify-humanity-opener-styles">
+    .verification-product-wrap {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .verify-humanity-button-container {
+      position: absolute;
+      left: 50%;
+      top: calc(100% + 32px);
+      transform: translateX(-50%);
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      z-index: 1;
+    }
+
+    #verify-humanity-button {
+      box-sizing: border-box;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: 180px;
+      max-width: 100%;
+      height: 24px;
+      margin: 0;
+      padding: 0 10px;
+      border: 1px solid rgba(151, 168, 179, 0.55);
+      border-radius: 999px;
+      background: linear-gradient(180deg, #1a2329 0%, #070d12 48%, #02060a 72%, #10181e 100%);
+      box-shadow: inset 0 1px 2px rgba(235, 245, 255, 0.16), 0 1px 3px rgba(0, 0, 0, 0.6);
+      color: #b6bec4;
+      font: 400 8px/1 Arial, sans-serif;
+      letter-spacing: 0.16em;
+      white-space: nowrap;
+      text-align: center;
+      text-decoration: none;
+      opacity: 0.78;
+      transition: opacity 0.2s ease;
+      cursor: pointer;
+    }
+
+    #verify-humanity-button:hover { opacity: 1; }
+    #verify-humanity-button:focus-visible {
+      outline: 2px solid #b8c9d5;
+      outline-offset: 4px;
+      opacity: 1;
+    }
+
+    @media (max-width: 900px) {
+      .verify-humanity-button-container { top: calc(100% + 24px); }
+      #verify-humanity-button { width: 150px; height: 22px; font-size: 7.5px; }
+    }
+
+    @media (max-width: 900px) and (orientation: landscape) {
+      .verify-humanity-button-container { top: calc(100% + 12px); }
+      #verify-humanity-button { width: 125px; height: 21px; font-size: 7px; }
+    }
+
+    @media (hover: none), (pointer: coarse) {
+      #verify-humanity-button:hover { opacity: 0.78; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #verify-humanity-button { transition: none; }
+    }
+  </style>
+
+  <!-- BEGIN VERIFICATION COMPONENT: scoped styles -->
+  <style id="lgwv-styles">
+    :root.lgwv-modal-open { overflow:hidden; }
+    #lgwv-dialog,#lgwv-dialog * { box-sizing:border-box; }
+    #lgwv-dialog { color-scheme:light; width:min(400px,calc(100vw - 28px)); max-width:none; max-height:calc(100dvh - 28px); margin:auto; padding:0; overflow:auto; overscroll-behavior:contain; border:1px solid #ccd2d7; border-radius:7px; background:#fff; color:#202a32; box-shadow:0 26px 100px #0009; font:14px/1.5 Arial,Helvetica,sans-serif; text-align:left; }
+    #lgwv-dialog::backdrop { background:#03070bd4; backdrop-filter:blur(4px); }
+    #lgwv-dialog [hidden] { display:none !important; }
+    #lgwv-dialog button,#lgwv-dialog input { font:inherit; }
+    #lgwv-dialog button { -webkit-tap-highlight-color:transparent; }
+    #lgwv-dialog button:focus-visible,#lgwv-dialog input:focus-visible,#lgwv-slider-thumb:focus-visible { outline:3px solid #326a9d; outline-offset:3px; }
+    .lgwv-topline { min-height:48px; padding:8px 12px 8px 19px; display:flex; align-items:center; justify-content:space-between; gap:12px; background:#f7f8fa; border-bottom:1px solid #e1e5e8; }
+    .lgwv-topline-label { font-size:10px; letter-spacing:.13em; color:#687680; }
+    #lgwv-close { flex:0 0 auto; width:34px; height:34px; display:grid; place-items:center; padding:0; border:0; border-radius:4px; background:transparent; color:#53616b; cursor:pointer; font-size:25px; font-weight:300; line-height:1; }
+    #lgwv-close:hover { background:#e6ebee; color:#18242c; }
+    .lgwv-heading { margin:14px 14px 0; padding:19px 18px; background:#315f8e; color:#fff; border-radius:2px; }
+    #lgwv-title { margin:0; font-size:22px; font-weight:500; line-height:1.3; letter-spacing:-.02em; }
+    #lgwv-title strong { font-weight:700; }
+    #lgwv-description { margin:7px 0 0; color:#e0eaf3; font-size:12px; line-height:1.5; }
+    .lgwv-screen { padding:14px; }
+    .lgwv-grid { position:relative; width:100%; aspect-ratio:1; overflow:hidden; background:#f2f1ed; }
+    .lgwv-grid img { display:block; width:100%; height:100%; object-fit:cover; user-select:none; pointer-events:none; }
+    #lgwv-tiles { position:absolute; inset:0; display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); }
+    .lgwv-tile { position:relative; display:block; min-width:0; min-height:0; padding:0; border:1px solid #fff; border-radius:0; background:transparent; cursor:pointer; }
+    .lgwv-tile:hover { background:#2b659918; }
+    .lgwv-tile[aria-pressed="true"] { box-shadow:inset 0 0 0 4px #315f8e; background:#315f8e22; }
+    .lgwv-tile[aria-pressed="true"]::after { content:"✓"; position:absolute; top:7px; left:7px; display:grid; place-items:center; width:23px; height:23px; border-radius:50%; background:#315f8e; color:#fff; font-size:15px; line-height:1; }
+    #lgwv-dialog .lgwv-tile:focus-visible { outline:3px solid #172f47; outline-offset:-5px; z-index:1; }
+    .lgwv-grid-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:14px; }
+    #lgwv-selection-count { color:#6a7780; font-size:12px; }
+    #lgwv-verify { min-width:99px; min-height:40px; padding:9px 18px; border:1px solid #29517a; border-radius:3px; color:#fff; background:#315f8e; font-size:12px; font-weight:700; letter-spacing:.06em; cursor:pointer; }
+    #lgwv-verify:hover { background:#264e78; }
+    .lgwv-checkbox-card { display:flex; align-items:center; gap:14px; min-height:104px; margin:10px 4px; padding:20px 16px; border:1px solid #d3d9de; border-radius:3px; background:#fafafa; cursor:pointer; }
+    #lgwv-nonhuman { flex:0 0 auto; width:29px; height:29px; margin:0; padding:0; accent-color:#315f8e; cursor:pointer; }
+    .lgwv-checkbox-label { font-size:20px; line-height:1.3; }
+    .lgwv-checkmark-decoration { flex:0 0 auto; margin-left:auto; width:29px; height:29px; border:2px solid #93a7b7; border-right-color:transparent; border-bottom-color:#c5d0d8; border-radius:50%; transform:rotate(-22deg); }
+    .lgwv-footnote { color:#77848d; margin:17px 4px 8px; font-size:11px; text-align:center; }
+    .lgwv-slider-wrap { padding:25px 4px 10px; }
+    #lgwv-slider-viewport { position:relative; width:100%; height:72px; overflow:hidden; border-radius:4px; background:#f6f8fa; border:1px solid #dce2e7; user-select:none; }
+    #lgwv-runway { position:absolute; top:12px; left:8px; width:62%; height:46px; border:1px solid #c9d3dc; border-radius:4px; background:linear-gradient(90deg,#dbe5ee,#edf2f6); transition:width .14s ease-out; }
+    #lgwv-goal { position:absolute; top:26px; left:58%; width:18px; height:18px; border:2px dashed #768c9d; border-radius:50%; transform:translateX(-50%); transition:left .14s ease-out; }
+    #lgwv-slider-thumb { position:absolute; top:12px; left:8px; width:46px; height:46px; display:grid; place-items:center; border:1px solid #28517a; border-radius:4px; background:#315f8e; color:white; box-shadow:0 2px 5px #16304925; cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; font-size:25px; line-height:1; }
+    #lgwv-slider-thumb:active { cursor:grabbing; }
+    .lgwv-slider-direction { margin:13px 0 0; color:#7a8790; text-align:center; font-size:12px; }
+    #lgwv-status { min-height:224px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px 24px; text-align:center; }
+    #lgwv-status-mark { width:35px; height:35px; margin:0 0 20px; border:3px solid #dee6ec; border-top-color:#315f8e; border-radius:50%; animation:lgwv-spin .8s linear infinite; }
+    #lgwv-status-mark.lgwv-rejected { display:grid; place-items:center; border:1px solid #b8c3cb; border-radius:50%; color:#61717e; animation:none; font-size:22px; line-height:1; }
+    #lgwv-status-title { margin:0; color:#26343e; font-size:18px; font-weight:500; line-height:1.4; }
+    #lgwv-status-detail { min-height:21px; margin:9px 0 0; color:#697986; font-size:13px; line-height:1.6; }
+    .lgwv-bottomline { padding:11px 18px; border-top:1px solid #e8ecef; background:#fafbfc; color:#8a969f; font-size:10px; letter-spacing:.05em; text-align:right; }
+    @keyframes lgwv-spin { to { transform:rotate(360deg); } }
+    @media (max-width:430px) { #lgwv-dialog { width:calc(100vw - 24px); max-height:calc(100dvh - 24px); } .lgwv-checkbox-label { font-size:18px; } .lgwv-checkbox-card { gap:11px; padding:18px 13px; } }
+    @media (prefers-reduced-motion:reduce) { #lgwv-runway,#lgwv-goal { transition:none; } #lgwv-status-mark { animation:none; border-color:#315f8e; border-right-color:#dee6ec; } #lgwv-dialog::backdrop { backdrop-filter:none; } }
+  </style>
+  <!-- END VERIFICATION COMPONENT: scoped styles -->
 </head>
 
 <body>
@@ -860,10 +985,17 @@
         </a>
       </div>
 
-      <div class="coming-soon-wrap">
-        <img src="coming_soon_538x855.png" width="538" height="855"
-             alt="Coming soon: a new collection of short stories. General, speculative, and science fiction examining human bias, memory, belief, and misclassification."
-             onerror="this.onerror=null; this.src='coming_soon_538x855(1).png';">
+      <div class="verification-product-wrap">
+        <div class="coming-soon-wrap">
+          <img src="coming_soon_538x855.png" width="538" height="855"
+               alt="Coming soon: a new collection of short stories. General, speculative, and science fiction examining human bias, memory, belief, and misclassification."
+               onerror="this.onerror=null; this.src='coming_soon_538x855(1).png';">
+        </div>
+
+        <div class="verify-humanity-button-container">
+          <button type="button" class="verify-humanity-button" id="verify-humanity-button"
+                  aria-haspopup="dialog" aria-controls="lgwv-dialog">VERIFY HUMANITY</button>
+        </div>
       </div>
 
       <div class="album-stack">
@@ -1075,6 +1207,59 @@
     <button type="submit">Send</button>
   </form>
 </div>
+
+
+<!-- BEGIN VERIFICATION COMPONENT: markup -->
+  <dialog id="lgwv-dialog" aria-labelledby="lgwv-title" aria-describedby="lgwv-description">
+    <div class="lgwv-topline">
+      <span class="lgwv-topline-label">Human verification</span>
+      <button id="lgwv-close" type="button" aria-label="Close verification">×</button>
+    </div>
+    <header class="lgwv-heading" id="lgwv-heading">
+      <h2 id="lgwv-title">Human verification</h2>
+      <p id="lgwv-description">Complete the check below.</p>
+    </header>
+
+    <section id="lgwv-bicycle" class="lgwv-screen" hidden>
+      <div class="lgwv-grid">
+        <img src="captcha-banana.png" loading="lazy" decoding="async" alt="A single yellow banana on a plain background." width="1254" height="1254" draggable="false">
+        <div id="lgwv-tiles" role="group" aria-label="Select image squares"></div>
+      </div>
+      <div class="lgwv-grid-footer">
+        <span id="lgwv-selection-count" aria-live="polite">0 selected</span>
+        <button id="lgwv-verify" type="button">VERIFY</button>
+      </div>
+    </section>
+
+    <section id="lgwv-checkbox" class="lgwv-screen" hidden>
+      <label class="lgwv-checkbox-card" for="lgwv-nonhuman">
+        <input id="lgwv-nonhuman" type="checkbox">
+        <span class="lgwv-checkbox-label">I’m not a human</span>
+        <span class="lgwv-checkmark-decoration" aria-hidden="true"></span>
+      </label>
+      <p class="lgwv-footnote">Please confirm to continue.</p>
+    </section>
+
+    <section id="lgwv-slider" class="lgwv-screen" hidden>
+      <div class="lgwv-slider-wrap">
+        <div id="lgwv-slider-viewport">
+          <div id="lgwv-runway" aria-hidden="true"></div>
+          <div id="lgwv-goal" aria-hidden="true"></div>
+          <div id="lgwv-slider-thumb" role="slider" tabindex="0" aria-label="Slide to verify" aria-describedby="lgwv-slider-help" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Verification incomplete. 0 percent.">→</div>
+        </div>
+        <p class="lgwv-slider-direction" id="lgwv-slider-help">Drag the handle all the way to the right.</p>
+      </div>
+      <p class="lgwv-footnote">Keyboard: hold an arrow key, then release to verify.</p>
+    </section>
+
+    <section id="lgwv-status" role="status" aria-live="polite" aria-atomic="true" hidden>
+      <div id="lgwv-status-mark" aria-hidden="true"></div>
+      <h3 id="lgwv-status-title">Verifying…</h3>
+      <p id="lgwv-status-detail">Please wait.</p>
+    </section>
+    <footer class="lgwv-bottomline">IDENTITY SERVICES</footer>
+  </dialog>
+  <!-- END VERIFICATION COMPONENT: markup -->
 
 <script>
   /*
@@ -1424,7 +1609,7 @@
   });
 
   const controlHoverTargets = document.querySelectorAll(
-    ".trilogy-button, .miscellanea-button, .miscellanea-close, .miscellanea-copy a, .contact button"
+    ".trilogy-button, .miscellanea-button, .verify-humanity-button, .miscellanea-close, .miscellanea-copy a, .contact button"
   );
 
   controlHoverTargets.forEach(function(element) {
@@ -1503,6 +1688,268 @@
     window.addEventListener("scroll", updateMobileCue, { passive: true });
     window.addEventListener("resize", updateMobileCue);
     window.addEventListener("orientationchange", updateMobileCue);
+  })();
+</script>
+
+
+<!-- BEGIN VERIFICATION COMPONENT: controller -->
+  <script>
+  (() => {
+    'use strict';
+    const byId = id => document.getElementById(id);
+    const dialog = byId('lgwv-dialog');
+    const closeButton = byId('lgwv-close');
+    const title = byId('lgwv-title');
+    const description = byId('lgwv-description');
+    const heading = byId('lgwv-heading');
+    const status = byId('lgwv-status');
+    const statusTitle = byId('lgwv-status-title');
+    const statusDetail = byId('lgwv-status-detail');
+    const statusMark = byId('lgwv-status-mark');
+    const thumb = byId('lgwv-slider-thumb');
+    const viewport = byId('lgwv-slider-viewport');
+    const runway = byId('lgwv-runway');
+    const goal = byId('lgwv-goal');
+    const checkbox = byId('lgwv-nonhuman');
+    const keys = ['bicycle','checkbox','slider'];
+    const screens = Object.fromEntries(keys.map(key => [key,byId('lgwv-' + key)]));
+    const challenges = {
+      bicycle: {
+        title:'Select all squares containing a bicycle',
+        description:'Select all matching squares, then press Verify.',
+        failure:'Bicycle identification failed.',
+        detail:'Please consult the reference image.',
+        destination:'https://en.wikipedia.org/wiki/Bicycle',
+        delay:2400
+      },
+      checkbox: {
+        title:'Confirm your identity.',
+        description:'Complete the check below.',
+        failure:'Humanity not detected.',
+        detail:'Please consult the documentation.',
+        destination:'https://en.wikipedia.org/wiki/Human',
+        delay:2400
+      },
+      slider: {
+        title:'Slide to verify.',
+        description:'Move the handle to the end of the track.',
+        failure:'Human verification failed.',
+        detail:'Disconnecting…',
+        destination:'about:blank',
+        delay:2000
+      }
+    };
+    const timers = new Set();
+    let phase = 'closed';
+    let current = null;
+    let returnFocus = null;
+    let drag = null;
+    let sliderX = 8;
+    let keyboardMoved = false;
+    let keyboardStart = 8;
+
+    const later = (fn,delay) => {
+      const token = window.setTimeout(() => { timers.delete(token); fn(); },delay);
+      timers.add(token);
+      return token;
+    };
+    const cancelTimers = () => { timers.forEach(window.clearTimeout); timers.clear(); };
+    const showOnly = element => {
+      Object.values(screens).forEach(screen => { screen.hidden = screen !== element; });
+      status.hidden = element !== status;
+    };
+    const releaseDrag = () => {
+      if (drag && thumb.hasPointerCapture(drag.id)) thumb.releasePointerCapture(drag.id);
+      drag = null;
+    };
+    const sliderBounds = () => ({ min:8,max:Math.max(8,viewport.clientWidth - 108) });
+    function paintSlider(value) {
+      const bounds = sliderBounds();
+      sliderX = Math.max(bounds.min,Math.min(bounds.max,value));
+      const width = viewport.clientWidth;
+      const target = Math.min(width - 22,Math.max(width * .58,sliderX + 83));
+      thumb.style.left = sliderX + 'px';
+      goal.style.left = target + 'px';
+      runway.style.width = Math.max(52,target + 13 - 8) + 'px';
+      const progress = bounds.max > bounds.min ? Math.round((sliderX - bounds.min) / (bounds.max - bounds.min) * 99) : 0;
+      thumb.setAttribute('aria-valuenow',String(progress));
+      thumb.setAttribute('aria-valuetext','Verification incomplete. ' + progress + ' percent.');
+    }
+    function clearState() {
+      cancelTimers();
+      releaseDrag();
+      phase = 'closed';
+      current = null;
+      keyboardMoved = false;
+      checkbox.checked = false;
+      checkbox.disabled = false;
+      thumb.setAttribute('aria-disabled','false');
+      document.documentElement.classList.remove('lgwv-modal-open');
+      dialog.removeAttribute('aria-busy');
+    }
+    function close() {
+      const focusTarget = returnFocus;
+      clearState();
+      if (dialog.open) dialog.close();
+      returnFocus = null;
+      if (focusTarget && focusTarget.isConnected && typeof focusTarget.focus === 'function') focusTarget.focus({preventScroll:true});
+    }
+    function open(kind) {
+      const opener = dialog.open ? returnFocus : document.activeElement;
+      clearState();
+      returnFocus = opener;
+      current = Object.prototype.hasOwnProperty.call(challenges,kind) ? kind : keys[Math.floor(Math.random() * keys.length)];
+      const challenge = challenges[current];
+      phase = 'ready';
+      title.textContent = challenge.title;
+      description.textContent = challenge.description;
+      heading.hidden = false;
+      statusMark.classList.remove('lgwv-rejected');
+      statusMark.textContent = '';
+      showOnly(screens[current]);
+      byId('lgwv-tiles').querySelectorAll('button').forEach(tile => tile.setAttribute('aria-pressed','false'));
+      byId('lgwv-selection-count').textContent = '0 selected';
+      if (!dialog.open) dialog.showModal();
+      document.documentElement.classList.add('lgwv-modal-open');
+      if (current === 'slider') {
+        paintSlider(8);
+        thumb.focus({preventScroll:true});
+      } else if (current === 'checkbox') {
+        checkbox.focus({preventScroll:true});
+      } else {
+        byId('lgwv-tiles').firstElementChild.focus({preventScroll:true});
+      }
+    }
+    function fail() {
+      if (phase !== 'ready' || !current || !dialog.open) return;
+      const challenge = challenges[current];
+      phase = 'processing';
+      releaseDrag();
+      checkbox.disabled = true;
+      thumb.setAttribute('aria-disabled','true');
+      keyboardMoved = false;
+      showOnly(status);
+      statusMark.classList.remove('lgwv-rejected');
+      statusMark.textContent = '';
+      statusTitle.textContent = 'Verifying…';
+      statusDetail.textContent = 'Please wait.';
+      dialog.setAttribute('aria-busy','true');
+      closeButton.focus({preventScroll:true});
+      later(() => {
+        if (phase !== 'processing' || !dialog.open) return;
+        phase = 'rejected';
+        statusMark.classList.add('lgwv-rejected');
+        statusMark.textContent = '×';
+        statusTitle.textContent = challenge.failure;
+        statusDetail.textContent = challenge.detail;
+        dialog.removeAttribute('aria-busy');
+        later(() => {
+          if (phase !== 'rejected' || !dialog.open) return;
+          // Ordinary same-tab navigation retains the browser's Back route.
+          window.location.assign(challenge.destination);
+        },challenge.delay);
+      },850);
+    }
+    const tiles = byId('lgwv-tiles');
+    for (let index = 0; index < 9; index++) {
+      const tile = document.createElement('button');
+      tile.type = 'button';
+      tile.className = 'lgwv-tile';
+      tile.setAttribute('aria-label','Image square ' + (index + 1) + ', row ' + (Math.floor(index / 3) + 1) + ', column ' + (index % 3 + 1));
+      tile.setAttribute('aria-pressed','false');
+      tile.addEventListener('click',() => {
+        if (phase !== 'ready' || current !== 'bicycle') return;
+        tile.setAttribute('aria-pressed',String(tile.getAttribute('aria-pressed') !== 'true'));
+        const count = tiles.querySelectorAll('[aria-pressed="true"]').length;
+        byId('lgwv-selection-count').textContent = count + ' selected';
+      });
+      tiles.appendChild(tile);
+    }
+    byId('lgwv-verify').addEventListener('click',fail);
+    checkbox.addEventListener('change',() => { if (checkbox.checked) fail(); });
+    closeButton.addEventListener('click',close);
+    dialog.addEventListener('cancel',event => { event.preventDefault(); close(); });
+    dialog.addEventListener('close',() => { if (!dialog.open) clearState(); });
+    dialog.addEventListener('click',event => {
+      if (event.target !== dialog) return;
+      const rect = dialog.getBoundingClientRect();
+      if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) close();
+    });
+
+    thumb.addEventListener('pointerdown',event => {
+      if (phase !== 'ready' || current !== 'slider' || !event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return;
+      event.preventDefault();
+      thumb.focus({preventScroll:true});
+      drag = {id:event.pointerId,clientX:event.clientX,start:sliderX,moved:0};
+      thumb.setPointerCapture(event.pointerId);
+    });
+    thumb.addEventListener('pointermove',event => {
+      if (!drag || drag.id !== event.pointerId || phase !== 'ready') return;
+      paintSlider(drag.start + event.clientX - drag.clientX);
+      drag.moved = Math.max(drag.moved,Math.abs(sliderX - drag.start));
+    });
+    thumb.addEventListener('pointerup',event => {
+      if (!drag || drag.id !== event.pointerId) return;
+      const attempted = drag.moved >= 6;
+      releaseDrag();
+      if (attempted) fail();
+    });
+    thumb.addEventListener('pointercancel',event => {
+      if (!drag || drag.id !== event.pointerId) return;
+      const origin = drag.start;
+      releaseDrag();
+      paintSlider(origin);
+    });
+    thumb.addEventListener('lostpointercapture',() => { drag = null; });
+    const sliderKeys = new Set(['ArrowRight','ArrowUp','ArrowLeft','ArrowDown','PageUp','PageDown','Home','End']);
+    thumb.addEventListener('keydown',event => {
+      if (phase !== 'ready' || current !== 'slider') return;
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        fail();
+        return;
+      }
+      if (!sliderKeys.has(event.key)) return;
+      event.preventDefault();
+      if (!keyboardMoved) keyboardStart = sliderX;
+      const bounds = sliderBounds();
+      let next = sliderX;
+      if (event.key === 'ArrowRight' || event.key === 'ArrowUp') next += 16;
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') next -= 16;
+      if (event.key === 'PageUp') next += 50;
+      if (event.key === 'PageDown') next -= 50;
+      if (event.key === 'Home') next = bounds.min;
+      if (event.key === 'End') next = bounds.max;
+      paintSlider(next);
+      keyboardMoved = keyboardMoved || Math.abs(sliderX - keyboardStart) >= 1;
+    });
+    thumb.addEventListener('keyup',event => {
+      if (sliderKeys.has(event.key) && keyboardMoved && phase === 'ready') {
+        event.preventDefault();
+        fail();
+      }
+    });
+    window.addEventListener('resize',() => { if (dialog.open && current === 'slider' && phase === 'ready') paintSlider(sliderX); });
+    // Clear the failure before departure so Back cannot restore an active redirect.
+    window.addEventListener('pagehide',close);
+    window.addEventListener('pageshow',event => { if (event.persisted) close(); });
+    window.LGWVerification = Object.freeze({open,close,reset:close});
+  })();
+  </script>
+  <!-- END VERIFICATION COMPONENT: controller -->
+
+<script>
+  (function() {
+    const verificationButton = document.getElementById("verify-humanity-button");
+
+    verificationButton.addEventListener("click", function() {
+      // Keep the site's two dialogs mutually exclusive for keyboard visitors.
+      if (!document.getElementById("miscellanea-modal").hidden) {
+        closeMiscellaneaModal();
+      }
+      verificationButton.focus({ preventScroll: true });
+      window.LGWVerification.open();
+    });
   })();
 </script>
 
