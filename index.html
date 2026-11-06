@@ -1055,7 +1055,7 @@
       </a>
       <div class="miscellanea-copy">
         <h3>The Pale Gleaner of Black Spruce Bog</h3>
-        <div class="miscellanea-date" id="pale-gleaner-date">Forthcoming: October 22, 2026 — 3:30 AM ET</div>
+        <div class="miscellanea-date" id="pale-gleaner-date">Publication date: October 22, 2026</div>
         <p>One of 13 works selected for Spillwords’ 2026 <em>13 Days of Halloween</em> series.</p>
         <p>On a Saturday at Lake Garland, a boy and his grandfather fish, cook their catch, and let the fire burn low. When the boy asks for a scary story, his grandfather gives him one: the summer of 1926, when a search party roped themselves together and walked into the black spruce bog after a missing child.</p>
         <p>Four went in. Not all of them came back, and one of the ones who did came back empty.</p>
@@ -1273,47 +1273,6 @@
     <footer class="lgwv-bottomline">IDENTITY SERVICES</footer>
   </dialog>
   <!-- END VERIFICATION COMPONENT: markup -->
-
-<script>
-  /*
-    Update the story's date label at the scheduled publication time:
-    October 22, 2026, 3:30 AM Eastern (07:30 UTC).
-  */
-  (function() {
-    const publicationTime = Date.parse("2026-10-22T03:30:00-04:00");
-    const publicationDate = document.getElementById("pale-gleaner-date");
-    let publicationTimer = null;
-
-    function updatePublication() {
-      if (publicationTimer !== null) {
-        window.clearTimeout(publicationTimer);
-        publicationTimer = null;
-      }
-
-      const remaining = publicationTime - Date.now();
-      const isPublished = remaining <= 0;
-
-      publicationDate.textContent = isPublished
-        ? "Publication date: October 22, 2026"
-        : "Forthcoming: October 22, 2026 — 3:30 AM ET";
-
-      if (!isPublished) {
-        publicationTimer = window.setTimeout(
-          updatePublication,
-          Math.min(remaining, 2147483647)
-        );
-      }
-    }
-
-    updatePublication();
-
-    document.addEventListener("visibilitychange", function() {
-      if (!document.hidden) {
-        updatePublication();
-      }
-    });
-  })();
-</script>
 
 <script>
   /*
